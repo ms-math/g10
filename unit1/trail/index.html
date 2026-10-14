@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A retro canoe-trip review game for Grade 10 Unit 1 math, from Lachine to Mattawa.">
+<meta name="robots" content="noindex">
+<title>The Ottawa River Trail</title>
+<style>
+:root{color-scheme:dark}
+@font-face{font-family:"VT323";src:url("../fonts/vt323.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("../fonts/press-start-2p.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one 4:3-ish "monitor" centred on a dark desk — pixel scene on top, green-screen text below, status bar pinned under it.
+   Deliberately single-theme: an Apple II lab screen looks the same in light or dark mode. */
+:root{
+  --desk:#0b0d10; --crt:#000000; --bezel:#1d2026;
+  --green:#41ff5f; --green-dim:#1f9a33; --white:#f4f4ec; --orange:#ff8a2a; --violet:#d65cff; --blue:#3aa8ff; --red:#ff4b4b; --yellow:#ffe14a;
+  --f-text:"VT323", "Courier New", monospace;
+  --f-title:"Press Start 2P", "Courier New", monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--desk);color:var(--green);font-family:var(--f-text);font-size:24px;line-height:1.15;margin:0}
+.desk{min-height:100%;display:flex;justify-content:center;align-items:flex-start;padding-inline:16px;padding-block:14px}
+.monitor{width:100%;max-width:980px;background:var(--bezel);border-radius:14px;padding:12px}
+.crt{position:relative;background:var(--crt);border-radius:6px;overflow:hidden;min-height:560px;display:flex;flex-direction:column}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.crt.q canvas{width:min(100%,calc(15vh * 2.9167))}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 14px;color:var(--green-dim);font-size:20px;border-bottom:2px solid #0f3016}
+.topbar button{font:inherit;background:none;border:1px solid var(--green-dim);color:var(--green);padding:0 8px;cursor:pointer}
+canvas{display:block;width:min(100%,calc(28vh * 2.9167));margin:0 auto;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;background:#000}
+#main{flex:1;padding:14px 22px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.status{border-top:2px solid #0f3016;padding:6px 14px 8px;display:flex;flex-wrap:wrap;gap:4px 22px;font-size:21px;color:var(--white)}
+.status b{color:var(--green);font-weight:400}
+.track{width:100%;color:var(--green-dim);white-space:pre;overflow:hidden;font-size:19px}
+h1{font-family:var(--f-title);font-size:clamp(18px,3.2vw,30px);color:var(--orange);margin:6px 0 2px;line-height:1.35;text-align:center;letter-spacing:.02em}
+h2{font-family:var(--f-title);font-size:clamp(12px,1.7vw,16px);color:var(--yellow);margin:2px 0;line-height:1.5}
+p{margin:0}
+.white{color:var(--white)} .orange{color:var(--orange)} .blue{color:var(--blue)} .violet{color:var(--violet)} .red{color:var(--red)} .yellow{color:var(--yellow)} .dim{color:var(--green-dim)}
+.center{text-align:center}
+.menu{display:flex;flex-direction:column;gap:2px;margin:4px 0}
+.menu button,.btn{font:inherit;text-align:left;background:none;border:none;color:var(--white);padding:2px 6px;cursor:pointer}
+.menu button .k,.btn .k{color:var(--orange)}
+.menu button:hover,.menu button:focus-visible,.btn:hover,.btn:focus-visible{background:var(--green);color:#000;outline:none}
+.menu button:hover .k,.menu button:focus-visible .k,.btn:hover .k,.btn:focus-visible .k{color:#000}
+.prompt{color:var(--green)}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.blink{animation:none}}
+.eqs{font-size:30px;color:var(--white);display:flex;flex-direction:column;gap:2px}
+.story{color:var(--white);max-width:60ch}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:30px;color:var(--white)}
+input{font:inherit;font-size:30px;width:4.6em;background:#000;color:var(--yellow);border:2px solid var(--green);padding:0 6px;text-align:center;caret-color:var(--yellow)}
+input:focus{outline:none;border-color:var(--yellow)}
+input.name{width:9em;text-align:left;font-size:26px}
+.msg{padding:6px 10px;border:2px solid currentColor}
+.msg.good{color:var(--green)} .msg.bad{color:var(--red)} .msg.hint{color:var(--yellow)} .msg.info{color:var(--blue)}
+.steps{color:var(--white);border:2px dashed var(--green-dim);padding:6px 12px}
+.steps ol{margin:4px 0 0;padding-left:1.6em;display:flex;flex-direction:column;gap:3px}
+.steps .why{color:var(--green-dim)} .steps .work{color:var(--yellow)}
+table.area{border-collapse:collapse;color:var(--yellow);margin:2px 0}
+table.area td{padding:0 12px;text-align:center}
+table.area tr:first-child td{border-bottom:2px solid var(--yellow)}
+table.area td:first-child{border-right:2px solid var(--yellow)}
+.row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.store td{padding:2px 12px 2px 0;color:var(--white)}
+.store button{font:inherit;background:none;border:1px solid var(--green);color:var(--green);min-width:2em;cursor:pointer}
+.store button:focus-visible{background:var(--green);color:#000;outline:none}
+.report{border-collapse:collapse;color:var(--white)}
+.report td,.report th{padding:1px 14px 1px 0;text-align:left;font-weight:400}
+.report th{color:var(--green-dim)}
+.tomb{border:3px solid var(--white);border-radius:60px 60px 4px 4px;padding:26px 18px 16px;max-width:420px;margin:6px auto;text-align:center;color:var(--white)}
+.cont{color:var(--green-dim)}
+@media (max-width:640px){body{font-size:20px}.eqs,.answer,input{font-size:24px}.crt{min-height:0}#main{padding:12px 14px}}
+</style>
+
+<div class="desk"><div class="monitor"><div class="crt" id="crt">
+  <div class="topbar"><span>UNIT 1 REVIEW · GRADE 10 MATH</span><button id="soundBtn" type="button" aria-pressed="false">SOUND: OFF</button></div>
+  <canvas id="scene" width="280" height="96" aria-hidden="true"></canvas>
+  <div id="main" aria-live="polite"></div>
+  <div class="status" id="status" hidden></div>
+</div></div></div>
+
+<script>
+(function(){
+"use strict";
+/* ============ math helpers (shared with the Unit 1 practice page) ============ */
+const M="−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const sn=n=>n<0?M+Math.abs(n):String(n);
+const kStr=k=>k===1?"":k===-1?M:sn(k);
+const coefTerm=(c,v)=>(c===1?"":c===-1?M:sn(c))+v;
+function poly(terms){let s="";for(const [c,v] of terms){if(c===0)continue;const a=Math.abs(c);const body=v?(a===1?"":a)+v:String(a);s+=s===""?(c<0?M:"")+body:(c<0?" "+M+" ":" + ")+body;}return s||"0";}
+const lin=(m,b,v="x")=>poly([[m,v],[b,""]]);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fval=f=>f.n/f.d;
+const fstr=f=>f.d===1?sn(f.n):(f.n<0?M:"")+Math.abs(f.n)+"/"+f.d;
+const isInt=f=>f.d===1;
+function mul(k,x){return k===1?(x<0?`(${sn(x)})`:sn(x)):k===-1?`${M}(${sn(x)})`:`${sn(k)}(${sn(x)})`}
+function evalStr(m,b,x){let s=mul(m,x);if(b>0)s+=` + ${b}`;else if(b<0)s+=` ${M} ${-b}`;return s}
+function signedTimes(k,inner){const a=Math.abs(k);if(a===1&&/^\d+$/.test(inner))return `${k<0?M:"+"} ${inner}`;return `${k<0?M:"+"} ${a===1?"":a}(${inner})`}
+function linSteps(A,B,C,D,v="x"){
+  const st=[];const a=A-C;
+  if(C!==0)st.push([`${C>0?"Subtract":"Add"} ${coefTerm(Math.abs(C),v)} ${C>0?"from":"to"} both sides`,`${poly([[a,v],[B,""]])} = ${sn(D)}`]);
+  if(B!==0)st.push([`${B>0?"Subtract":"Add"} ${Math.abs(B)} ${B>0?"from":"to"} both sides`,`${poly([[a,v]])} = ${sn(D-B)}`]);
+  const ans=F(D-B,a);
+  if(a!==1)st.push([`Divide both sides by ${sn(a)}`,`${v} = ${fstr(ans)}`]);
+  return{st,ans};
+}
+const yEq=(m,b,rev)=>rev?`y = ${poly([[b,""],[m,"x"]])}`:`y = ${lin(m,b)}`;
+
+/* comparison: y = m1x + b1 and y = m2x + b2 */
+function compPack(m1,b1,m2,b2,x0,y0){
+  const {st}=linSteps(m1,b1,m2,b2);
+  const steps=[["Both equations equal y, so set ① equal to ②",`${lin(m1,b1)} = ${lin(m2,b2)}`],...st,
+    [`Substitute x = ${sn(x0)} into ①`,`y = ${evalStr(m1,b1,x0)} = ${sn(y0)}`],
+    ["Check in ②",`y = ${evalStr(m2,b2,x0)} = ${sn(y0)} ✓`],
+    ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+  const xm=[];
+  if(b1!==0||b2!==0)xm.push({val:F(b2+b1,m1-m2),msg:"When a number moves across the equals sign, it changes sign. Check that step."});
+  if(m1+m2!==0)xm.push({val:F(b2-b1,m1+m2),msg:`To get the x-terms together, ${m2>0?"subtract":"add"} ${coefTerm(Math.abs(m2),"x")} on both sides. It changes sign when it moves.`});
+  return{steps,xm,tests:[(x,y)=>Math.abs(y-(m1*x+b1))<1e-6,(x,y)=>Math.abs(y-(m2*x+b2))<1e-6]};
+}
+/* substitution: A x + B y = C with y = m x + b (or x = m y + b when xform) */
+function subPack(A,B,C,m,b,xform,x0,y0){
+  const den=xform?A*m+B:A+B*m;let steps,am=[];
+  if(!xform){
+    const {st}=linSteps(den,B*b,0,C);
+    steps=[[`Replace y in ① with (${lin(m,b)}). Keep the brackets`,`${A===1?"x":A===-1?M+"x":sn(A)+"x"} ${signedTimes(B,lin(m,b))} = ${sn(C)}`],
+      ["Expand the brackets",`${poly([[A,"x"],[B*m,"x"],[B*b,""]])} = ${sn(C)}`],
+      ["Collect like terms",`${lin(den,B*b)} = ${sn(C)}`],...st,
+      [`Substitute x = ${sn(x0)} into ②`,`y = ${evalStr(m,b,x0)} = ${sn(y0)}`],
+      ["Check in ①",`${mul(A,x0)} ${signedTimes(B,sn(y0))} = ${sn(C)} ✓`],
+      ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+    if(B!==1&&A+B*m!==0)am.push({val:F(C-b,A+B*m),msg:`Multiply ${sn(B)} by both terms in the brackets, not just the first one.`});
+    if(B<0)am.push({val:F(C+B*b,den),msg:`${sn(B)} times ${sn(b)} is ${sn(B*b)}. Watch the signs when you multiply a negative into the brackets.`});
+  }else{
+    const {st}=linSteps(den,A*b,0,C,"y");
+    steps=[[`Replace x in ① with (${lin(m,b,"y")}). Keep the brackets`,`${kStr(A)}(${lin(m,b,"y")}) ${B<0?M:"+"} ${coefTerm(Math.abs(B),"y")} = ${sn(C)}`],
+      ["Expand the brackets",`${poly([[A*m,"y"],[A*b,""],[B,"y"]])} = ${sn(C)}`],
+      ["Collect like terms",`${lin(den,A*b,"y")} = ${sn(C)}`],...st,
+      [`Substitute y = ${sn(y0)} into ②`,`x = ${evalStr(m,b,y0)} = ${sn(x0)}`],
+      ["Check in ①",`${mul(A,x0)} ${signedTimes(B,sn(y0))} = ${sn(C)} ✓`],
+      ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+    if(A!==1&&A*m+B!==0)am.push({val:F(C-b,A*m+B),msg:`Multiply ${sn(A)} by both terms in the brackets, not just the first one.`});
+    if(A<0)am.push({val:F(C+A*b,den),msg:`${sn(A)} times ${sn(b)} is ${sn(A*b)}. Watch the signs when you multiply a negative into the brackets.`});
+  }
+  const t1=(x,y)=>Math.abs(A*x+B*y-C)<1e-6;
+  const t2=xform?(x,y)=>Math.abs(x-(m*y+b))<1e-6:(x,y)=>Math.abs(y-(m*x+b))<1e-6;
+  return{steps,xm:am,tests:[t1,t2]};
+}
+
+/* ============ generators ============ */
+function genSolve(L){
+  for(let t=0;t<500;t++){
+    let A,B,C,D,x,disp,bracket=null;
+    if(L===0){A=ri(2,9);x=ri(-5,10);B=nz(-12,15);C=0;D=A*x+B;disp=Math.random()<.25?`${sn(D)} = ${lin(A,B)}`:`${lin(A,B)} = ${sn(D)}`;}
+    else if(L===1){
+      x=ri(-6,10);C=nz(-6,9);B=nz(-15,15);
+      if(Math.random()<.35){const k=pick([2,3,4,5,-2,-3]);const r=nz(-6,6);A=k;B=k*r;if(A===C)continue;bracket={k,r};}
+      else{A=nz(-6,9);if(A===C)continue;}
+      D=(A-C)*x+B;if(Math.abs(D)>45)continue;
+      disp=bracket?`${kStr(bracket.k)}(${lin(1,bracket.r)}) = ${lin(C,D)}`:`${lin(A,B)} = ${lin(C,D)}`;
+    }else{
+      const k=pick([2,3,4,5,6,-2,-3,-4,-5]),q=pick([1,1,2,3]),r=nz(-8,8);
+      A=k*q;B=k*r;bracket={k,q,r};
+      if(Math.random()<.4){C=nz(-7,9);D=nz(-30,30);const a=A-C;if(a===0||Math.abs(a)>9||(D-B)%a===0)continue;x=null;}
+      else{C=nz(-7,9);if(A===C)continue;x=nz(-9,9);D=(A-C)*x+B;if(Math.abs(D)>60)continue;}
+      let right=lin(C,D);
+      if(Math.random()<.4&&C!==1&&C!==-1&&D%C===0&&D!==0)right=`${kStr(C)}(${lin(1,D/C)})`;
+      disp=`${kStr(k)}(${lin(q,r)}) = ${right}`;
+    }
+    const pre=bracket?[["Expand the brackets",`${lin(A,B)} = ${lin(C,D)}`]]:[];
+    const {st,ans}=linSteps(A,B,C,D);
+    if(x!==null&&x!==undefined&&fval(ans)!==x)continue;
+    const L1=F(A*ans.n+B*ans.d,ans.d),R1=F(C*ans.n+D*ans.d,ans.d);
+    const steps=[...pre,...st,["Check: put it back into both sides",`left = ${fstr(L1)}, right = ${fstr(R1)} ✓`]];
+    const mistakes=[{val:F(-ans.n,ans.d),msg:"The sign of your answer is wrong. Check the step where you divide, and any negatives you moved across."}];
+    if(B!==0)mistakes.push({val:F(D+B,A-C),msg:`When you move ${sn(B)} to the other side, use the opposite operation, so it changes sign.`});
+    if(C!==0&&A+C!==0)mistakes.push({val:F(D-B,A+C),msg:`To move ${coefTerm(C,"x")} across, ${C>0?"subtract":"add"} ${coefTerm(Math.abs(C),"x")} on both sides. It changes sign.`});
+    if(bracket&&bracket.k!==1&&A-C!==0)mistakes.push({val:F(D-bracket.r,A-C),msg:`Multiply ${sn(bracket.k)} by both terms inside the brackets, not just the first one.`});
+    const hint=bracket?`Expand first: multiply ${sn(bracket.k)} by every term inside the brackets. Then collect the x-terms on one side.`
+      :C!==0?`Get the x-terms on one side: ${C>0?"subtract":"add"} ${coefTerm(Math.abs(C),"x")} ${C>0?"from":"to"} both sides. Then deal with the numbers.`
+      :`Reverse BEDMAS: undo the ${B>0?"+ "+B:M+" "+(-B)} first, then divide by ${A}.`;
+    return{kind:"solve",skill:"solve",A,B,C,D,prompt:"Solve for x.",eqs:[disp],ans,steps,mistakes,hint};
+  }
+}
+function genExpand(L){
+  for(let t=0;t<200;t++){
+    let m=1,n=1,p,q,special=null;
+    if(L===0){p=ri(1,9);q=ri(1,9);}
+    else if(L===1){const s=Math.random();if(s<.15){p=nz(-9,9);q=-p;special="diff";}else if(s<.3){p=nz(-9,9);q=p;special="square";}else{p=nz(-9,9);q=nz(-9,9);}}
+    else{m=ri(1,5);n=ri(1,5);if(m===1&&n===1)continue;const s=Math.random();
+      if(s<.15){n=m;p=nz(-9,9);q=-p;special="diff";}else if(s<.3){n=m;p=nz(-9,9);q=p;special="square";}else{p=nz(-9,9);q=nz(-9,9);}}
+    const a=m*n,b=m*q+n*p,c=p*q,first=lin(m,p),second=lin(n,q);
+    const disp=special==="square"?`(${first})²`:`(${first})(${second})`;
+    const tl=(c0,v)=>poly([[c0,v]]),sg=c0=>(c0<0?M:"+")+Math.abs(c0);
+    const area=`<table class="area"><tr><td>×</td><td>${tl(n,"x")}</td><td>${sg(q)}</td></tr><tr><td>${tl(m,"x")}</td><td>${tl(a,"x²")}</td><td>${tl(m*q,"x")}</td></tr><tr><td>${sg(p)}</td><td>${tl(n*p,"x")}</td><td>${tl(c,"")}</td></tr></table>`;
+    const steps=[];
+    if(special==="square")steps.push(["A bracket squared means multiply it by itself",`(${first})(${first})`]);
+    steps.push(["Draw the area model and multiply each pair",area]);
+    steps.push(["Collect the two x-terms on the diagonal",`${poly([[m*q,"x"],[n*p,"x"]])} = ${tl(b,"x")}`]);
+    steps.push(["Write it in standard form, ax² + bx + c",poly([[a,"x²"],[b,"x"],[c,""]])]);
+    return{kind:"expand",skill:"expand",prompt:"Expand and simplify into standard form.",eqs:[disp],a,b,c,m,n,p,q,special,steps,
+      hint:`Draw a 2 × 2 area model. Put the terms of (${first}) down the side and the terms of (${special==="square"?first:second}) across the top. Multiply each pair, then add the two x-terms.`};
+  }
+}
+function genComp(L){
+  for(let t=0;t<500;t++){
+    let m1,m2,b1,x0;
+    if(L===0){m1=ri(1,6);m2=ri(1,6);x0=ri(1,8);b1=ri(0,12);}
+    else if(L===1){m1=nz(-5,6);m2=nz(-5,6);x0=ri(-5,8);b1=nz(-15,15);}
+    else{m1=nz(-8,9);m2=nz(-8,9);x0=nz(-9,9);b1=nz(-25,25);}
+    if(m1===m2)continue;
+    const y0=m1*x0+b1,b2=y0-m2*x0;
+    if(L===0&&(b2<-10||b2>25||y0<0||y0>40))continue;
+    if(Math.abs(y0)>(L===2?60:45))continue;
+    if(L===1&&Math.abs(b2)>20)continue;if(L===2&&Math.abs(b2)>40)continue;if(b1===b2)continue;
+    const r1=L>=1&&m1<0&&b1>0&&Math.random()<.45,r2=L>=1&&m2<0&&b2>0&&Math.random()<.45;
+    const pk=compPack(m1,b1,m2,b2,x0,y0);
+    return{kind:"poi",skill:"comp",prompt:"Find the point of intersection by comparison.",eqs:[yEq(m1,b1,r1),yEq(m2,b2,r2)],x0,y0,...pk,
+      hint:`Both equations start with y =, so set the right sides equal: ${lin(m1,b1)} = ${lin(m2,b2)}. Solve that for x.`};
+  }
+}
+function genSub(L){
+  for(let t=0;t<800;t++){
+    let x0,y0,A,B,m,b,xform=false;
+    if(L===0){x0=ri(1,8);m=ri(1,3);b=ri(-3,8);y0=m*x0+b;if(y0<1)continue;A=ri(1,4);B=1;}
+    else if(L===1){x0=ri(-4,8);m=nz(-3,4);b=nz(-8,8);y0=m*x0+b;A=nz(-4,7);B=pick([2,3,4,5,-1]);}
+    else{xform=Math.random()<.35;x0=nz(-8,8);y0=nz(-8,8);m=nz(-4,4);A=nz(-6,8);B=pick([-2,-3,-4,-5,-6,3]);b=xform?x0-m*y0:y0-m*x0;}
+    if(b===0&&L>0)continue;if(Math.abs(b)>15)continue;
+    const C=A*x0+B*y0;if(Math.abs(C)>70)continue;
+    const den=xform?A*m+B:A+B*m;if(den===0)continue;
+    const pk=subPack(A,B,C,m,b,xform,x0,y0);
+    return{kind:"poi",skill:"sub",prompt:"Find the point of intersection by substitution.",eqs:[`${poly([[A,"x"],[B,"y"]])} = ${sn(C)}`,xform?`x = ${lin(m,b,"y")}`:`y = ${lin(m,b)}`],x0,y0,xform,...pk,
+      hint:xform?`② tells you what x equals. Replace the x in ① with (${lin(m,b,"y")}), solve for y, then find x.`:`② tells you what y equals. Replace the y in ① with (${lin(m,b)}), keep the brackets, then expand.`};
+  }
+}
+/* word problems told as trail events */
+function genStory(L){
+  const kinds=L===0?["post","race","furs"]:["post","race","food","furs","packs"];
+  for(let t=0;t<300;t++){
+    const k=pick(kinds);let q;
+    if(k==="post"){
+      const x0=ri(3,10),m1=ri(2,5),d=ri(1,3),m2=m1+d,b2=L===0?0:ri(1,4)*5,b1=b2+d*x0,y0=m2*x0+b2;
+      q={x0,y0,title:"TRADING POSTS",story:`Two trading posts sell flour. Post A charges a $${b1} fee plus $${m1} per bag. Post B charges ${b2?`a $${b2} fee plus `:""}$${m2} per bag. For how many bags is the cost the same, and what is that cost?`,
+        vars:"x = bags of flour, y = total cost ($)",eqs:[`y = ${lin(m1,b1)}`,`y = ${lin(m2,b2)}`],...compPack(m1,b1,m2,b2,x0,y0)};
+    }else if(k==="race"){
+      const s1=ri(3,6),d=ri(1,3),s2=s1+d,x0=ri(2,8),kk=d*x0,y0=s2*x0;
+      q={x0,y0,title:"A RIVAL BRIGADE",story:`A rival brigade is ${kk} km ahead of you, paddling ${s1} km/h. Your brigade paddles ${s2} km/h. When and where do you catch them?`,
+        vars:"x = hours, y = km from your starting point",eqs:[`y = ${lin(s1,kk)}`,`y = ${lin(s2,0)}`],...compPack(s1,kk,s2,0,x0,y0)};
+    }else if(k==="food"){
+      const r2=ri(4,8),d=ri(2,5),r1=r2+d,x0=ri(2,9),F2=ri(8,14)*10,F1=F2+d*x0,y0=F2-r2*x0;if(y0<=0)continue;
+      q={x0,y0,title:"PEMMICAN",story:`Your canoe carries ${F1} lbs of pemmican, and your crew eats ${r1} lbs a day. A second canoe carries ${F2} lbs, and its crew eats ${r2} lbs a day. When will both canoes have the same amount left, and how much?`,
+        vars:"x = days, y = lbs of pemmican left",eqs:[yEq(-r1,F1,true),yEq(-r2,F2,true)],...compPack(-r1,F1,-r2,F2,x0,y0)};
+    }else if(k==="furs"){
+      const x0=ri(4,15);let kk,c=1,y0,T,phr;
+      if(L<2){kk=ri(2,9);y0=x0+kk;phr=`${kk} more beaver pelts than marten pelts`;}
+      else{c=pick([2,3]);kk=ri(1,5);y0=c*x0+kk;phr=`${kk} more beaver pelts than ${c===2?"twice":"three times"} the number of marten pelts`;}
+      T=x0+y0;
+      q={x0,y0,title:"FUR TRADE",story:`At a trading camp you get ${T} pelts, marten and beaver. You have ${phr}. How many of each do you have?`,
+        vars:"x = marten pelts, y = beaver pelts",eqs:[`x + y = ${T}`,`y = ${lin(c,kk)}`],...subPack(1,1,T,c,kk,false,x0,y0)};
+    }else{
+      const y0=ri(2,8),c=pick([2,3]),w1=pick([20,25,30]),w2=pick([40,45,50]),x0=c*y0,W=w1*x0+w2*y0;
+      q={x0,y0,xform:true,title:"THE PORTAGE",story:`Your crew must carry ${W} kg of cargo over a portage in small ${w1} kg packs and large ${w2} kg packs. There are ${c===2?"twice":"three times"} as many small packs as large packs. How many of each are there?`,
+        vars:"x = small packs, y = large packs",eqs:[`${w1}x + ${w2}y = ${W}`,`x = ${c}y`],...subPack(w1,w2,W,c,0,true,x0,y0)};
+    }
+    q.kind="poi";q.skill="story";q.level=L;
+    q.steps=[["Write the equations",`① ${q.eqs[0]}   ② ${q.eqs[1]}`],...q.steps];
+    q.hint=L===0?(q.eqs[0].startsWith("y")&&q.eqs[1].startsWith("y")?"Both equations start with y =, so set them equal and solve for x.":"Substitute ② into ①, then solve.")
+      :`The equations are ① ${q.eqs[0]} and ② ${q.eqs[1]}. ${q.eqs[0].startsWith("y")&&q.eqs[1].startsWith("y")?"Set them equal (comparison).":"Substitute ② into ①."}`;
+    return q;
+  }
+}
+const GEN={solve:genSolve,expand:genExpand,comp:genComp,sub:genSub,story:genStory};
+
+/* ============ checking ============ */
+function parse(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[xy]=/i,"");
+  if(s==="")return null;
+  if(/^[-+]?\d+(\.\d+)?$/.test(s)||/^[-+]?\.\d+$/.test(s))return{v:parseFloat(s)};
+  const m=s.match(/^([-+]?\d+)\/([-+]?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2]};
+  return{bad:true};
+}
+const near=(v,t)=>Math.abs(v-t)<0.006;
+function check(q,vals){
+  if(q.kind==="solve"){
+    const r=parse(vals[0]);if(!r)return{s:"empty",msg:"Type a value for x first."};if(r.bad)return{s:"empty",msg:"Use a whole number, a fraction like 7/3, or a decimal like 2.33."};
+    const t=fval(q.ans);
+    if(isInt(q.ans)?r.v===t:near(r.v,t))return{s:"ok"};
+    for(const mk of q.mistakes){if(fval(mk.val)!==t&&near(r.v,fval(mk.val)))return{s:"miss",msg:mk.msg}}
+    return{s:"miss",msg:"Put your answer back into both sides. If they don't match, look for the step that went wrong."};
+  }
+  if(q.kind==="expand"){
+    const vs=vals.map(parse);
+    if(vs.some(v=>!v))return{s:"empty",msg:"Fill in all three boxes. Use 0 if a term is missing."};
+    if(vs.some(v=>v.bad))return{s:"empty",msg:"Each box needs a number, like 3, -5 or 0."};
+    const [a,b,c]=vs.map(v=>v.v);
+    if(a===q.a&&b===q.b&&c===q.c)return{s:"ok"};
+    if(a!==q.a)return{s:"miss",msg:`The x² term comes from ${poly([[q.m,"x"]])} × ${poly([[q.n,"x"]])}.`};
+    if(c===q.c&&b!==q.b){
+      if(q.special==="square"&&b===0)return{s:"miss",msg:"A squared bracket has two middle terms. Write it as two brackets."};
+      if(b===q.m*q.q-q.n*q.p||b===-q.m*q.q+q.n*q.p)return{s:"miss",msg:"First and last terms are right. One of the two x-terms has the wrong sign."};
+      return{s:"miss",msg:"First and last terms are right. Add the two x-terms on the diagonal, keeping their signs."};
+    }
+    if(c===-q.c)return{s:"miss",msg:`Check the sign of the last term: ${sn(q.p)} × ${sn(q.q)}.`};
+    return{s:"miss",msg:"Some terms don't match. Draw the area model and check each box."};
+  }
+  const rx=parse(vals[0]),ry=parse(vals[1]);
+  if(!rx||!ry)return{s:"empty",msg:"Fill in both boxes: an x-value and a y-value."};
+  if(rx.bad||ry.bad)return{s:"empty",msg:"Each box needs a number, like 4 or -3."};
+  if(rx.v===q.x0&&ry.v===q.y0)return{s:"ok"};
+  if(rx.v===q.y0&&ry.v===q.x0&&q.x0!==q.y0)return{s:"miss",msg:"x and y look swapped. A point is always (x, y)."};
+  const fv=q.xform?ry.v:rx.v,ft=q.xform?q.y0:q.x0,vn=q.xform?"y":"x";
+  if(fv===ft)return{s:"miss",msg:`Your ${vn} is right. Substitute ${vn} = ${sn(ft)} into an equation to find ${vn==="x"?"y":"x"}.`};
+  for(const mk of q.xm||[]){if(fval(mk.val)!==ft&&near(fv,fval(mk.val)))return{s:"miss",msg:mk.msg}}
+  const w1=q.tests[0](rx.v,ry.v),w2=q.tests[1](rx.v,ry.v);
+  if(w1&&!w2)return{s:"miss",msg:"Your point works in ① but not ②."};
+  if(w2&&!w1)return{s:"miss",msg:"Your point works in ② but not ①."};
+  return{s:"miss",msg:"Your point isn't on either line. Substitute it into both equations to check."};
+}
+
+/* ============ game data ============ */
+const ROUTE=[
+  {name:"Lachine",km:0,sprite:"fort",blurb:"Each spring, fur-trade canoe brigades left Lachine, just above the Montreal rapids, and paddled west up the Ottawa River."},
+  {name:"Long Sault Rapids",km:85,skill:"solve",lesson:"L1",sprite:"rapids",act:"PORTAGE",blurb:"A long run of rapids near Carillon. Brigades unloaded the canoes and carried everything along the shore. That's a portage.",task:"To carry your gear around the rapids, solve 3 equations."},
+  {name:"Chaudière Falls",km:185,skill:"expand",lesson:"L2",sprite:"falls",act:"PORTAGE",blurb:"Today this is the heart of the city of Ottawa. Chaudière means “kettle” — the falling water churns like a boiling pot.",task:"To get around the falls, expand 3 expressions."},
+  {name:"Chats Falls",km:240,skill:"comp",lesson:"L3",sprite:"falls",act:"CROSSING",blurb:"A wide line of chutes across the whole river. French travellers named it for the raccoons (chats sauvages) they saw here.",task:"To find the safe crossing, solve 3 systems by comparison."},
+  {name:"Allumette Island",km:340,skill:"sub",lesson:"L4",sprite:"island",act:"PORTAGE",blurb:"A large island near today’s Pembroke. Its rapids, the Rapides des Allumettes, meant more hard paddling and portaging.",task:"To get past the rapids, solve 3 systems by substitution."},
+  {name:"Mattawa",km:485,skill:"mixed",lesson:"Final",sprite:"fort",act:"FINAL",blurb:"Where the Mattawa River meets the Ottawa. Brigades turned west here toward Lake Nipissing. For you, the Unit 1 Test is waiting.",task:"One last stretch: 4 mixed questions, one from each lesson."}
+];
+const ROLES=[
+  {name:"Montreal merchant",level:0,money:200,mult:1,food:400,kits:4,desc:"Support questions. Plenty of money for supplies."},
+  {name:"Voyageur",level:1,money:120,mult:2,food:300,kits:3,desc:"On-track questions, like your worksheets. Points ×2."},
+  {name:"Guide",level:2,money:80,mult:3,food:250,kits:2,desc:"Challenge questions. Little money. Points ×3."}
+];
+const SKILLNAME={solve:"Solving for x (L1)",expand:"Expanding (L2)",comp:"Comparison (L3)",sub:"Substitution (L4)",story:"Word problems"};
+const DEFAULT_NAMES=["Amélie","Jean","Marie","Louis","Odile","Pierre","Rose","André","Lucie","Paul"];
+const FOOD_PRICE=0.2,KIT_PRICE=10,EAT=10,KMDAY=35;
+const DEATHS=["a missing negative sign","a forgotten bracket","dividing by the wrong number","x and y swapped","an unchecked answer","moving a term without changing its sign"];
+
+let S=null;
+function freshState(){return{mode:"brigade",role:1,names:[],money:0,food:0,kits:0,health:100,day:0,km:0,leg:0,first:0,asked:0,misses:0,
+  stats:{solve:{a:0,f:0},expand:{a:0,f:0},comp:{a:0,f:0},sub:{a:0,f:0},story:{a:0,f:0}},bonusFood:0}}
+class GameOver extends Error{constructor(cause){super(cause);this.cause=cause}}
+
+/* ============ sound ============ */
+let sound=false,actx=null;
+function beep(freq,dur,type="square",vol=.05){if(!sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur)}catch(e){}}
+const sfx={ok(){beep(660,.08);setTimeout(()=>beep(990,.12),90)},bad(){beep(160,.25,"sawtooth",.04)},key(){beep(1200,.02,"square",.02)},arrive(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.12),i*120))}};
+const soundBtn=document.getElementById("soundBtn");
+function toggleSound(){sound=!sound;soundBtn.textContent="SOUND: "+(sound?"ON":"OFF");soundBtn.setAttribute("aria-pressed",String(sound));if(sound)sfx.key()}
+soundBtn.addEventListener("click",e=>{toggleSound();e.currentTarget.blur()});
+
+/* ============ scene ============ */
+const cv=document.getElementById("scene"),cx=cv.getContext("2d");
+const PAL={black:"#000",green:"#41ff5f",dgreen:"#1f9a33",white:"#f4f4ec",orange:"#ff8a2a",violet:"#d65cff",blue:"#3aa8ff",yellow:"#ffe14a"};
+const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let sceneT=0,sceneLandmark=null,landX=400;
+function rect(x,y,w,h,c){cx.fillStyle=c;cx.fillRect(Math.round(x),Math.round(y),w,h)}
+function drawSprite(kind,x){
+  if(kind==="fort"){rect(x,34,46,22,PAL.orange);for(let i=0;i<46;i+=6)rect(x+i,30,3,4,PAL.orange);rect(x+18,42,9,14,PAL.black);rect(x+40,14,2,20,PAL.white);rect(x+42,14,12,7,PAL.white);rect(x+44,16,3,3,PAL.orange)}
+  else if(kind==="falls"){rect(x,40,6,24,PAL.violet);for(let i=0;i<34;i+=4)rect(x+8+i,40+((i/4+Math.floor(sceneT/6))%3),2,22,PAL.white);rect(x+44,40,6,24,PAL.violet)}
+  else if(kind==="rapids"){for(let i=0;i<60;i+=7)rect(x+i,60+((i+Math.floor(sceneT/4))%5),5,2,PAL.white);rect(x+10,48,8,6,PAL.violet);rect(x+34,50,10,5,PAL.violet)}
+  else if(kind==="island"){rect(x,52,64,10,PAL.dgreen);for(let i=4;i<60;i+=9){rect(x+i+3,36,2,16,PAL.orange);rect(x+i,30,8,8,PAL.green)}}
+}
+function drawScene(moving){
+  rect(0,0,280,96,PAL.black);
+  // stars & moon-ish sun
+  for(let i=0;i<22;i++){rect((i*53+7)%280,(i*29)%26,1,1,PAL.white)}
+  cx.fillStyle=PAL.white;cx.beginPath();cx.arc(240,12,6,0,Math.PI*2);cx.fill();cx.fillStyle=PAL.black;cx.beginPath();cx.arc(243,10,5,0,Math.PI*2);cx.fill();
+  // hills
+  const off=moving?sceneT*0.25:0;
+  for(let i=-1;i<8;i++){const hx=((i*48-off)%336+336)%336-48;cx.fillStyle=PAL.violet;cx.beginPath();cx.moveTo(hx,46);cx.lineTo(hx+24,24);cx.lineTo(hx+48,46);cx.fill()}
+  // trees
+  const toff=moving?sceneT*0.8:0;
+  for(let i=0;i<24;i++){const tx=((i*14-toff)%336+336)%336-24;cx.fillStyle=i%3?PAL.green:PAL.dgreen;cx.beginPath();cx.moveTo(tx,52);cx.lineTo(tx+6,34+(i%4)*2);cx.lineTo(tx+12,52);cx.fill();rect(tx+5,52,2,2,PAL.orange)}
+  rect(0,54,280,42,PAL.blue);
+  for(let i=0;i<30;i++){const wx=((i*23-(moving?sceneT*1.3:0))%300+300)%300-10;rect(wx,60+(i*7)%30,6,1,PAL.white)}
+  if(sceneLandmark)drawSprite(sceneLandmark,landX);
+  // canoe
+  const bob=moving&&!reduce?Math.round(Math.sin(sceneT/6)):0;
+  const y=70+bob;
+  rect(70,y,62,5,PAL.orange);rect(66,y-2,4,4,PAL.orange);rect(132,y-2,4,4,PAL.orange);rect(72,y+5,58,1,PAL.yellow);
+  for(let i=0;i<5;i++){const px=78+i*11;rect(px,y-7,4,7,PAL.white);rect(px+1,y-10,2,3,PAL.yellow);const sw=moving&&!reduce&&((Math.floor(sceneT/8)+i)%2)?2:-2;rect(px+2+sw,y+2,1,8,PAL.yellow)}
+}
+let animId=0;
+function animateTravel(ms,landmarkKind,showLand){
+  return new Promise(res=>{
+    const start=performance.now();sceneLandmark=showLand?landmarkKind:null;
+    const step=now=>{
+      const p=Math.min(1,(now-start)/ms);sceneT+=1;
+      if(showLand)landX=300-p*130;
+      drawScene(true);
+      if(p<1&&!skipTravel)animId=requestAnimationFrame(step);else{skipTravel=false;res()}
+    };
+    animId=requestAnimationFrame(step);
+  });
+}
+let skipTravel=false;
+
+/* ============ UI helpers ============ */
+const crtEl=document.getElementById("crt"),main=document.getElementById("main"),statusEl=document.getElementById("status");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let keyHandler=null;
+document.addEventListener("keydown",e=>{
+  if(e.target&&e.target.tagName==="INPUT"&&e.key!=="Enter")return;
+  if(e.key==="m"||e.key==="M"){if(!(e.target&&e.target.tagName==="INPUT")){toggleSound();return}}
+  if(keyHandler)keyHandler(e);
+});
+function waitKey(handler){return new Promise(res=>{keyHandler=e=>{const r=handler(e);if(r!==undefined){e.preventDefault();keyHandler=null;res(r)}}})}
+function menu(html,options){
+  crtEl.classList.remove("q");
+  main.innerHTML=html+`<div class="menu">${options.map(o=>`<button data-k="${o.key}"><span class="k">${o.key}.</span> ${o.label}</button>`).join("")}</div><p class="prompt">What is your choice? <span class="blink">_</span></p>`;
+  return new Promise(res=>{
+    main.querySelectorAll(".menu button").forEach(b=>b.addEventListener("click",()=>{keyHandler=null;sfx.key();res(options.find(o=>o.key===b.dataset.k).value)}));
+    keyHandler=e=>{const o=options.find(o=>o.key===e.key);if(o){e.preventDefault();keyHandler=null;sfx.key();res(o.value)}};
+  });
+}
+function pressSpace(html,label="Press SPACE BAR to continue"){
+  crtEl.classList.remove("q");
+  main.innerHTML=html+`<p class="cont"><button class="btn" id="contBtn">${label}</button></p>`;
+  const b=document.getElementById("contBtn");if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();
+  return new Promise(res=>{const done=()=>{keyHandler=null;res()};b.addEventListener("click",done);keyHandler=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();done()}}});
+}
+function dateStr(d){const dt=new Date(Date.UTC(1826,4,1)+d*864e5);return ["January","February","March","April","May","June","July","August","September","October","November","December"][dt.getUTCMonth()]+" "+dt.getUTCDate()+", 1826"}
+function healthWord(h){return h>75?"Good":h>50?"Fair":h>25?"Poor":"Very poor"}
+function renderStatus(){
+  if(!S){statusEl.hidden=true;return}
+  statusEl.hidden=false;
+  const total=ROUTE[ROUTE.length-1].km,w=40,pos=Math.round(S.km/total*w);
+  let tr="";for(let i=0;i<=w;i++){const lm=ROUTE.find(r=>Math.round(r.km/total*w)===i);tr+=i===pos?"▶":lm?"●":"─"}
+  statusEl.innerHTML=`<span>Date: <b>${dateStr(S.day)}</b></span><span>Food: <b>${Math.max(0,Math.round(S.food))} lbs</b></span><span>Repair kits: <b>${S.kits}</b></span><span>Health: <b>${healthWord(S.health)}</b></span><span>Km: <b>${Math.round(S.km)} / ${total}</b></span><span class="track">Lachine ${tr} Mattawa</span>`;
+}
+function spendDays(n,reason){
+  S.day+=n;S.food-=EAT*n;
+  if(S.mode==="practice"&&S.food<30){S.food+=60;S.bonusFood++;}
+  renderStatus();
+  if(S.mode==="brigade"&&S.food<=0)throw new GameOver({why:"food",reason});
+}
+function hurt(n,reason){S.health=Math.max(0,Math.min(100,S.health-n));if(S.mode==="practice"&&S.health<15)S.health=15;renderStatus();if(S.mode==="brigade"&&S.health<=0)throw new GameOver({why:"health",reason});}
+const crew=()=>pick(S.names.slice(1));
+
+/* ============ question screen ============ */
+const MISS_LINES=[
+  ["A pack slips into the mud. You lose a day digging it out.",1,4],
+  ["Wrong channel! You backtrack and lose a day.",1,4],
+  ["The crew argues about the answer. Lose a day.",1,5],
+  ["NAME twists an ankle on the portage trail.",1,8],
+  ["Black flies swarm the camp while you recheck your work.",1,6],
+  ["You make camp early to rethink. Lose a day.",1,3]
+];
+async function ask(q,ctx){
+  crtEl.classList.add('q');const sk=q.skill;S.stats[sk].a++;S.asked++;
+  let attempts=0,shown=false;
+  const inputs=q.kind==="solve"?`<span>x =</span><input id="i0" aria-label="x" autocomplete="off" spellcheck="false">`
+    :q.kind==="expand"?`<input id="i0" aria-label="x squared coefficient" autocomplete="off"><span>x² +</span><input id="i1" aria-label="x coefficient" autocomplete="off"><span>x +</span><input id="i2" aria-label="constant" autocomplete="off">`
+    :`<span>(</span><input id="i0" aria-label="x" autocomplete="off"><span>,</span><input id="i1" aria-label="y" autocomplete="off"><span>)</span>`;
+  const showEq=q.skill!=="story"||q.level===0;
+  const body=q.skill==="story"
+    ?`<p class="story">${q.story}</p><p class="blue">Let ${q.vars}.</p>${showEq?`<div class="eqs">${q.eqs.map((e,i)=>`<div><span class="dim">${i?"②":"①"}</span> ${e}</div>`).join("")}</div>`:`<p class="dim">Write the two equations, then solve.</p>`}`
+    :`<p class="white">${q.prompt}</p><div class="eqs">${q.eqs.map((e,i)=>`<div>${q.eqs.length>1?`<span class="dim">${i?"②":"①"}</span> `:""}${e}</div>`).join("")}</div>`;
+  main.innerHTML=`<h2>${ctx.header}</h2>${body}<form class="answer" id="ans" autocomplete="off">${inputs}<button class="btn" type="submit"><span class="k">ENTER</span> = check</button></form><div id="fb"></div><div id="st"></div>`;
+  const f=document.getElementById("ans");const ins=[...f.querySelectorAll("input")];ins[0].focus({preventScroll:true});
+  const fb=(cls,html)=>{document.getElementById("fb").innerHTML=`<div class="msg ${cls}">${html}</div>`};
+  return new Promise((res,rej)=>{
+    const finish=async(first)=>{
+      f.querySelectorAll("input,button").forEach(el=>el.disabled=true);
+      const st=document.getElementById("st");st.insertAdjacentHTML("beforeend",`<p class="cont"><button class="btn" id="go">Press SPACE BAR to continue</button></p>`);
+      const go=document.getElementById("go");
+      const done=()=>{keyHandler=null;res(first)};go.addEventListener("click",done);
+      keyHandler=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();done()}};
+    };
+    f.addEventListener("submit",e=>{
+      e.preventDefault();
+      const r=check(q,ins.map(i=>i.value));
+      if(r.s==="empty"){fb("hint",r.msg);return}
+      if(r.s==="ok"){
+        sfx.ok();const first=attempts===0&&!shown;
+        if(first){S.first++;S.stats[sk].f++;S.health=Math.min(100,S.health+3);}
+        let extra="";
+        if(first&&Math.random()<.35){const lbs=pick([10,15,20]);S.food+=lbs;extra=` ${esc(crew())} catches a pike while you work: +${lbs} lbs of food.`}
+        renderStatus();
+        fb("good",`CORRECT!${first?"":" Good recovery."}${extra}`);
+        finish(first);return;
+      }
+      attempts++;S.misses++;sfx.bad();
+      const line=pick(MISS_LINES);
+      let html=`NOT QUITE. ${esc(r.msg)}<br><span class="orange">${line[0].replace("NAME",esc(crew()))}</span>`;
+      try{spendDays(line[1],ctx.where);hurt(line[2],ctx.where);}catch(err){keyHandler=null;rej(err);return}
+      if(attempts===2)html+=`<br><span class="yellow">HINT: ${q.hint}</span>`;
+      fb("bad",html);
+      if(attempts>=3){
+        shown=true;
+        document.getElementById("st").innerHTML=`<div class="steps"><span class="white">WORKED STEPS</span><ol>${q.steps.map(s=>`<li><span class="why">${s[0]}</span><br><span class="work">${s[1]}</span></li>`).join("")}</ol></div>`;
+        finish(false);
+      }else{ins[0].focus();ins[0].select()}
+    });
+  });
+}
+
+/* ============ events ============ */
+const FLAVOUR=[
+  ()=>({t:"A fair wind! You raise a blanket for a sail and make good time.",fn(){S.day=Math.max(0,S.day-1);S.food+=EAT}}),
+  ()=>({t:"Wild blueberries on the shore. +20 lbs of food.",fn(){S.food+=20}}),
+  ()=>({t:"Heavy rain. You wait it out under the canoe. Lose 1 day.",fn(){spendDays(1,"the rain")}}),
+  ()=>({t:"Black flies! Everyone is miserable.",fn(){hurt(6,"black flies")}}),
+  ()=>({t:`${esc(crew())} sings a paddling song. The crew feels better.`,fn(){S.health=Math.min(100,S.health+8)}}),
+  ()=>({t:"The canoe scrapes a rock and springs a leak.",fn(){if(S.kits>0){S.kits--;this.t+=" You use 1 repair kit of birch bark and spruce gum."}else{this.t+=" With no repair kit, you lose 3 days patching it.";spendDays(3,"a leaking canoe")}}}),
+  ()=>({t:`${esc(crew())} has a fever. You rest for a day.`,fn(){spendDays(1,"a fever");hurt(5,"a fever")}}),
+  ()=>({t:"You meet Anishinaabe traders who share smoked fish. +25 lbs of food.",fn(){S.food+=25}})
+];
+async function flavourEvent(){
+  const ev=pick(FLAVOUR)();ev.fn();renderStatus();
+  await pressSpace(`<h2>${dateStr(S.day).toUpperCase()}</h2><p class="white">${ev.t}</p>`);
+}
+
+/* ============ flow ============ */
+async function travel(fromKm,toKm,landKind,showLand){
+  const dist=toKm-fromKm,days=Math.max(1,Math.round(dist/KMDAY));
+  crtEl.classList.remove("q");main.innerHTML=`<p class="white">Paddling up the Ottawa River…</p><p class="dim">Press SPACE to skip ahead</p>`;
+  keyHandler=e=>{if(e.key===" "){e.preventDefault();skipTravel=true}};
+  const ms=reduce?400:2600;
+  const t0=S.km,steps=days;
+  const anim=animateTravel(ms,landKind,showLand);
+  for(let d=1;d<=steps;d++){
+    await new Promise(r=>setTimeout(r,skipTravel?0:ms/steps));
+    S.km=t0+dist*d/steps;spendDays(1,"the river");
+  }
+  await anim;keyHandler=null;S.km=toKm;renderStatus();
+}
+async function landmark(i){
+  const L=ROUTE[i];sfx.arrive();sceneLandmark=L.sprite;landX=170;drawScene(false);
+  await pressSpace(`<h1>${L.name}</h1><p class="white center">${dateStr(S.day)}</p><p class="white">${L.blurb}</p><p class="yellow">${L.task}</p>`);
+  const lvl=ROLES[S.role].level;
+  const skills=L.skill==="mixed"?shuffle(["solve","expand","comp","sub"]):[L.skill,L.skill,L.skill];
+  for(let k=0;k<skills.length;k++){
+    const q=GEN[skills[k]](lvl);
+    await ask(q,{header:`${L.name.toUpperCase()} · ${L.act} ${k+1} OF ${skills.length}${L.skill==="mixed"?" · "+SKILLNAME[skills[k]].toUpperCase():""}`,where:L.name});
+  }
+}
+async function storyEvent(){
+  const q=GEN.story(ROLES[S.role].level);
+  await ask(q,{header:`${dateStr(S.day).toUpperCase()} · ${q.title}`,where:"the river"});
+}
+function score(){
+  const r=ROLES[S.role];
+  const parts=[["Questions right on the first try",S.first*100],["Crew health",S.health*2],["Food left (lbs)",Math.max(0,Math.round(S.food))],["Repair kits left",S.kits*20],["Money left",Math.round(S.money)]];
+  const sub=parts.reduce((s,p)=>s+p[1],0);
+  return{parts,sub,mult:r.mult,total:sub*r.mult};
+}
+function reportHTML(){
+  const rows=Object.keys(S.stats).filter(k=>S.stats[k].a>0).map(k=>{const s=S.stats[k];const ok=s.f*3>=s.a*2;return `<tr><td>${SKILLNAME[k]}</td><td>${s.f} of ${s.a}</td><td class="${ok?"":"orange"}">${ok?"Ready":"Review this"}</td></tr>`}).join("");
+  const weak=Object.keys(S.stats).filter(k=>S.stats[k].a>0&&S.stats[k].f*3<S.stats[k].a*2).map(k=>SKILLNAME[k]);
+  return `<h2>TRAIL REPORT</h2><table class="report"><tr><th>Skill</th><th>First try</th><th></th></tr>${rows}</table>
+    <p class="white">${weak.length?`Before the test, review: <span class="orange">${weak.join(", ")}</span>. Use the practice page and the worksheet for that lesson.`:"You got most questions on the first try in every skill. You're ready for the test."}</p>`;
+}
+async function titleScreen(){
+  S=null;renderStatus();sceneLandmark="fort";landX=190;drawScene(false);
+  for(;;){
+    const c=await menu(`<h1>THE OTTAWA RIVER TRAIL</h1><p class="white center">A Unit 1 review: Lachine to Mattawa, 1826</p><p class="dim center">Solve equations, expand, and find points of intersection to get your brigade up the river.</p>`,
+      [{key:"1",label:"Travel the trail",value:"go"},{key:"2",label:"Learn about the trail",value:"learn"},{key:"3",label:"How to type answers",value:"how"}]);
+    if(c==="go")return;
+    if(c==="learn")await pressSpace(`<h2>THE TRAIL</h2><p class="white">You lead a canoe brigade of 5 people up the Ottawa River, about 485 km. Each landmark is a lesson from Unit 1:</p>
+      <p class="white">Long Sault Rapids — solving for x (L1)<br>Chaudière Falls — expanding (L2)<br>Chats Falls — comparison (L3)<br>Allumette Island — substitution (L4)<br>Mattawa — a mixed final stretch before the test</p>
+      <p class="white">Between landmarks you'll meet word problems on the river. A wrong answer costs a day of food and some crew health. After a 2nd miss you get a hint; after a 3rd you see the worked steps.</p>`);
+    if(c==="how")await pressSpace(`<h2>TYPING ANSWERS</h2><p class="white">Type numbers in the yellow boxes and press ENTER. Use TAB to move between boxes.</p>
+      <p class="white">Negatives: <span class="yellow">-3</span> · Fractions: <span class="yellow">7/3</span> · Decimals: <span class="yellow">2.33</span> (round to 2 places)</p>
+      <p class="white">Points of intersection go in two boxes: <span class="yellow">( 4 , -2 )</span>. Expanding goes in three: <span class="yellow">2</span> x² + <span class="yellow">-9</span> x + <span class="yellow">-5</span>. Use 0 for a missing term.</p>
+      <p class="white">Press M at any time to turn sound on or off.</p>`);
+  }
+}
+async function setup(){
+  S=freshState();
+  S.mode=await menu(`<h2>CHOOSE YOUR TRIP</h2>`,[
+    {key:"1",label:`Brigade mode <span class="dim">— run out of food or health and your trip ends</span>`,value:"brigade"},
+    {key:"2",label:`Practice paddle <span class="dim">— everyone reaches Mattawa</span>`,value:"practice"}]);
+  S.role=await menu(`<h2>MANY KINDS OF PEOPLE TRAVELLED THE OTTAWA RIVER. YOU MAY:</h2>`,ROLES.map((r,i)=>({key:String(i+1),label:`Be a ${r.name.toLowerCase()} <span class="dim">— ${r.desc}</span>`,value:i})));
+  const r=ROLES[S.role];S.money=r.money;
+  const defs=shuffle(DEFAULT_NAMES.slice()).slice(0,5);
+  main.innerHTML=`<h2>NAME YOUR BRIGADE</h2><p class="dim">Names stay on this screen only. Nothing is saved.</p>
+    <form id="nf" class="menu" autocomplete="off">${[0,1,2,3,4].map(i=>`<label class="row"><span style="min-width:7em" class="white">${i?"Paddler "+i:"Your name"}:</span><input class="name" id="n${i}" maxlength="12" value="${esc(defs[i])}" spellcheck="false"></label>`).join("")}
+    <p><button class="btn" type="submit"><span class="k">ENTER</span> = these are my paddlers</button></p></form>`;
+  document.getElementById("n0").focus();document.getElementById("n0").select();
+  await new Promise(res=>{document.getElementById("nf").addEventListener("submit",e=>{e.preventDefault();S.names=[0,1,2,3,4].map(i=>(document.getElementById("n"+i).value.trim()||defs[i]).slice(0,12));res()})});
+  // store
+  let food=r.food,kits=r.kits;
+  await new Promise(res=>{
+    const draw=()=>{const cost=food*FOOD_PRICE+kits*KIT_PRICE;
+      main.innerHTML=`<h2>THE GENERAL STORE AT LACHINE</h2><p class="white">You have <span class="yellow">$${r.money}</span>. Your crew eats about ${EAT} lbs a day, and the trip takes about 2 weeks. Wrong answers cost extra days.</p>
+      <table class="store"><tr><td>Food (20¢ a lb)</td><td><button id="f-" aria-label="less food">−</button> <span class="yellow">${food} lbs</span> <button id="f+" aria-label="more food">+</button></td><td>$${(food*FOOD_PRICE).toFixed(0)}</td></tr>
+      <tr><td>Repair kits ($${KIT_PRICE} each)</td><td><button id="k-" aria-label="fewer kits">−</button> <span class="yellow">${kits}</span> <button id="k+" aria-label="more kits">+</button></td><td>$${kits*KIT_PRICE}</td></tr>
+      <tr><td>Total</td><td></td><td class="${cost>r.money?"red":"yellow"}">$${cost.toFixed(0)}</td></tr></table>
+      <p class="dim">F / G = more or less food · K / J = more or fewer kits</p>
+      <p><button class="btn" id="buy" ${cost>r.money?"disabled":""}><span class="k">ENTER</span> = buy and leave Lachine</button></p>`;
+      const can=(df,dk)=>food+df>=0&&kits+dk>=0&&(food+df)*FOOD_PRICE+(kits+dk)*KIT_PRICE<=r.money;
+      const ch=(df,dk)=>{if(can(df,dk)){food+=df;kits+=dk;sfx.key();draw();const b=document.getElementById(df>0?"f+":df<0?"f-":dk>0?"k+":"k-");b&&b.focus()}};
+      document.getElementById("f-").onclick=()=>ch(-50,0);document.getElementById("f+").onclick=()=>ch(50,0);
+      document.getElementById("k-").onclick=()=>ch(0,-1);document.getElementById("k+").onclick=()=>ch(0,1);
+      document.getElementById("buy").onclick=()=>{keyHandler=null;res()};
+      keyHandler=e=>{const k=e.key.toLowerCase();if(k==="f")ch(50,0);else if(k==="g")ch(-50,0);else if(k==="k")ch(0,1);else if(k==="j")ch(0,-1);else if(k==="enter"&&e.target.tagName!=="BUTTON"){keyHandler=null;res()}};
+      if(!document.activeElement||document.activeElement===document.body)document.getElementById("buy").focus();
+    };draw();
+  });
+  S.food=food;S.kits=kits;S.money-=food*FOOD_PRICE+kits*KIT_PRICE;renderStatus();
+  await pressSpace(`<h1>LACHINE</h1><p class="white center">${dateStr(0)}</p><p class="white">${ROUTE[0].blurb}</p><p class="white">${esc(S.names[0])}, your brigade is ready: ${S.names.slice(1).map(esc).join(", ")}.</p>`,"Press SPACE BAR to push off");
+}
+async function journey(){
+  for(let i=1;i<ROUTE.length;i++){
+    const a=ROUTE[i-1].km,b=ROUTE[i].km,mid=Math.round((a+b)/2);
+    await travel(a,mid,ROUTE[i].sprite,false);
+    if(Math.random()<.6)await flavourEvent();
+    if(i<ROUTE.length-1||Math.random()<.5)await storyEvent(); else await flavourEvent();
+    await travel(mid,b,ROUTE[i].sprite,true);
+    await landmark(i);
+  }
+}
+async function win(){
+  sfx.arrive();sceneLandmark="fort";landX=170;drawScene(false);
+  const sc=score();
+  await pressSpace(`<h1>YOU MADE IT TO MATTAWA!</h1><p class="white center">${dateStr(S.day)} · ${S.day} days on the river</p>
+    <p class="white">Congratulations, ${esc(S.names[0])}! Your brigade reached Mattawa${S.mode==="practice"&&S.bonusFood?` (with help from ${S.bonusFood} passing brigade${S.bonusFood>1?"s":""} that shared food)`:""}.</p>
+    <table class="report">${sc.parts.map(p=>`<tr><td>${p[0]}</td><td class="yellow">${p[1]}</td></tr>`).join("")}<tr><td>Bonus for being a ${ROLES[S.role].name.toLowerCase()}</td><td class="yellow">×${sc.mult}</td></tr><tr><td class="white">TOTAL POINTS</td><td class="orange">${sc.total}</td></tr></table>`,"Press SPACE BAR for your trail report");
+}
+async function lose(err){
+  sfx.bad();
+  const cause=pick(DEATHS);
+  const where=S.km>=ROUTE[ROUTE.length-1].km?"Mattawa":`km ${Math.round(S.km)}`;
+  await pressSpace(`<h1>YOUR BRIGADE IS STRANDED</h1><p class="white center">${dateStr(S.day)} · ${where}</p>
+    <p class="white">${err.cause.why==="food"?"The food has run out.":"The crew is too exhausted to paddle."}</p>
+    <p class="orange center" style="font-size:30px">You have died of ${cause}.</p>`);
+  main.innerHTML=`<div class="tomb"><p>HERE LIES</p><p class="yellow" style="font-size:30px">${esc(S.names[0])}’s brigade</p><p class="dim">${dateStr(S.day)}</p><p style="margin-top:10px">Epitaph:</p><input id="ep" class="name" maxlength="24" aria-label="Epitaph" value="" placeholder="check your signs"><p class="dim" style="font-size:18px">Not saved anywhere.</p></div>`;
+  document.getElementById("ep").focus();
+  await new Promise(res=>{keyHandler=e=>{if(e.key==="Enter"){e.preventDefault();keyHandler=null;res()}};document.getElementById("ep").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();keyHandler=null;res()}})});
+}
+async function run(){
+  let skipTitle=false;
+  for(;;){
+    if(!skipTitle)await titleScreen();
+    skipTitle=false;
+    await setup();
+    let ok=true;
+    try{await journey();}catch(err){if(err instanceof GameOver){ok=false;await lose(err)}else throw err}
+    if(ok)await win();
+    const again=await menu(reportHTML(),[{key:"1",label:"Travel the trail again",value:1},{key:"2",label:"Back to the title screen",value:2}]);
+    if(again===1){skipTitle=true;sceneLandmark="fort";landX=190;drawScene(false);}
+  }
+}
+drawScene(false);
+setInterval(()=>{if(!document.hidden&&!travelling()){sceneT++;drawScene(false)}},250);
+function travelling(){return main.textContent.startsWith("Paddling")}
+run();
+})();
+</script>
+
+</body>
+</html>

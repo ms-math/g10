@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Self-checking practice for Grade 10 Unit 1: solving equations, expanding, comparison and substitution.">
+<meta name="robots" content="noindex">
+<title>Unit 1 Algebra Practice</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one centred column on graph paper — controls, then a single question card, then the worked steps in "blue pen". */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0; --pen-soft:#e7eefb; --pen-ink:#ffffff;
+  --good:#17703f; --good-soft:#e2f3e9; --bad:#b0302a; --bad-soft:#fbe8e6; --hl:#fff0a0; --hl-ink:#3d3300;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-pen:"Kalam", "Comic Sans MS", "Segoe Print", cursive;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:1.9rem;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 .pen{font-family:var(--f-pen);color:var(--pen);font-weight:700}
+.lede{margin:4px 0 0;color:var(--muted);max-width:52ch}
+.score{display:flex;gap:14px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.score b{color:var(--ink);font-size:1.15rem}
+.controls{display:flex;flex-direction:column;gap:10px}
+.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.95rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--pen);border-color:var(--pen);color:var(--pen-ink)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.levelnote{font-size:.88rem;color:var(--muted);margin:4px 0 0}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:22px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px}
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qtag{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pen)}
+.rule{font-size:.9rem;color:var(--muted)}
+.prompt{margin:0;font-size:1.05rem}
+.eqs{display:flex;flex-direction:column;gap:6px;font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}
+.eqs .n{display:inline-block;width:1.6em;color:var(--muted);font-weight:400}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:1.3rem;font-weight:700}
+.answer input{font:inherit;font-weight:700;width:5.2em;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);text-align:center}
+.answer input:focus{outline:none;border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.answer input.ok{border-color:var(--good)} .answer input.no{border-color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:.98rem;padding:9px 16px;border-radius:8px;border:1.5px solid var(--pen);background:var(--card);color:var(--pen);cursor:pointer}
+.btn.primary{background:var(--pen);color:var(--pen-ink)}
+.btn.quiet{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px;padding-inline:6px}
+.btn:focus-visible,.seg button:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.feedback{border-radius:8px;padding:12px 14px;font-size:1rem}
+.feedback.good{background:var(--good-soft);color:var(--good)}
+.feedback.bad{background:var(--bad-soft);color:var(--bad)}
+.feedback.hint{background:var(--hl);color:var(--hl-ink)}
+.feedback strong{display:block;margin-bottom:2px}
+.steps{border-top:1.5px dashed var(--line);padding-top:14px}
+.steps h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.steps ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.steps li::marker{color:var(--muted);font-size:.9rem}
+.why{display:block;font-size:.9rem;color:var(--muted)}
+.work{font-family:var(--f-pen);color:var(--pen);font-size:1.3rem;line-height:1.35}
+.work.final{background:linear-gradient(transparent 55%,var(--hl) 55%);padding-inline:2px}
+.area{border-collapse:collapse;font-family:var(--f-pen);color:var(--pen);font-size:1.2rem;margin:4px 0}
+.area td{padding:4px 14px;text-align:center}
+.area tr:first-child td{border-bottom:2px solid var(--pen)}
+.area td:first-child{border-right:2px solid var(--pen)}
+.area td.mid{background:var(--hl);color:var(--hl-ink)}
+footer{font-size:.85rem;color:var(--muted)}
+@media (max-width:480px){h1{font-size:1.55rem}.eqs{font-size:1.25rem}.answer{font-size:1.15rem}}
+@media (prefers-reduced-motion:no-preference){.feedback,.steps{animation:rise .18s ease-out}@keyframes rise{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Unit 1 <span class="pen">Algebra Practice</span></h1>
+      <p class="lede">Pick a skill and a level. Type your answer and press Check. If you get it wrong, try the hint, then the full steps.</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <span><b id="sFirst">0</b> first try</span>
+      <span><b id="sDone">0</b> done</span>
+      <span><b id="sStreak">0</b> streak</span>
+    </div>
+  </header>
+
+  <section class="controls" aria-label="Choose practice">
+    <div>
+      <div class="label" id="skillLbl">Skill</div>
+      <div class="seg" id="skills" role="group" aria-labelledby="skillLbl">
+        <button data-skill="solve">Solve for x <small>L1</small></button>
+        <button data-skill="expand">Expand <small>L2</small></button>
+        <button data-skill="comp">Comparison <small>L3</small></button>
+        <button data-skill="sub">Substitution <small>L4</small></button>
+        <button data-skill="mixed">Mixed review</button>
+      </div>
+    </div>
+    <div>
+      <div class="label" id="levelLbl">Level</div>
+      <div class="seg" id="levels" role="group" aria-labelledby="levelLbl">
+        <button data-level="0">Support</button>
+        <button data-level="1">On track</button>
+        <button data-level="2">Challenge</button>
+      </div>
+      <p class="levelnote" id="levelNote"></p>
+    </div>
+  </section>
+
+  <main class="card" id="card">
+    <div class="qtop"><span class="qtag" id="qtag"></span><span class="rule" id="rule"></span></div>
+    <p class="prompt" id="prompt"></p>
+    <div class="eqs" id="eqs"></div>
+    <form class="answer" id="answer" autocomplete="off"></form>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn" type="button">Check</button>
+      <button class="btn" id="hintBtn" type="button">Hint</button>
+      <button class="btn quiet" id="stepsBtn" type="button">Show steps</button>
+      <button class="btn" id="nextBtn" type="button">New question</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="steps" id="steps" hidden></div>
+  </main>
+
+  <footer>Answers can be whole numbers, negatives (−3 or -3), fractions (−8/7) or decimals rounded to 2 places. Every question is new, so you can keep practising.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const M = "−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const sn=n=>n<0?M+Math.abs(n):String(n);
+const kStr=k=>k===1?"":k===-1?M:sn(k);
+const coefTerm=(c,v)=>(c===1?"":c===-1?M:sn(c))+v;
+function poly(terms){let s="";for(const [c,v] of terms){if(c===0)continue;const a=Math.abs(c);const body=v?(a===1?"":a)+v:String(a);s+= s===""?(c<0?M:"")+body:(c<0?" "+M+" ":" + ")+body;}return s||"0";}
+const lin=(m,b,v="x")=>poly([[m,v],[b,""]]);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fval=f=>f.n/f.d;
+const fstr=f=>f.d===1?sn(f.n):(f.n<0?M:"")+Math.abs(f.n)+"/"+f.d;
+const isInt=f=>f.d===1;
+function mul(k,x){return k===1?(x<0?`(${sn(x)})`:sn(x)):k===-1?`−(${sn(x)})`:`${sn(k)}(${sn(x)})`}
+function evalStr(m,b,x){let s=mul(m,x);if(b>0)s+=` + ${b}`;else if(b<0)s+=` ${M} ${-b}`;return s}
+function signedTimes(k,inner,first){ // "+ 2(…)" or "− 3(…)" after a first term
+  const a=Math.abs(k);if(a===1&&/^\d+$/.test(inner))return `${k<0?M:"+"} ${inner}`;return `${k<0?M:"+"} ${a===1?"":a}(${inner})`;}
+
+/* A v + B = C v + D  → steps to v = answer */
+function linSteps(A,B,C,D,v="x"){
+  const st=[];const a=A-C;
+  if(C!==0)st.push([`${C>0?"Subtract":"Add"} ${coefTerm(Math.abs(C),v)} ${C>0?"from":"to"} both sides`,`${poly([[a,v],[B,""]])} = ${sn(D)}`]);
+  if(B!==0)st.push([`${B>0?"Subtract":"Add"} ${Math.abs(B)} ${B>0?"from":"to"} both sides`,`${poly([[a,v]])} = ${sn(D-B)}`]);
+  const ans=F(D-B,a);
+  if(a!==1)st.push([`Divide both sides by ${sn(a)}`,`${v} = ${fstr(ans)}`]);
+  return{st,ans};
+}
+
+/* ---------- Generators ---------- */
+function genSolve(L){
+  for(let t=0;t<500;t++){
+    let A,B,C,D,x,disp,bracket=null,flip=false;
+    if(L===0){
+      A=ri(2,9);x=ri(-5,10);B=nz(-12,15);C=0;D=A*x+B;
+      flip=Math.random()<.25;
+      disp=flip?`${sn(D)} = ${lin(A,B)}`:`${lin(A,B)} = ${sn(D)}`;
+    }else if(L===1){
+      x=ri(-6,10);C=nz(-6,9);B=nz(-15,15);
+      if(Math.random()<.35){const k=pick([2,3,4,5,-2,-3]);const r=nz(-6,6);A=k;B=k*r;if(A===C)continue;bracket={k,r};}
+      else{A=nz(-6,9);if(A===C)continue;}
+      D=(A-C)*x+B;if(Math.abs(D)>45)continue;
+      disp=bracket?`${kStr(bracket.k)}(${lin(1,bracket.r)}) = ${lin(C,D)}`:`${lin(A,B)} = ${lin(C,D)}`;
+    }else{
+      const k=pick([2,3,4,5,6,-2,-3,-4,-5]),q=pick([1,1,2,3]),r=nz(-8,8);
+      A=k*q;B=k*r;bracket={k,q,r};
+      const fracAns=Math.random()<.4;
+      if(fracAns){C=nz(-7,9);D=nz(-30,30);const a=A-C;if(a===0||Math.abs(a)>9||(D-B)%a===0)continue;x=null;}
+      else{C=nz(-7,9);if(A===C)continue;x=nz(-9,9);D=(A-C)*x+B;if(Math.abs(D)>60)continue;}
+      let right=lin(C,D);
+      if(Math.random()<.4&&C!==1&&C!==-1&&D%C===0&&D!==0){right=`${kStr(C)}(${lin(1,D/C)})`;bracket.right=true;}
+      disp=`${kStr(k)}(${lin(q,r)}) = ${right}`;
+    }
+    const pre=[];
+    if(bracket)pre.push(["Expand the brackets",`${lin(A,B)} = ${lin(C,D)}`]);
+    const {st,ans}=linSteps(A,B,C,D);
+    if(x!==null&&x!==undefined&&fval(ans)!==x)continue;
+    const L1=F(A*ans.n+B*ans.d,ans.d),R1=F(C*ans.n+D*ans.d,ans.d);
+    const steps=[...pre,...st,["Check: put it back into both sides",`left = ${fstr(L1)}, right = ${fstr(R1)} ✓`]];
+    const mistakes=[{val:F(-ans.n,ans.d),msg:"The sign of your answer is wrong. Check the step where you divide, and any negatives you moved across."}];
+    if(B!==0)mistakes.push({val:F(D+B,A-C),msg:`When you move ${sn(B)} to the other side, use the opposite operation, so it changes sign.`});
+    if(C!==0&&A+C!==0)mistakes.push({val:F(D-B,A+C),msg:`To move ${coefTerm(C,"x")} across, ${C>0?"subtract":"add"} ${coefTerm(Math.abs(C),"x")} on both sides. It changes sign.`});
+    if(bracket&&bracket.r!==undefined&&bracket.k!==1){const Bw=bracket.r;if(A-C!==0)mistakes.push({val:F(D-Bw,A-C),msg:`Multiply ${sn(bracket.k)} by both terms inside the brackets, not just the first one.`});}
+    let hint;
+    if(bracket)hint=`Expand first: multiply ${sn(bracket.k)} by every term inside the brackets. Then collect the x-terms on one side.`;
+    else if(C!==0)hint=`Get the x-terms on one side: ${C>0?"subtract":"add"} ${coefTerm(Math.abs(C),"x")} ${C>0?"from":"to"} both sides. Then deal with the numbers.`;
+    else hint=`Reverse BEDMAS: undo the ${B>0?"+ "+B:M+" "+(-B)} first, then divide by ${A}.`;
+    return{kind:"solve",A,B,C,D,tag:"Solve for x",rule:"Undo operations in reverse BEDMAS order",prompt:"Solve for x.",eqs:[disp],ans,steps,mistakes,hint};
+  }
+}
+
+function genExpand(L){
+  for(let t=0;t<200;t++){
+    let m=1,n=1,p,q,special=null;
+    if(L===0){p=ri(1,9);q=ri(1,9);}
+    else if(L===1){const s=Math.random();if(s<.15){p=nz(-9,9);q=-p;special="diff";}else if(s<.3){p=nz(-9,9);q=p;special="square";}else{p=nz(-9,9);q=nz(-9,9);}}
+    else{m=ri(1,5);n=ri(1,5);if(m===1&&n===1)continue;const s=Math.random();
+      if(s<.15){n=m;p=nz(-9,9);q=-p;special="diff";}else if(s<.3){n=m;p=nz(-9,9);q=p;special="square";}else{p=nz(-9,9);q=nz(-9,9);}}
+    const a=m*n,b=m*q+n*p,c=p*q;
+    const first=lin(m,p),second=lin(n,q);
+    const disp=special==="square"?`(${first})²`:`(${first})(${second})`;
+    const tl=(c0,v)=>poly([[c0,v]]);const sg=c0=>(c0<0?M:"+")+Math.abs(c0);
+    const area=`<table class="area" aria-label="Area model"><tr><td>×</td><td>${tl(n,"x")}</td><td>${sg(q)}</td></tr><tr><td>${tl(m,"x")}</td><td>${tl(a,"x²")}</td><td class="mid">${tl(m*q,"x")}</td></tr><tr><td>${sg(p)}</td><td class="mid">${tl(n*p,"x")}</td><td>${tl(c,"")}</td></tr></table>`;
+    const steps=[];
+    if(special==="square")steps.push(["A bracket squared means multiply it by itself",`(${first})(${first})`]);
+    steps.push(["Draw the area model and multiply each pair",area]);
+    steps.push(["Collect the x-terms on the diagonal",`${poly([[m*q,"x"],[n*p,"x"]])} = ${tl(b,"x")}`]);
+    steps.push(["Write it in standard form, ax² + bx + c",`${poly([[a,"x²"],[b,"x"],[c,""]])}`]);
+    return{kind:"expand",tag:"Expand",rule:"Area model, then collect like terms",prompt:"Expand and simplify. Write the answer in standard form.",eqs:[disp],a,b,c,m,n,p,q,special,steps,
+      hint:`Draw a 2 × 2 area model. Put the terms of (${first}) down the side and the terms of (${special==="square"?first:second}) across the top. Multiply each pair, then add the two x-terms.`};
+  }
+}
+
+function fmtY(m,b,L){if(L>=1&&m<0&&b>0&&Math.random()<.45)return `y = ${poly([[b,""],[m,"x"]])}`;return `y = ${lin(m,b)}`}
+
+function genComp(L){
+  for(let t=0;t<500;t++){
+    let m1,m2,b1,x0;
+    if(L===0){m1=ri(1,6);m2=ri(1,6);x0=ri(1,8);b1=ri(0,12);}
+    else if(L===1){m1=nz(-5,6);m2=nz(-5,6);x0=ri(-5,8);b1=nz(-15,15);}
+    else{m1=nz(-8,9);m2=nz(-8,9);x0=nz(-9,9);b1=nz(-25,25);}
+    if(m1===m2)continue;
+    const y0=m1*x0+b1,b2=y0-m2*x0;
+    if(L===0&&(b2<-10||b2>25||y0<0||y0>40))continue;
+    if(Math.abs(y0)>(L===2?60:45))continue;
+    if(L===1&&Math.abs(b2)>20)continue;
+    if(L===2&&Math.abs(b2)>40)continue;
+    if(b1===b2)continue;
+    const e1=fmtY(m1,b1,L),e2=fmtY(m2,b2,L);
+    const {st}=linSteps(m1,b1,m2,b2);
+    const steps=[["Both equations equal y, so set ① equal to ②",`${lin(m1,b1)} = ${lin(m2,b2)}`],...st,
+      [`Substitute x = ${sn(x0)} into ①`,`y = ${evalStr(m1,b1,x0)} = ${sn(y0)}`],
+      [`Check in ②`,`y = ${evalStr(m2,b2,x0)} = ${sn(y0)} ✓`],
+      ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+    const xm=[];
+    const a=m1-m2;
+    if(b1!==0||b2!==0){const v=F(b2+b1,a);xm.push({val:v,msg:"When you move a number across the equals sign, it changes sign. Check that step."});}
+    if(m1+m2!==0)xm.push({val:F(b2-b1,m1+m2),msg:`To get the x-terms together, ${m2>0?"subtract":"add"} ${coefTerm(Math.abs(m2),"x")} on both sides. It changes sign when it moves.`});
+    return{kind:"poi",tag:"Solve by comparison",rule:"Set y₁ = y₂, solve for x, then find y",prompt:"Find the point of intersection.",
+      eqs:[e1,e2],x0,y0,steps,xm,
+      tests:[(x,y)=>Math.abs(y-(m1*x+b1))<1e-6,(x,y)=>Math.abs(y-(m2*x+b2))<1e-6],
+      hint:`Both equations start with y =, so set the right sides equal: ${lin(m1,b1)} = ${lin(m2,b2)}. Solve that for x.`};
+  }
+}
+
+function genSub(L){
+  for(let t=0;t<800;t++){
+    let x0,y0,A,B,m,b,xform=false;
+    if(L===0){x0=ri(1,8);m=ri(1,3);b=ri(-3,8);y0=m*x0+b;if(y0<1)continue;A=ri(1,4);B=1;}
+    else if(L===1){x0=ri(-4,8);m=nz(-3,4);b=nz(-8,8);y0=m*x0+b;A=nz(-4,7);B=pick([2,3,4,5,-1]);}
+    else{xform=Math.random()<.35;x0=nz(-8,8);y0=nz(-8,8);m=nz(-4,4);A=nz(-6,8);B=pick([-2,-3,-4,-5,-6,3]);b=xform?x0-m*y0:y0-m*x0;}
+    if(b===0&&L>0)continue;
+    if(Math.abs(b)>15)continue;
+    const C=A*x0+B*y0;if(Math.abs(C)>70)continue;
+    const den=xform?A*m+B:A+B*m;if(den===0)continue;
+    const e1=`${poly([[A,"x"],[B,"y"]])} = ${sn(C)}`;
+    const e2=xform?`x = ${lin(m,b,"y")}`:`y = ${lin(m,b)}`;
+    let steps,am=[],hint;
+    if(!xform){
+      const rep=`${A===1?"x":A===-1?M+"x":sn(A)+"x"} ${signedTimes(B,lin(m,b))} = ${sn(C)}`;
+      const {st}=linSteps(den,B*b,0,C);
+      steps=[[`Replace y in ① with (${lin(m,b)}). Keep the brackets`,rep],
+        ["Expand the brackets",`${poly([[A,"x"],[B*m,"x"],[B*b,""]])} = ${sn(C)}`],
+        ["Collect like terms",`${lin(den,B*b)} = ${sn(C)}`],...st,
+        [`Substitute x = ${sn(x0)} into ②`,`y = ${evalStr(m,b,x0)} = ${sn(y0)}`],
+        ["Check in ①",`${mul(A,x0)} ${signedTimes(B,sn(y0))} = ${sn(C)} ✓`],
+        ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+      if(B!==1&&A+B*m!==0)am.push({which:"x",val:F(C-b,A+B*m),msg:`Multiply ${sn(B)} by both terms in the brackets, not just the first one.`});
+      if(B<0)am.push({which:"x",val:F(C+B*b,den),msg:`${sn(B)} times ${sn(b)} is ${sn(B*b)}. Watch the signs when you multiply a negative into the brackets.`});
+      hint=`Equation ② tells you what y equals. Replace the y in ① with (${lin(m,b)}), keep the brackets, then expand.`;
+    }else{
+      const rep=`${kStr(A)}(${lin(m,b,"y")}) ${B<0?M:"+"} ${coefTerm(Math.abs(B),"y")} = ${sn(C)}`;
+      const {st}=linSteps(den,A*b,0,C,"y");
+      steps=[[`Replace x in ① with (${lin(m,b,"y")}). Keep the brackets`,rep],
+        ["Expand the brackets",`${poly([[A*m,"y"],[A*b,""],[B,"y"]])} = ${sn(C)}`],
+        ["Collect like terms",`${lin(den,A*b,"y")} = ${sn(C)}`],...st,
+        [`Substitute y = ${sn(y0)} into ②`,`x = ${evalStr(m,b,y0)} = ${sn(x0)}`],
+        ["Check in ①",`${mul(A,x0)} ${signedTimes(B,sn(y0))} = ${sn(C)} ✓`],
+        ["Conclusion",`∴ The point of intersection is (${sn(x0)}, ${sn(y0)}).`]];
+      if(A!==1&&A*m+B!==0)am.push({which:"y",val:F(C-b,A*m+B),msg:`Multiply ${sn(A)} by both terms in the brackets, not just the first one.`});
+      if(A<0)am.push({which:"y",val:F(C+A*b,den),msg:`${sn(A)} times ${sn(b)} is ${sn(A*b)}. Watch the signs when you multiply a negative into the brackets.`});
+      hint=`This time ② tells you what x equals. Replace the x in ① with (${lin(m,b,"y")}), solve for y first, then find x.`;
+    }
+    const t1=(x,y)=>Math.abs(A*x+B*y-C)<1e-6;
+    const t2=xform?(x,y)=>Math.abs(x-(m*y+b))<1e-6:(x,y)=>Math.abs(y-(m*x+b))<1e-6;
+    return{kind:"poi",tag:"Solve by substitution",rule:xform?"② is solved for x, so substitute for x":"Substitute ② into ①, solve, then find the other variable",
+      prompt:"Find the point of intersection.",eqs:[e1,e2],x0,y0,steps,am,xform,tests:[t1,t2],hint};
+  }
+}
+
+const GEN={solve:genSolve,expand:genExpand,comp:genComp,sub:genSub};
+
+/* ---------- Parsing ---------- */
+function parse(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[xy]=/i,"");
+  if(s==="")return null;
+  if(/^[-+]?\d+(\.\d+)?$/.test(s))return{v:parseFloat(s),dec:/\./.test(s)};
+  if(/^[-+]?\.\d+$/.test(s))return{v:parseFloat(s),dec:true};
+  const m=s.match(/^([-+]?\d+)\/([-+]?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2],dec:false};
+  return{bad:true};
+}
+const close=(v,target)=>Math.abs(v-target)<(Number.isInteger(target)?1e-9:0.006);
+const near=(v,target)=>Math.abs(v-target)<0.006;
+
+/* ---------- State & UI ---------- */
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let skill=store.get("u1.skill","comp"),level=store.get("u1.level",1);
+if(!["solve","expand","comp","sub","mixed"].includes(skill))skill="comp";if(![0,1,2].includes(level))level=1;
+const stats={first:0,done:0,streak:0};
+let q=null,attempts=0,revealed=false,finished=false;
+const LEVELNOTES=["Support: smaller whole numbers and friendly signs.","On track: like the questions on your worksheets.","Challenge: negatives, brackets, fractions and trickier forms."];
+
+function setPressed(){
+  document.querySelectorAll("#skills button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.skill===skill)));
+  document.querySelectorAll("#levels button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.level===level)));
+  $("levelNote").textContent=LEVELNOTES[level];
+}
+function inputHTML(id,label){return `<input id="${id}" aria-label="${label}" inputmode="text" spellcheck="false">`}
+function newQ(){
+  const k=skill==="mixed"?pick(["solve","expand","comp","sub"]):skill;
+  q=GEN[k](level);attempts=0;revealed=false;finished=false;
+  $("qtag").textContent=q.tag+(skill==="mixed"?" · mixed":"");
+  $("rule").textContent=q.rule;$("prompt").textContent=q.prompt;
+  const circ=["①","②"];
+  $("eqs").innerHTML=q.eqs.map((e,i)=>`<div>${q.eqs.length>1?`<span class="n">${circ[i]}</span>`:""}${e}</div>`).join("");
+  const f=$("answer");
+  if(q.kind==="solve")f.innerHTML=`<span>x =</span>${inputHTML("a1","x")}`;
+  else if(q.kind==="expand")f.innerHTML=`${inputHTML("a1","x squared coefficient")}<span>x² +</span>${inputHTML("a2","x coefficient")}<span>x +</span>${inputHTML("a3","constant")}`;
+  else f.innerHTML=`<span>(</span>${inputHTML("a1","x")}<span>,</span>${inputHTML("a2","y")}<span>)</span>`;
+  $("fb").innerHTML="";$("steps").hidden=true;$("steps").innerHTML="";
+  $("checkBtn").disabled=false;$("stepsBtn").textContent="Show steps";
+  const first=$("a1");if(first&&document.activeElement&&document.activeElement.closest&&document.activeElement.closest(".card"))first.focus();
+}
+function fb(type,title,msg){$("fb").innerHTML=`<div class="feedback ${type}"><strong>${title}</strong>${msg||""}</div>`}
+function mark(id,ok){const el=$(id);if(el){el.classList.toggle("ok",ok);el.classList.toggle("no",!ok)}}
+function showSteps(){
+  revealed=true;
+  const items=q.steps.map((s,i)=>`<li><span class="why">${s[0]}</span><span class="work${i===q.steps.length-1?" final":""}">${s[1]}</span></li>`).join("");
+  $("steps").innerHTML=`<h2>Worked steps</h2><ol>${items}</ol>`;$("steps").hidden=false;$("stepsBtn").textContent="Steps shown";
+}
+function updateScore(){$("sFirst").textContent=stats.first;$("sDone").textContent=stats.done;$("sStreak").textContent=stats.streak}
+function win(extra){
+  if(!finished){finished=true;stats.done++;if(attempts===0&&!revealed){stats.first++;stats.streak++}else stats.streak=0;updateScore();}
+  const praise=attempts===0&&!revealed?pick(["Correct!","Nailed it.","That's right.","Correct, first try."]):"Correct!";
+  fb("good",praise,extra||"");$("checkBtn").disabled=true;$("nextBtn").focus();
+}
+function miss(msg){attempts++;fb("bad","Not quite.",msg+(attempts>=2&&!revealed?" You can also press Show steps.":""))}
+
+function check(){
+  if(finished)return;
+  if(q.kind==="solve"){
+    const r=parse($("a1").value);
+    if(!r)return fb("hint","Type your answer first.","Write the value of x in the box.");
+    if(r.bad)return fb("hint","I can't read that number.","Use a whole number, a fraction like 7/3, or a decimal like 2.33.");
+    const t=fval(q.ans);
+    if(close(r.v,t)||(!isInt(q.ans)&&near(r.v,t))){mark("a1",true);return win(isInt(q.ans)?"":`x = ${fstr(q.ans)} (about ${t.toFixed(2)}).`)}
+    mark("a1",false);
+    for(const mk of q.mistakes){if(fval(mk.val)!==t&&near(r.v,fval(mk.val)))return miss(mk.msg)}
+    return miss("Put your answer back into both sides of the equation. If the two sides don't match, look for the step where something went wrong.");
+  }
+  if(q.kind==="expand"){
+    const vs=["a1","a2","a3"].map(id=>parse($(id).value));
+    if(vs.some(v=>!v))return fb("hint","Fill in all three boxes.","Use 0 if a term is missing, like x² + 0x − 9.");
+    if(vs.some(v=>v.bad))return fb("hint","I can't read one of those.","Each box needs a number, such as 3, −5 or 0.");
+    const [a,b,c]=vs.map(v=>v.v);
+    const ok=[a===q.a,b===q.b,c===q.c];["a1","a2","a3"].forEach((id,i)=>mark(id,ok[i]));
+    if(ok.every(Boolean))return win(`${poly([[q.a,"x²"],[q.b,"x"],[q.c,""]])}`);
+    if(!ok[0])return miss(`The x² term comes from multiplying the two first terms: ${poly([[q.m,"x"]])} × ${poly([[q.n,"x"]])}.`);
+    if(ok[0]&&ok[2]&&!ok[1]){
+      if(q.special==="square"&&b===0)return miss("A squared bracket is not just the first term squared plus the last term squared. Write it as two brackets and you'll get two middle terms.");
+      if(b===q.m*q.q-q.n*q.p||b===-q.m*q.q+q.n*q.p)return miss("Your first and last terms are right. One of the two x-terms on the diagonal has the wrong sign.");
+      return miss("Your first and last terms are right. Find the two x-terms on the diagonal of the area model and add them, keeping their signs.");
+    }
+    if(!ok[2]&&c===-q.c)return miss(`Check the sign of the last term. It's ${sn(q.p)} × ${sn(q.q)}.`);
+    return miss("Some of your terms don't match. Draw the area model and check each box.");
+  }
+  // point of intersection
+  const rx=parse($("a1").value),ry=parse($("a2").value);
+  if(!rx||!ry)return fb("hint","Fill in both boxes.","A point of intersection has an x-value and a y-value.");
+  if(rx.bad||ry.bad)return fb("hint","I can't read one of those.","Each box needs a number, such as 4 or −3.");
+  const okx=rx.v===q.x0,oky=ry.v===q.y0;mark("a1",okx);mark("a2",oky);
+  if(okx&&oky)return win(`(${sn(q.x0)}, ${sn(q.y0)}) works in both equations.`);
+  if(rx.v===q.y0&&ry.v===q.x0&&q.x0!==q.y0)return miss("It looks like x and y are swapped. A point is always written (x, y).");
+  const firstVar=q.xform?"y":"x",fv=q.xform?ry.v:rx.v,ft=q.xform?q.y0:q.x0;
+  if(fv===ft)return miss(`Your ${firstVar} is right. Substitute ${firstVar} = ${sn(ft)} into one of the equations to find ${firstVar==="x"?"y":"x"}.`);
+  const mlist=q.xm||q.am||[];
+  for(const mk of mlist){if(fval(mk.val)!==ft&&near(fv,fval(mk.val)))return miss(mk.msg)}
+  const w1=q.tests[0](rx.v,ry.v),w2=q.tests[1](rx.v,ry.v);
+  if(w1&&!w2)return miss("Your point works in ① but not in ②, so it isn't on both lines.");
+  if(w2&&!w1)return miss("Your point works in ② but not in ①, so it isn't on both lines.");
+  return miss("Your point isn't on either line. Substitute it into both equations to check, then look back through your steps.");
+}
+
+$("skills").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;skill=b.dataset.skill;store.set("u1.skill",skill);setPressed();newQ();});
+$("levels").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;level=+b.dataset.level;store.set("u1.level",level);setPressed();newQ();});
+$("checkBtn").addEventListener("click",check);
+$("answer").addEventListener("submit",e=>{e.preventDefault();check();});
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();check();}});
+$("hintBtn").addEventListener("click",()=>fb("hint","Hint",q.hint));
+$("stepsBtn").addEventListener("click",()=>{showSteps();if(!finished)stats.streak=0,updateScore();});
+$("nextBtn").addEventListener("click",()=>{if(!finished&&(revealed||attempts>0)){stats.done++;stats.streak=0;updateScore();}newQ();$("a1")&&$("a1").focus();});
+setPressed();newQ();updateScore();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Grade 10 math, Unit 1 review: a self-checking practice page and a retro review game.">
+<meta name="robots" content="noindex">
+<title>Unit 1 Review</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-400.woff") format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-700.woff") format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"Kalam";src:url("fonts/kalam-700.woff") format("woff");font-weight:700;font-display:swap}
+@font-face{font-family:"VT323";src:url("fonts/vt323.woff") format("woff");font-display:swap}
+/* Layout: a short centred column on graph paper with one card per activity. */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0; --crt:#000; --crt-green:#41ff5f; --crt-orange:#ff8a2a;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif; --f-pen:"Kalam","Segoe Print",cursive; --f-crt:"VT323","Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){:root{--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:40px 56px;display:flex;flex-direction:column;gap:20px}
+h1{font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h1 span{font-family:var(--f-pen);color:var(--pen)}
+.lede{margin:0;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+a.card{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:20px}
+a.card:hover,a.card:focus-visible{border-color:var(--pen);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--pen) 25%,transparent)}
+a.card h2{margin:0;font-size:1.25rem}
+a.card p{margin:0;color:var(--muted)}
+a.card .go{margin-top:auto;font-weight:700;color:var(--pen)}
+a.game{background:var(--crt);border-color:#222}
+a.game h2{font-family:var(--f-crt);font-size:1.9rem;font-weight:400;color:var(--crt-orange);letter-spacing:.02em}
+a.game p{color:#cfe9d2;font-family:var(--f-crt);font-size:1.3rem;line-height:1.2}
+a.game .go{color:var(--crt-green);font-family:var(--f-crt);font-size:1.3rem}
+footer{font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Unit 1 Review <span>Algebra &amp; Systems of Equations</span></h1>
+    <p class="lede">Solving equations, expanding, and finding where two lines meet by comparison and substitution.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="practice/">
+      <h2>Algebra Practice</h2>
+      <p>Pick a skill and a level. Every question is new, and you get a hint and the worked steps if you need them.</p>
+      <span class="go">Start practising →</span>
+    </a>
+    <a class="card game" href="trail/">
+      <h2>The Ottawa River Trail</h2>
+      <p>Paddle a canoe brigade from Lachine to Mattawa. Solve the problems to keep your crew moving.</p>
+      <span class="go">&gt; Push off_</span>
+    </a>
+  </div>
+  <footer>Nothing you type on these pages is sent anywhere.</footer>
+</div>
+</body>
+</html>
