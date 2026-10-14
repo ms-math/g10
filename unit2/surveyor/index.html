@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A 16-bit survey-adventure review game for Grade 10 Unit 2 math, along the Rideau from Bytown to Kingston in 1827.">
+<meta name="robots" content="noindex">
+<title>Bytown Surveyor</title>
+<style>
+:root{color-scheme:dark}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("../fonts/press-start-2p.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: a 16-bit console game. HUD strip, top-down map canvas with RPG windows layered over it
+   (dialog box at the bottom, question window over the map), touch pad underneath.
+   Deliberately single-theme: a console screen looks the same on a light or dark host. */
+:root{
+  --night:#0b1024; --frame:#1a2244; --win1:#2a46a0; --win2:#14225e; --edge:#f5f0dc; --ink:#f5f0dc;
+  --gold:#ffd34d; --sky:#7ee8ff; --red:#ff6b6b; --green:#8dff7a; --dim:#a9b8e6; --shadow:#060a1c;
+  --f-title:"Press Start 2P", "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Verdana", "Segoe UI", sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:19px;line-height:1.35}
+.wrap{min-height:100%;display:flex;justify-content:center;align-items:flex-start;padding-inline:16px;padding-block:12px}
+.console{width:100%;max-width:980px;display:flex;flex-direction:column;gap:8px}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:2px 18px;padding:6px 12px;background:var(--frame);border:3px solid var(--edge);border-radius:6px;box-shadow:0 0 0 3px var(--shadow);font-size:18px}
+.hud b{color:var(--gold);font-weight:700}
+.hud .ttl{font-family:var(--f-title);font-size:10px;color:var(--sky);letter-spacing:.06em;margin-right:auto}
+.hud button{font:inherit;font-size:16px;background:none;border:2px solid var(--dim);color:var(--ink);padding:0 8px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.hud button:focus-visible{outline:2px solid var(--gold)}
+.trail{display:flex;align-items:center;gap:6px;width:100%;font-size:15px;color:var(--dim)}
+.trail .bar{position:relative;flex:1;height:6px;background:#2a3566;border-radius:3px}
+.trail .fill{position:absolute;left:0;top:0;bottom:0;background:var(--gold);border-radius:3px}
+.trail .stop{position:absolute;top:-3px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#2a3566;border:2px solid var(--dim)}
+.trail .stop.done{background:var(--green);border-color:var(--green)}
+.screen{position:relative;border:3px solid var(--edge);border-radius:6px;box-shadow:0 0 0 3px var(--shadow);overflow:hidden;background:#000;aspect-ratio:320/208}
+#map{display:block;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
+.win{background:linear-gradient(180deg,var(--win1),var(--win2));border:3px solid var(--edge);border-radius:8px;box-shadow:0 0 0 3px var(--shadow),inset 0 0 0 2px #3b5bc4;color:var(--ink)}
+#dialog{position:absolute;left:3%;right:3%;bottom:4%;padding:12px 18px 14px;min-height:28%;font-size:clamp(16px,2.3vw,22px)}
+#dialog .who{position:absolute;top:-16px;left:14px;font-family:var(--f-title);font-size:10px;background:var(--win2);border:3px solid var(--edge);border-radius:6px;padding:5px 8px;color:var(--gold)}
+#dialog .more{position:absolute;right:12px;bottom:6px;color:var(--gold);font-size:14px}
+#banner{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-family:var(--f-title);font-size:clamp(12px,2.4vw,22px);padding:12px 18px;text-align:center;white-space:nowrap;transition:opacity .6s}
+#banner small{display:block;font-family:var(--f-body);font-size:.75em;color:var(--dim);margin-top:6px}
+#panel{position:absolute;inset:3%;padding:14px 18px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+#panel.title{inset:9% 22%}
+#say{max-height:7.4em;overflow-y:auto}
+h1{font-family:var(--f-title);font-size:clamp(18px,3.4vw,32px);color:var(--gold);margin:6px 0 2px;line-height:1.4;text-align:center;text-shadow:3px 3px 0 var(--shadow);text-wrap:balance}
+h2{font-family:var(--f-body);font-weight:700;font-size:15px;color:var(--sky);margin:0;line-height:1.4;letter-spacing:.08em;text-transform:uppercase}
+p{margin:0}
+.gold{color:var(--gold)} .sky{color:var(--sky)} .red{color:var(--red)} .green{color:var(--green)} .dim{color:var(--dim)} .center{text-align:center}
+.hl{color:var(--gold)}
+.small{font-size:17px}
+.menu{display:flex;flex-direction:column;gap:4px}
+.menu button,.btn{font:inherit;text-align:left;background:none;border:none;color:var(--ink);padding:3px 8px 3px 26px;cursor:pointer;position:relative;border-radius:4px}
+.menu button::before,.btn::before{content:"▶";position:absolute;left:6px;color:var(--gold);opacity:0;font-size:.8em;top:.25em}
+.menu button:hover,.menu button:focus-visible,.btn:hover,.btn:focus-visible{background:rgba(255,255,255,.08);outline:none}
+.menu button:hover::before,.menu button:focus-visible::before,.btn:hover::before,.btn:focus-visible::before{opacity:1}
+.k{color:var(--gold)}
+.btn:disabled{opacity:.45;cursor:default}
+.qwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:12px 20px;align-items:start}
+.qwrap.nofig{grid-template-columns:minmax(0,1fr)}
+.qtext{display:flex;flex-direction:column;gap:10px;min-width:0}
+.figwrap{display:flex;flex-direction:column;gap:4px;min-width:0}
+#fig{display:block;width:100%;height:auto;border:3px solid var(--edge);border-radius:4px;background:#0f1d4a;touch-action:manipulation}
+#fig.click{cursor:crosshair}
+#fig:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.big{font-size:26px}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:24px}
+.answer .lbl{color:var(--sky)}
+input{font:inherit;font-size:24px;width:4.6em;background:#0a1238;color:var(--gold);border:3px solid var(--edge);border-radius:4px;padding:0 6px;text-align:center}
+input:focus{outline:none;border-color:var(--gold)}
+input.name{width:9em;text-align:left}
+input.wide{width:min(11em,100%);text-align:left;letter-spacing:.02em}
+.keys{display:inline-flex;gap:6px}
+.key{font:inherit;font-weight:700;font-size:20px;min-width:2.1em;padding:0 8px;background:var(--win2);color:var(--gold);border:3px solid var(--edge);border-radius:6px;cursor:pointer}
+.key:hover,.key:focus-visible{border-color:var(--gold);outline:none}
+.preview{font-size:17px;color:var(--dim);min-height:1.3em}
+.choices{display:flex;flex-direction:column;gap:5px}
+.opt{font:inherit;font-size:22px;text-align:left;background:rgba(10,18,56,.6);border:3px solid #6f85d0;border-radius:6px;color:var(--ink);padding:3px 10px;cursor:pointer}
+.opt:hover,.opt:focus-visible{border-color:var(--gold);outline:none}
+.opt:disabled{opacity:.35;cursor:default;text-decoration:line-through}
+.opt.right{border-color:var(--green);color:var(--green);opacity:1;text-decoration:none}
+.msg{padding:6px 10px;border:3px solid currentColor;border-radius:6px;background:rgba(6,10,28,.45)}
+.msg.good{color:var(--green)} .msg.bad{color:var(--red)} .msg.hint{color:var(--gold)}
+.msg .ink{color:var(--ink)}
+.steps{border:3px dashed #6f85d0;border-radius:6px;padding:6px 12px}
+.steps ol{margin:4px 0 0;padding-left:1.6em;display:flex;flex-direction:column;gap:3px}
+.steps .why{color:var(--dim)} .steps .work{color:var(--gold)}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.78em;line-height:.95;text-align:center;margin:0 .08em}
+.fr>span:first-child{border-bottom:2px solid currentColor;padding:0 .12em}
+table.box,table.tbl{border-collapse:collapse;color:var(--gold);margin:3px 0;font-variant-numeric:tabular-nums}
+table.box td{padding:0 12px;text-align:center}
+table.box tr:first-child td{border-bottom:2px solid var(--gold)}
+table.box td:first-child{border-right:2px solid var(--gold)}
+table.tbl th{color:var(--dim);font-weight:400;text-align:left;padding:0 16px 0 0}
+table.tbl td{padding:0 16px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.store td{padding:2px 12px 2px 0}
+.store button{font:inherit;background:none;border:2px solid var(--edge);color:var(--ink);min-width:2em;border-radius:4px;cursor:pointer}
+.store button:focus-visible{outline:2px solid var(--gold)}
+.report{border-collapse:collapse}
+.report td,.report th{padding:1px 14px 1px 0;text-align:left;font-weight:400}
+.report th{color:var(--dim)}
+.stone{border:4px solid var(--edge);border-radius:70px 70px 6px 6px;padding:24px 18px 14px;max-width:440px;margin:4px auto;text-align:center;background:#3a3f55}
+.pad{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 4px;user-select:none;-webkit-user-select:none}
+.dpad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,40px);gap:4px}
+.pad button{font-family:var(--f-title);font-size:14px;background:var(--frame);color:var(--ink);border:3px solid var(--edge);border-radius:8px;cursor:pointer;touch-action:none}
+.pad button:active{background:var(--win1)}
+.pad .abtn{width:64px;height:64px;border-radius:50%;background:#7a2a3a}
+.pad .btns{display:flex;align-items:center;gap:10px}
+.pad .rbtn{width:44px;height:44px;border-radius:50%;background:#2a4a3a;font-size:12px}
+.pad .tip{flex:1;text-align:center;color:var(--dim);font-size:16px}
+@media (max-width:700px){
+  body{font-size:18px}
+  #panel,#panel.title{position:fixed;inset:0;border-radius:0;z-index:20;padding:14px 16px 24px}
+  .qwrap{grid-template-columns:minmax(0,1fr)}
+  .answer,input,.big{font-size:20px}.opt{font-size:19px}
+  .pad .tip{display:none}
+  .hud .ttl{display:none}
+  .hud{font-size:15px}
+  #dialog{position:fixed;left:8px;right:8px;bottom:12px;min-height:0;z-index:15;font-size:18px;padding-top:18px}
+}
+@media (prefers-reduced-motion:reduce){#banner{transition:none}}
+</style>
+
+<div class="wrap"><div class="console">
+  <div class="hud" id="hud"><span class="ttl">BYTOWN SURVEYOR</span><span id="hudStats"></span><button id="soundBtn" type="button" aria-pressed="false">Sound: off</button><div class="trail" id="trail" hidden></div></div>
+  <div class="screen" id="screen">
+    <canvas id="map" width="320" height="208" aria-label="Map of the Rideau route. Use the arrow keys to walk."></canvas>
+    <div id="banner" class="win" hidden></div>
+    <div id="dialog" class="win" hidden aria-live="polite"><span class="who" id="who"></span><p id="say"></p><span class="more" id="more">▼</span></div>
+    <div id="panel" class="win" hidden aria-live="polite"></div>
+  </div>
+  <div class="pad" id="pad">
+    <div class="dpad"><span></span><button data-dir="up" aria-label="Walk up">▲</button><span></span><button data-dir="left" aria-label="Walk left">◀</button><button data-dir="down" aria-label="Walk down">▼</button><button data-dir="right" aria-label="Walk right">▶</button></div>
+    <p class="tip">Arrow keys or WASD to walk · Walk into people to talk · SPACE to continue · R restarts a push puzzle · M for sound</p>
+    <span class="btns"><button class="rbtn" id="rbtn" aria-label="Start a push puzzle over">R</button><button class="abtn" id="abtn" aria-label="Talk or continue">A</button></span>
+  </div>
+</div></div>
+<script>
+(function(){
+"use strict";
+/* =================== math helpers =================== */
+const M="−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const sn=n=>n<0?M+Math.abs(n):String(n);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fv=x=>typeof x==="number"?x:x.n/x.d;
+const fneg=x=>typeof x==="number"?-x:F(-x.n,x.d);
+const fa=x=>typeof x==="number"?String(x):(x.d===1?String(x.n):x.n+"/"+x.d);
+function fh(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}<span class="fr"><span>${Math.abs(x.n)}</span><span>${x.d}</span></span>`}
+function cxv(c,v="x"){const val=fv(c);if(val===1)return v;if(val===-1)return M+v;return fh(c)+v}
+function lineH(m,b){
+  const mv=fv(m),bv=fv(b);let s="y = ";
+  if(mv!==0){s+=cxv(m);if(bv>0)s+=" + "+fh(b);else if(bv<0)s+=" "+M+" "+fh(fneg(b));}
+  else s+=fh(b);
+  return s;
+}
+const SUP=["","","²","³","⁴"];
+const xp=p=>p===0?"":p===1?"x":"x"+SUP[p];
+function poly(ts){let s="";for(const [c,p] of ts){if(c===0)continue;const a=Math.abs(c);const body=p===0?String(a):(a===1?"":a)+xp(p);s+=s===""?(c<0?M:"")+body:(c<0?" "+M+" ":" + ")+body}return s||"0"}
+const bin=p=>`(x ${p<0?M:"+"} ${Math.abs(p)})`;
+const sg=n=>(n<0?M:"+")+Math.abs(n);
+function primes(n){n=Math.abs(n);const out=[];for(let p=2;p*p<=n;p++)while(n%p===0){out.push(p);n/=p}if(n>1)out.push(n);return out}
+function rad(n){let k=1,r=n;for(let i=Math.floor(Math.sqrt(n));i>1;i--){if(n%(i*i)===0){k=i;r=n/(i*i);break}}return{k,r}}
+function radH(n){const {k,r}=rad(n);if(r===1)return String(k);if(k===1)return `√${n}`;return `√${n} = ${k}√${r}`}
+const isSq=n=>Number.isInteger(Math.sqrt(n));
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const P=(x,y)=>`(${sn(x)}, ${sn(y)})`;
+function side(Pp,Qq){const dx=Qq[0]-Pp[0],dy=Qq[1]-Pp[1];return{dx,dy,m:F(dy,dx),n:dx*dx+dy*dy}}
+const dot=(a,b)=>a.dx*b.dx+a.dy*b.dy, cross=(a,b)=>a.dx*b.dy-a.dy*b.dx;
+const inBox=(pts,lo,hi)=>pts.every(p=>p[0]>=lo&&p[0]<=hi&&p[1]>=lo&&p[1]<=hi);
+function fitBox(pts,lo,hi){
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);
+  if(w>hi-lo||h>hi-lo)return null;
+  const ox=ri(lo,hi-w)-Math.min(...xs),oy=ri(lo,hi-h)-Math.min(...ys);
+  return pts.map(p=>[p[0]+ox,p[1]+oy]);
+}
+function boxH(p,q,k){/* box method table for (x+p)(x+q), optional leading factor shown outside */
+  return `${k&&k!==1?`<span class="yellow">${k===-1?M:sn(k)}</span>`:""}<table class="box" style="display:inline-table;vertical-align:middle"><tr><td>×</td><td>x</td><td>${sg(q)}</td></tr><tr><td>x</td><td>x²</td><td>${poly([[q,1]])}</td></tr><tr><td>${sg(p)}</td><td>${poly([[p,1]])}</td><td>${sn(p*q)}</td></tr></table>`;
+}
+function expand(k,a1,b1,a2,b2){return[k*a1*a2,k*(a1*b2+b1*a2),k*b1*b2]}
+const triStr=c=>poly([[c[0],2],[c[1],1],[c[2],0]]);
+function toCo(ts){const a=[];for(const [c,p] of ts)a[p]=(a[p]||0)+c;for(let i=0;i<a.length;i++)a[i]=a[i]||0;return a}
+function radS(n){const {k,r}=rad(n);return r===1?String(k):k===1?`√${n}`:`${k}√${r}`}
+
+/* =================== question generators =================== */
+/* Each returns {skill, text, fig?, ans:{type,...}, steps, hint, mistakes?, fieldMsg?, missFn?} */
+const LINEF=[{pre:"y =",post:"x +",label:"slope m"},{label:"y-intercept b"}];
+
+function genLine(L){
+  for(let t=0;t<500;t++){
+    const type=pick(L===0?["graph","graph","slopept","twopts"]:["graph","slopept","twopts","twopts"]);
+    let m;
+    if(L===0)m=F(pick([1,2,3,-1,-2]));
+    else if(L===1)m=pick([F(nz(-4,4)),F(pick([1,-1]),2),F(pick([1,2,-1,-2]),3),F(pick([3,-3]),2)]);
+    else m=pick([F(pick([2,-2,1,-1]),pick([3,5])),F(pick([3,-3,1,-1]),4),F(pick([3,5,-3,-5]),2),F(nz(-5,5))]);
+    const d=m.d;let q;
+    if(type==="graph"){
+      const b=ri(-4,4),dir=(L>0&&Math.random()<.4)?-1:1;
+      const k=d===1?(Math.abs(m.n)>=3?1:pick([1,2])):1;
+      const x2=dir*d*k,y2=b+dir*m.n*k;
+      if(Math.abs(x2)>6||Math.abs(y2)>6)continue;
+      const rise=y2-b,run=x2;
+      q={text:`<p>The engineers drew the line of the new dam on the survey plan. Write its equation.</p>`,
+        fig:{type:"grid",min:-6,max:6,lines:[{m:fv(m),b}],pts:[{x:0,y:b},{x:x2,y:y2}]},
+        steps:[["Pick two points where the line crosses the grid exactly",`(0, ${sn(b)}) and ${P(x2,y2)}`],["Count the rise and the run",`rise = ${sn(rise)}, run = ${sn(run)}`],["Slope = rise ÷ run",`m = ${sn(rise)}/${sn(run)} = ${fh(m)}`],["Read b where the line crosses the y-axis",`b = ${sn(b)}`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:`Start at (0, ${sn(b)}) and count to the other marked point: how far up or down (rise), and how far across (run)?`,
+        vals:[m,b]};
+    }else if(type==="slopept"){
+      const x1=L===0?ri(1,6):d*nz(-3,3),y1=L===0?ri(1,15):ri(-9,12);
+      const mx=m.n*x1/d,b=y1-mx;
+      if(!Number.isInteger(b)||Math.abs(b)>25)continue;
+      q={text:`<p>A lot boundary has a slope of <span class="hl">${fh(m)}</span> and passes through the survey stake at <span class="hl">${P(x1,y1)}</span>. Write the equation of the boundary.</p>`,
+        steps:[[`Put m = ${fh(m)} into y = mx + b`,`y = ${cxv(m)} + b`],[`Sub ${P(x1,y1)} to get b`,`${sn(y1)} = ${fh(m)}(${sn(x1)}) + b`],["Multiply",`${sn(y1)} = ${sn(mx)} + b`],[`${mx>=0?"Subtract":"Add"} ${Math.abs(mx)} ${mx>=0?"from":"to"} both sides`,`${sn(b)} = b`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:`Write y = ${cxv(m)} + b, then replace x with ${sn(x1)} and y with ${sn(y1)} and solve for b.`,
+        vals:[m,b],mistakes:y1+mx!==b?[{f:1,val:y1+mx,msg:`When ${sn(mx)} moves across the equals sign, it changes sign. Check that step.`}]:[]};
+    }else{
+      const sgn=(L>0&&Math.random()<.4)?-1:1,k=pick([1,2]);
+      const x1=L===0?ri(0,5):d*ri(-3,3),y1=L===0?ri(0,8):ri(-8,8);
+      const run=sgn*d*k,rise=sgn*m.n*k,x2=x1+run,y2=y1+rise;
+      if(L===0&&(x2<0||y2<0||y2>20))continue;
+      if(Math.abs(x2)>12||Math.abs(y2)>20)continue;
+      const b=y1-m.n*x1/d;if(!Number.isInteger(b)||Math.abs(b)>25)continue;
+      const mx=m.n*x1/d;
+      const mistakes=[];
+      if(rise!==0&&fv(F(run,rise))!==fv(m))mistakes.push({f:0,val:F(run,rise),msg:"Slope is rise over run: the change in y goes on top."});
+      mistakes.push({f:0,val:fneg(m),msg:"Check the sign of the slope. Subtract the coordinates in the same order on the top and the bottom."});
+      q={text:`<p>The towpath runs straight from stake A${P(x1,y1)} to stake B${P(x2,y2)}. Write the equation of its line.</p>`,
+        steps:[["Find the run and the rise",`run = ${sn(x2)} ${M} ${x1<0?`(${sn(x1)})`:x1} = ${sn(run)}, rise = ${sn(y2)} ${M} ${y1<0?`(${sn(y1)})`:y1} = ${sn(rise)}`],["Slope = rise ÷ run",`m = ${sn(rise)}/${sn(run)} = ${fh(m)}`],[`Sub A${P(x1,y1)} into y = ${cxv(m)} + b`,`${sn(y1)} = ${sn(mx)} + b, so b = ${sn(b)}`],[`Check with B: ${fh(m)}(${sn(x2)}) + ${b<0?`(${sn(b)})`:b}`,`= ${sn(y2)} ✓`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:"Find the slope first: (y₂ − y₁) over (x₂ − x₁). Then sub either point into y = mx + b to get b.",
+        vals:[m,b],mistakes};
+    }
+    return Object.assign(q,{skill:"line",ans:{type:"num",fields:LINEF,vals:q.vals},
+      fieldMsg:["Your b is right. Check the slope: rise over run.","Your slope is right. Sub a point into y = mx + b to find b."]});
+  }
+}
+
+function makeRightTri(L,iso){
+  for(let t=0;t<400;t++){
+    const a=nz(-4,4),b=nz(-4,4),k=iso?1:pick([2,-2,1,-1]),s=pick([1,-1]);
+    if(!iso&&Math.abs(k)===1&&Math.random()<.7)continue;
+    const B=[0,0],A=[a,b],C=[-b*k*s,a*k*s];
+    const pts=fitBox([A,B,C],0,10);if(!pts)continue;
+    const ss=[side(pts[0],pts[1]),side(pts[1],pts[2]),side(pts[2],pts[0])];
+    if(ss.some(q=>q.dx===0||q.dy===0))continue;
+    if(iso!==undefined&&((ss[0].n===ss[1].n)!==iso))continue;
+    return pts;/* right angle at index 1 */
+  }
+}
+function makeNoRightTri(wantIso){
+  for(let t=0;t<2000;t++){
+    let pts;
+    if(wantIso){
+      const groups=[[[3,4],[4,3],[-3,4],[-4,3],[5,0]],[[1,3],[3,1],[-1,3],[-3,1]],[[2,3],[3,2],[-2,3],[-3,2]],[[1,2],[2,1],[-1,2],[-2,1]]];
+      const g=pick(groups);const u=pick(g),v=pick(g);
+      pts=fitBox([[u[0],u[1]],[0,0],[v[0],v[1]]],0,10);
+    }else pts=[[ri(0,10),ri(0,10)],[ri(0,10),ri(0,10)],[ri(0,10),ri(0,10)]];
+    if(!pts)continue;
+    const ss=[side(pts[0],pts[1]),side(pts[1],pts[2]),side(pts[2],pts[0])];
+    if(ss.some(q=>q.dx===0||q.dy===0||q.n<5))continue;
+    if(Math.abs(cross(ss[0],ss[1]))<12)continue;
+    if(dot(ss[0],ss[1])===0||dot(ss[1],ss[2])===0||dot(ss[2],ss[0])===0)continue;
+    const iso=ss[0].n===ss[1].n||ss[1].n===ss[2].n||ss[2].n===ss[0].n;
+    if(iso!==!!wantIso)continue;
+    return pts;
+  }
+}
+function slopeRows(pts,names){
+  const n=pts.length,rows=[];
+  for(let i=0;i<n;i++){const s=side(pts[i],pts[(i+1)%n]);rows.push({name:names[i]+names[(i+1)%n],s})}
+  return rows;
+}
+
+function genPerp(L){
+  const type=pick(L===0?["slopes","right","rect"]:L===1?["slopes","right","rect","right"]:["perpline","right","rect"]);
+  if(type==="slopes"){
+    const m=L===0?F(nz(-6,6)):F(pick([1,2,3,-1,-2,-3,4,-4,5]),pick([2,3,4,5]));
+    if(m.d===1&&L>0)return genPerp(L);
+    const b=nz(-9,9),mp=F(-m.d,m.n);
+    const mistakes=[{f:1,val:F(m.d,m.n),msg:"Change the sign too. A perpendicular slope is the negative reciprocal."},{f:1,val:fneg(m),msg:"Flip the fraction as well as changing the sign."},{f:0,val:mp,msg:"Parallel lines have the same slope."}];
+    return{skill:"perp",text:`<p>The towpath follows the line</p><p class="big">${lineH(m,b)}</p><p>A fence must run parallel to it, and a drainage ditch must cross it at a right angle. What slopes do they need?</p>`,
+      ans:{type:"num",fields:[{pre:"Fence (parallel): m =",label:"parallel slope"},{pre:"Ditch (perpendicular): m =",label:"perpendicular slope"}],vals:[m,mp]},
+      steps:[["The slope of the towpath",`m = ${fh(m)}`],["Parallel lines have the same slope",`m∥ = ${fh(m)}`],["Perpendicular: flip the fraction and change the sign",`m⊥ = ${fh(mp)}`],["Check: the two slopes multiply to −1",`${fh(m)} × ${fh(mp)} = −1 ✓`]],
+      hint:`The slope is ${fh(m)}. Parallel keeps it the same. Perpendicular flips it upside down and changes the sign.`,mistakes};
+  }
+  if(type==="right"){
+    let none=L>0&&Math.random()<.3;
+    let raw=none?makeNoRightTri(Math.random()<.5):null;
+    if(!raw){none=false;raw=makeRightTri(L)}
+    const order=shuffle([0,1,2]);const labels=["A","B","C"];
+    /* assign labels: vertex raw[i] gets label labels[order[i]]; then sort by label */
+    const byLabel=[0,1,2].map(li=>raw[order.indexOf(li)]);
+    const rightLabel=none?3:order[1];
+    const rows=slopeRows(byLabel,labels);
+    let found="No two slopes are negative reciprocals, so there is no right angle.";
+    if(!none){for(let i=0;i<3;i++){const r1=rows[i],r2=rows[(i+1)%3];if(dot(r1.s,r2.s)===0)found=`${r1.name} and ${r2.name} have slopes ${fh(r1.s.m)} and ${fh(r2.s.m)}: negative reciprocals, so they meet at a right angle at ${labels[(i+1)%3]}.`}}
+    const opts=["Right angle at A","Right angle at B","Right angle at C","No right angle"];
+    const why=opts.map((o,i)=>i===3?"Two of the slopes are negative reciprocals. Find that pair.":none?"Check the slopes again: no pair multiplies to −1.":`The sides that meet at ${labels[i]} are not perpendicular. Compare their slopes.`);
+    return{skill:"perp",text:`<p>Three stakes mark a corner of the lock pit. Use slopes to decide whether the triangle has a right angle.</p>`,
+      fig:{type:"grid",min:0,max:10,polys:[byLabel],pts:byLabel.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+      ans:{type:"choice",opts,correct:rightLabel,why},
+      steps:[["Find the slope of each side",TBL(rows.map(r=>[r.name,fh(r.s.m)]),["Side","Slope"])],["Look for slopes that are negative reciprocals",found],["Conclusion",`∴ ${opts[rightLabel]}`]],
+      hint:"Find the slope of AB, BC and CA. A right angle needs two slopes that multiply to −1."};
+  }
+  if(type==="rect"){
+    const raw=makeRightTri(L,Math.random()<.4?true:undefined)||makeRightTri(L);
+    for(let t=0;t<50;t++){
+      const [A,B,C]=raw;const D=[A[0]+C[0]-B[0],A[1]+C[1]-B[1]];
+      let pts=[A,B,C,D];
+      if(!inBox(pts,0,10)){pts=fitBox(pts,0,10);if(!pts)return genPerp(L)}
+      const [a,b,c,dd]=pts;const ux=a[0]-b[0],uy=a[1]-b[1];
+      const sAB=side(a,b),sAD=side(a,dd);
+      return{skill:"perp",text:`<p>A lock chamber must be a rectangle. Stakes A, B and C are in place. <span class="hl">Click the grid point where stake D must go.</span></p>`,
+        fig:{type:"grid",min:0,max:10,click:true,segs:[[a,b],[b,c]],pts:[{x:a[0],y:a[1],label:"A"},{x:b[0],y:b[1],label:"B"},{x:c[0],y:c[1],label:"C"}]},
+        ans:{type:"pt",pt:dd},
+        ptWhy:(x,y)=>{
+          if((x===a[0]+b[0]-c[0]&&y===a[1]+b[1]-c[1])||(x===c[0]+b[0]-a[0]&&y===c[1]+b[1]-a[1]))return "That makes a parallelogram, but D must be across from B. From C, move the same run and rise that take you from B to A.";
+          return "D must be across from B. From C, move the same run and rise that take you from B to A.";},
+        steps:[["Find the run and rise from B to A",`run = ${sn(ux)}, rise = ${sn(uy)}`],["Do the same from C to reach D",`D = (${sn(c[0])} + ${ux<0?`(${sn(ux)})`:ux}, ${sn(c[1])} + ${uy<0?`(${sn(uy)})`:uy}) = ${P(dd[0],dd[1])}`],["Check that AD ⊥ AB",`m(AB) = ${fh(sAB.m)}, m(AD) = ${fh(sAD.m)}: negative reciprocals ✓`],["Conclusion",`∴ Stake D goes at ${P(dd[0],dd[1])}`]],
+        hint:"Opposite sides of a rectangle are parallel. DC must match AB, so from C, move the same way you move from B to A."};
+    }
+  }
+  /* perpline (level 2) */
+  for(let t=0;t<300;t++){
+    const m=F(pick([1,2,3,-1,-2,-3,4,-4]),pick([1,2,3,5]));if(fv(m)===0)continue;
+    const b=nz(-6,6),mp=F(-m.d,m.n);
+    const px=m.n*nz(-2,2),py=ri(-6,8);
+    const bp=py-fv(mp)*px;if(!Number.isInteger(bp)||Math.abs(bp)>20)continue;
+    const mpx=fv(mp)*px;
+    return{skill:"perp",text:`<p>A side road must meet the towpath <span class="hl">${lineH(m,b)}</span> at a right angle and pass through the inn at <span class="hl">${P(px,py)}</span>. Write the equation of the side road.</p>`,
+      ans:{type:"num",fields:LINEF,vals:[mp,bp]},
+      mistakes:[{f:0,val:F(m.d,m.n),msg:"Change the sign too. A perpendicular slope is the negative reciprocal."},{f:0,val:m,msg:"That's the parallel slope. Flip it and change the sign."}],
+      fieldMsg:["Your b is right. Check the perpendicular slope.","Your slope is right. Sub the inn's coordinates into y = mx + b to find b."],
+      steps:[["Towpath slope",`m = ${fh(m)}`],["Perpendicular slope: flip and change the sign",`m⊥ = ${fh(mp)}`],[`Sub ${P(px,py)} into y = ${cxv(mp)} + b`,`${sn(py)} = ${sn(mpx)} + b, so b = ${sn(bp)}`],["Write the equation",`∴ ${lineH(mp,bp)}`]],
+      hint:`First find the negative reciprocal of ${fh(m)}. Then sub ${P(px,py)} to get b.`};
+  }
+}
+
+/* ---- common factoring ---- */
+function factorPack(ts,negGCF){
+  const g=ts.reduce((a,[c])=>gcd(a,c),0),pm=Math.min(...ts.map(t=>t[1]));
+  const sgn=negGCF&&ts[0][0]<0?-1:1,G=sgn*g;
+  const inner=ts.map(([c,p])=>[c/G,p-pm]);
+  const gstr=poly([[G,pm]]);
+  return{g,pm,G,gstr,inner,str:`${gstr}(${poly(inner)})`};
+}
+function genGCF(L){
+  const type=pick(L===0?["num","bin","bin"]:L===1?["bin","binx","rect","binx"]:["negx","tri3","binx","negx"]);
+  if(type==="num"){
+    for(;;){const g=pick([2,3,4,5,6,8,9,10,12]),p=ri(1,6),q=ri(2,7);if(p===q||gcd(p,q)!==1)continue;const a=g*p,b=g*q;if(a>60||b>60)continue;
+      const pa=primes(a),pb=primes(b);
+      return{skill:"gcf",text:`<p>Two settlers' lots are ${a} and ${b} chains wide. The surveyor wants the longest measuring rod that fits each width a whole number of times. That is the <span class="hl">greatest common factor</span>. What is it?</p>`,
+        ans:{type:"num",fields:[{pre:`GCF of ${a} and ${b} =`,label:"greatest common factor"}],vals:[g]},
+        mistakes:[{f:0,val:a*b,msg:"That's a common multiple. The GCF is the biggest number that divides into both."}],
+        steps:[["Break each number into primes",`${a} = ${pa.join(" · ")||a}<br>${b} = ${pb.join(" · ")||b}`],["Multiply the primes they share",`GCF = ${primes(g).join(" · ")||g}`],["Conclusion",`∴ GCF = ${g}`]],
+        hint:`Draw a factor tree for ${a} and for ${b}. Circle the primes that appear in both.`}}
+  }
+  let ts,neg=false;
+  for(let t=0;t<300;t++){
+    if(type==="bin"||type==="rect"){const g=ri(2,9),p=ri(1,6),q=nz(-9,9);if(gcd(p,q)!==1||p===1&&Math.random()<.5)continue;ts=[[g*p,1],[g*q,0]];}
+    else if(type==="binx"){const g=ri(1,6),p=ri(1,5),q=nz(-9,9);if(gcd(p,q)!==1)continue;ts=[[g*p,2],[g*q,1]];if(g===1&&p===1&&Math.random()<.6)continue;}
+    else if(type==="negx"){const g=ri(1,5),p=ri(1,4),q=nz(-8,8);if(gcd(p,q)!==1)continue;ts=[[-g*p,2],[-g*q,1]];neg=true;}
+    else{const g=ri(2,6),p=nz(-5,5),q=nz(-6,6);const D=p*p-4*q;if(D>=0&&isSq(D))continue;/* inner trinomial must not factor */
+      ts=[[g,3],[g*p,2],[g*q,1]];if(Math.random()<.3)ts=[[g,4],[g*p,3],[g*q,2]];}
+    break;
+  }
+  const fp=factorPack(ts,neg);
+  const target=poly(ts);
+  const steps=[["Break each term into prime factors",ts.map(([c,p])=>`${poly([[c,p]])} = ${[...(c<0?[M+"1"]:[]),...primes(c),...Array(p).fill("x")].join(" · ")}`).join("<br>")],
+    [neg?"Find what every term shares. The first term is negative, so take out the negative too":"Find what every term shares",`GCF = ${fp.gstr}`],
+    ["Divide each term by the GCF",ts.map(([c,p])=>`${poly([[c,p]])} ÷ ${fp.gstr} = ${poly([[c/fp.G,p-fp.pm]])}`).join("<br>")],
+    ["Conclusion",`∴ ${target} = ${fp.str}`]];
+  if(type==="rect"){
+    const w=fp.gstr,len=poly(fp.inner);
+    return{skill:"gcf",text:`<p>A land grant is a rectangle with an area of <span class="hl">(${target})</span> square chains. Its width is <span class="hl">${w}</span> chains. What is its length?</p>`,
+      ans:{type:"expr",mode:"poly",target:toCo(fp.inner),ans:len,pre:"length =",post:"chains",label:"length"},
+      steps:[["Area = length × width, so factor the width out of the area",`${target} = ${w}(${len})`],...steps.slice(0,1),["The length is what's left in the bracket",`∴ length = ${len} chains`]],
+      hint:`Common factor ${w} out of ${target}. What's left in the bracket is the length.`};
+  }
+  return{skill:"gcf",text:`<p>The land agent's ledger needs this expression in factored form. <span class="hl">Factor fully.</span></p><p class="big">${target}</p>`,
+    ans:{type:"expr",mode:"factor",target:toCo(ts),ans:fp.str,label:"factored form"},steps,
+    hint:"Factor each term into primes. The GCF is everything every term shares, including x's. Fully factored means nothing in the bracket has a common factor."};
+}
+
+/* ---- factoring trinomials ---- */
+function pairsOf(c){const out=[];const a=Math.abs(c);for(let i=-a;i<=a;i++){if(i===0||c%i!==0)continue;const j=c/i;if(i<=j)out.push([i,j])}return out}
+function genTri(L){
+  const type=pick(L===0?["mulsum","factor","factor"]:L===1?["mulsum","factor","factor","garden"]:["kfactor","kfactor","factor","garden"]);
+  let p,q;
+  for(let t=0;t<300;t++){
+    if(L===0||type==="garden"){p=ri(1,9);q=ri(1,9);if(type==="garden"&&p===q)continue;}
+    else{p=nz(-9,9);q=nz(-9,9);if(p+q===0)continue;if(p>0&&q>0&&Math.random()<.6)continue;}
+    break;
+  }
+  const b=p+q,c=p*q;
+  const missFn=v=>{if(v[0]*v[1]===c)return `${sn(v[0])} × ${sn(v[1])} = ${sn(c)}, but they add to ${sn(v[0]+v[1])}, not ${sn(b)}.`;if(v[0]+v[1]===b)return `Those add to ${sn(b)}, but they multiply to ${sn(v[0]*v[1])}, not ${sn(c)}.`;return null};
+  const stepsCore=[[`Multiply: ${sn(c)}, Add: ${sn(b)}`,`The two numbers are ${sn(p)} and ${sn(q)}`],["Put them in the box",boxH(p,q)],["Read the brackets",`${bin(p)}${bin(q)}`]];
+  if(type==="mulsum")return{skill:"tri",text:`<p>To lay out the mill lots for x² ${b<0?M:"+"} ${Math.abs(b)===1?"":Math.abs(b)}x ${c<0?M:"+"} ${Math.abs(c)}, find the two numbers that <span class="hl">multiply to ${sn(c)}</span> and <span class="hl">add to ${sn(b)}</span>.</p>`,
+    ans:{type:"num",fields:[{pre:"",label:"first number"},{pre:"and",label:"second number"}],vals:[p,q],orderFree:true},missFn,
+    steps:[["List factor pairs of "+sn(c),pairsOf(c).filter(([r,s])=>c>0?(b>0?r>0:r<0):true).map(([r,s])=>`${sn(r)} × ${sn(s)} → sum ${sn(r+s)}`).join("<br>")],["Pick the pair that adds to "+sn(b),`${sn(p)} and ${sn(q)}`]],
+    hint:c<0?"The product is negative, so one number is positive and one is negative.":b<0?"The product is positive and the sum is negative, so both numbers are negative.":"List the factor pairs of "+c+" and add each pair."};
+  if(type==="garden"){
+    return{skill:"tri",text:`<p>Mill lots in Merrickville start as squares with sides of x chains. One lot was made longer on one side and wider on the other. Its new area is</p><p class="big">(x² + ${b}x + ${c}) square chains.</p><p>How many chains were added to each side?</p>`,
+      ans:{type:"num",fields:[{pre:"",label:"chains added to one side"},{pre:"and",label:"chains added to the other side"}],vals:[p,q],orderFree:true},missFn,
+      steps:[["The new sides are (x + ?) and (x + ?), so factor the area",`Multiply: ${c}, Add: ${b} → ${p} and ${q}`],["Box method",boxH(p,q)],["Conclusion",`∴ x² + ${b}x + ${c} = ${bin(p)}${bin(q)}, so ${p} and ${q} chains were added`]],
+      hint:`Factor the area. Find two numbers that multiply to ${c} and add to ${b}.`};
+  }
+  const k=type==="kfactor"?pick([2,3,4,5,-1]):1;
+  const tgt=expand(k,1,p,1,q);
+  const kS=k===1?"":k===-1?M:sn(k);
+  const steps=k===1?stepsCore.concat([["Conclusion",`∴ ${triStr(tgt)} = ${bin(p)}${bin(q)}`]])
+    :[[k===-1?"The x² term is negative, so common factor −1 first":`Every term shares ${k}, so common factor first`,`${triStr(tgt)} = ${k===-1?M:k}(${triStr([1,b,c])})`],...stepsCore,["Conclusion",`∴ ${triStr(tgt)} = ${k===-1?M:k}${bin(p)}${bin(q)}`]];
+  const exprMiss=info=>{
+    if(info.sum||!info.br.length)return null;
+    const lin=[];for(const br of info.br){if(br.p.length!==2||br.p[1]!==1)return null;for(let e=0;e<br.e;e++)lin.push(br.p[0])}
+    if(lin.length!==2)return null;const [r,s2]=lin;
+    if(info.k!==k||info.xp!==0){if(k!==1&&info.k===1&&r*s2===c&&r+s2===b)return `Expand it: you get ${triStr([1,b,c])}. The common factor ${k===-1?M+"1":k} is missing.`;return null}
+    if(r*s2===c&&r+s2!==b)return `${sn(r)} × ${sn(s2)} = ${sn(c)}, but ${sn(r)} + ${sn(s2)} = ${sn(r+s2)}, not ${sn(b)}.`;
+    if(r+s2===b&&r*s2!==c)return `${sn(r)} + ${sn(s2)} = ${sn(b)}, but ${sn(r)} × ${sn(s2)} = ${sn(r*s2)}, not ${sn(c)}.`;
+    return null};
+  return{skill:"tri",text:`<p>The miller's lot has an area of the expression below. <span class="hl">Factor fully</span> to find its dimensions.</p><p class="big">${triStr(tgt)}</p>`,
+    ans:{type:"expr",mode:"factor",target:tgt.slice().reverse(),ans:`${kS}${bin(p)}${bin(q)}`,label:"factored form"},steps,exprMiss,
+    hint:k!==1?`Common factor ${k===-1?"−1":k} first. Then find two numbers that multiply to ${sn(c)} and add to ${sn(b)}.`:`Find two numbers that multiply to ${sn(c)} and add to ${sn(b)}.`};
+}
+
+/* ---- length of a line ---- */
+const TRIPLES=[[3,4,5],[6,8,10],[5,12,13],[8,15,17],[9,12,15],[12,16,20],[7,24,25]];
+function genDist(L){
+  const type=pick(L===0?["grid","leg","shortcut","grid"]:L===1?["grid","grid","leg","shortcut"]:["grid","grid","leg"]);
+  if(type==="grid"){
+    for(let t=0;t<500;t++){
+      const lo=L===0?0:-8,hi=L===0?10:8;
+      let dx,dy;
+      if(L===0&&Math.random()<.6){const tr=pick([[3,4],[4,3],[6,8],[8,6]]);dx=tr[0];dy=tr[1];}else{dx=nz(-8,8);dy=nz(-8,8);}
+      if(Math.random()<.5)dx=-dx;if(Math.random()<.5)dy=-dy;
+      const x1=ri(lo,hi),y1=ri(lo,hi),x2=x1+dx,y2=y1+dy;
+      if(x2<lo||x2>hi||y2<lo||y2>hi)continue;
+      if(L>0&&x1>=0&&y1>=0&&x2>=0&&y2>=0&&Math.random()<.7)continue;
+      const n=dx*dx+dy*dy;if(n<10)continue;
+      const steps=[["Find Δx and Δy",`Δx = ${sn(x2)} ${M} ${x1<0?`(${sn(x1)})`:x1} = ${sn(dx)}<br>Δy = ${sn(y2)} ${M} ${y1<0?`(${sn(y1)})`:y1} = ${sn(dy)}`],["d = √((Δx)² + (Δy)²)",`d = √(${dx<0?`(${sn(dx)})`:dx}² + ${dy<0?`(${sn(dy)})`:dy}²) = √(${dx*dx} + ${dy*dy}) = √${n}`],["Conclusion",`∴ The line is ${radH(n)} chains long`]];
+      const base={skill:"dist",text:`<p>On the survey plan, each grid square is <span class="hl">1 chain</span> (66 feet, about 20 m). How long is the line from stake A${P(x1,y1)} to stake B${P(x2,y2)}?${isSq(n)?"":" Give the exact length, like 3√5. A decimal is OK too."}</p>`,
+        fig:{type:"grid",min:lo,max:hi,segs:[[[x1,y1],[x2,y2]]],legs:[[x1,y1],[x2,y1],[x2,y2]],pts:[{x:x1,y:y1,label:"A"},{x:x2,y:y2,label:"B"}]},steps,
+        hint:"Δx and Δy are the legs of a right triangle. Square each one, add them, then take the square root."};
+      if(isSq(n))return Object.assign(base,{ans:{type:"num",fields:[{pre:"d =",post:"chains",label:"length in chains"}],vals:[Math.sqrt(n)]},
+        mistakes:[{f:0,val:Math.abs(dx)+Math.abs(dy),msg:"You added the legs. Square them first, add the squares, then take the square root."},{f:0,val:n,msg:"Don't forget the square root at the end."}]});
+      const mist=[];const add=(v,msg)=>{if(v>0&&Math.abs(v-Math.sqrt(n))>1e-6&&!mist.some(m=>Math.abs(m.val-v)<1e-6))mist.push({val:v,msg})};
+      add(Math.sqrt(Math.abs(dx*dx-dy*dy)),"Add the squares. You only subtract when you are finding a missing leg.");
+      add(Math.abs(dx)+Math.abs(dy),"You added the legs. Square them first, add the squares, then take the square root.");
+      add(n,"Don't forget the square root at the end.");
+      if(x1!==0)add(Math.sqrt((x2+x1)**2+dy*dy),"Δx is x₂ − x₁. Watch the signs when a coordinate is negative.");
+      if(y1!==0)add(Math.sqrt(dx*dx+(y2+y1)**2),"Δy is y₂ − y₁. Watch the signs when a coordinate is negative.");
+      add(Math.sqrt(Math.abs(dx)*Math.abs(dx)+Math.abs(dy)),"Square both Δx and Δy before adding.");
+      return Object.assign(base,{ans:{type:"rad",n,ans:radS(n),pre:"d =",post:"chains",label:"length in chains"},mistakes:mist});
+    }
+  }
+  const [a,b,c]=pick(TRIPLES);
+  if(type==="shortcut"){
+    return{skill:"dist",text:`<p>A cleared field at Smiths Falls is ${a} chains by ${b} chains. Walking around two sides of it is ${a+b} chains. How many chains do you save by walking straight across the diagonal?</p>`,
+      fig:{type:"draw",w:420,h:250,items:[{poly:[[60,200],[360,200],[360,50],[60,50]],stroke:"grid"},{line:[60,200,360,200],stroke:"amber",w:4},{line:[360,200,360,50],stroke:"amber",w:4},{line:[60,200,360,50],stroke:"cyan",dash:true,w:3},{text:`${a} chains`,x:210,y:228},{text:`${b} chains`,x:370,y:130,align:"left"},{text:"diagonal = ?",x:180,y:110,color:"cyan"},{dot:[60,200]},{dot:[360,50]}]},
+      ans:{type:"num",fields:[{pre:"You save",post:"chains",label:"chains saved"}],vals:[a+b-c]},
+      mistakes:[{f:0,val:c,msg:"That's the length of the diagonal. Subtract it from the walk around the edges."}],
+      steps:[["The diagonal is the hypotenuse",`c = √(${a}² + ${b}²) = √(${a*a} + ${b*b}) = √${c*c} = ${c}`],["Around the edges",`${a} + ${b} = ${a+b}`],["Subtract",`${a+b} ${M} ${c} = ${a+b-c}`],["Conclusion",`∴ The shortcut saves ${a+b-c} chains`]],
+      hint:"Find the diagonal with the Right Angle Theorem, then subtract it from the walk around two sides."};
+  }
+  const s=L===2&&Math.random()<.5?0.5:1;const A=a*s,B=b*s,C=c*s;
+  if(Math.random()<.5){
+    return{skill:"dist",text:`<p>A ${C} m rope runs from the top of a survey mast to a stake in the ground ${A} m from the base of the mast. How tall is the mast?</p>`,
+      fig:{type:"draw",w:420,h:250,items:[{line:[90,30,90,210],stroke:"amber",w:5},{line:[40,210,380,210],stroke:"grid"},{line:[90,30,330,210],stroke:"cyan",w:2},{ra:[90,210,1,-1]},{text:"mast = ?",x:80,y:120,align:"right"},{text:`rope ${C} m`,x:230,y:110,color:"cyan",align:"left"},{text:`${A} m`,x:210,y:236},{dot:[330,210]}]},
+      ans:{type:"num",fields:[{pre:"height =",post:"m",label:"height in metres"}],vals:[B]},
+      mistakes:[{f:0,val:Math.sqrt(C*C+A*A),msg:"The rope is the hypotenuse, so subtract: height² = rope² − ground²."},{f:0,val:C*C-A*A,msg:"Don't forget the square root at the end."}],
+      steps:[["The rope is the hypotenuse, so the mast is a missing leg",`a = √(c² − b²)`],["Substitute",`a = √(${C}² − ${A}²) = √(${C*C} − ${A*A}) = √${C*C-A*A}`],["Conclusion",`∴ The mast is ${B} m tall`]],
+      hint:"The rope is the longest side (the hypotenuse). For a missing leg, subtract the squares."};
+  }
+  return{skill:"dist",text:`<p>A survey line runs ${A} chains east, then ${B} chains north. How far is the end of the line from the start, in a straight line?</p>`,
+    fig:{type:"draw",w:420,h:250,items:[{line:[60,210,320,210],stroke:"amber",w:4},{line:[320,210,320,40],stroke:"amber",w:4},{line:[60,210,320,40],stroke:"cyan",dash:true,w:3},{ra:[320,210,-1,-1]},{text:`${A} chains east`,x:190,y:236},{text:`${B} chains north`,x:330,y:130,align:"left"},{text:"? ",x:170,y:115,color:"cyan"},{dot:[60,210]},{dot:[320,40]}]},
+    ans:{type:"num",fields:[{pre:"d =",post:"chains",label:"distance in chains"}],vals:[C]},
+    mistakes:[{f:0,val:A+B,msg:"You added the legs. Square them, add the squares, then take the square root."},{f:0,val:A*A+B*B,msg:"Don't forget the square root at the end."}],
+    steps:[["The straight line is the hypotenuse",`c = √(a² + b²)`],["Substitute",`c = √(${A}² + ${B}²) = √(${A*A} + ${B*B}) = √${A*A+B*B}`],["Conclusion",`∴ The end is ${C} chains from the start`]],
+    hint:"East and north meet at a right angle, so the straight line is the hypotenuse."};
+}
+
+/* ---- classifying shapes ---- */
+const QUADS=["Square","Rectangle","Rhombus","Parallelogram","Trapezoid","Kite"];
+const LEN={25:[[3,4],[4,3],[-3,4],[-4,3],[5,0]],10:[[1,3],[3,1],[-1,3],[-3,1]],13:[[2,3],[3,2],[-2,3],[-3,2]],5:[[1,2],[2,1],[-1,2],[-2,1]],20:[[2,4],[4,2],[-2,4],[-4,2]]};
+function quadFacts(pts){
+  const s=[0,1,2,3].map(i=>side(pts[i],pts[(i+1)%4]));
+  const par02=cross(s[0],s[2])===0,par13=cross(s[1],s[3])===0;
+  const perp=[0,1,2,3].filter(i=>dot(s[i],s[(i+1)%4])===0);
+  const allEq=s.every(q=>q.n===s[0].n),oppEq=s[0].n===s[2].n&&s[1].n===s[3].n;
+  const kite=(s[0].n===s[1].n&&s[2].n===s[3].n)||(s[1].n===s[2].n&&s[3].n===s[0].n);
+  let kind="Quadrilateral";
+  if(par02&&par13)kind=perp.length?(allEq?"Square":"Rectangle"):(allEq?"Rhombus":"Parallelogram");
+  else if(par02||par13)kind="Trapezoid";else if(kite)kind="Kite";
+  return{s,par02,par13,perp,allEq,oppEq,kite,kind};
+}
+function buildQuad(kind){
+  for(let t=0;t<800;t++){
+    let A=[0,0],u,v,pts;
+    if(kind==="Square"||kind==="Rectangle"){u=[nz(-4,4),nz(-4,4)];const k=kind==="Square"?1:pick([2,-2]);v=[-u[1]*k,u[0]*k];if(kind==="Rectangle"&&Math.random()<.5)u=[u[0]*2,u[1]*2],v=[v[0]/2,v[1]/2];pts=[A,[u[0],u[1]],[u[0]+v[0],u[1]+v[1]],[v[0],v[1]]];}
+    else if(kind==="Rhombus"){const g=LEN[pick([25,10,13,5,20])];u=pick(g);v=pick(g);pts=[A,u,[u[0]+v[0],u[1]+v[1]],v];}
+    else if(kind==="Parallelogram"){u=[nz(-5,5),ri(-4,4)];v=[nz(-4,4),nz(-4,4)];pts=[A,u,[u[0]+v[0],u[1]+v[1]],v];}
+    else if(kind==="Trapezoid"){u=[nz(-3,3),ri(-2,2)];v=[nz(-4,4),nz(-4,4)];const k=pick([2,3]);pts=[A,[k*u[0],k*u[1]],[v[0]+u[0],v[1]+u[1]],v];}
+    else{const w=pick([[1,0],[0,1],[1,1],[1,-1]]),n=[-w[1],w[0]];const a=ri(1,4),c=ri(1,6),m=pick([1,2,3]);if(a===c)continue;
+      pts=[[a*w[0],a*w[1]],[n[0]*m,n[1]*m],[-c*w[0],-c*w[1]],[-n[0]*m,-n[1]*m]];}
+    pts=fitBox(pts,0,10);if(!pts)continue;
+    const f=quadFacts(pts);
+    if(f.kind!==kind)continue;
+    if(f.s.some(q=>q.dx===0||q.n<4))continue;
+    const cs=[0,1,2,3].map(i=>cross(f.s[i],f.s[(i+1)%4]));/* convex, consistent orientation */
+    if(!(cs.every(c=>c>0)||cs.every(c=>c<0)))continue;
+    /* random starting vertex */
+    const r=ri(0,3);pts=pts.slice(r).concat(pts.slice(0,r));
+    return pts;
+  }
+}
+function quadWhy(pick_,f){
+  const two=f.par02&&f.par13;
+  if(["Square","Rectangle","Rhombus","Parallelogram"].includes(pick_)&&!two)return f.par02||f.par13?"Only one pair of sides is parallel. Compare the slopes again.":"No sides are parallel. Compare the slopes again.";
+  if((pick_==="Square"||pick_==="Rectangle")&&!f.perp.length)return "No two neighbouring slopes are negative reciprocals, so there are no right angles.";
+  if((pick_==="Square"||pick_==="Rhombus")&&!f.allEq)return "The four sides are not all the same length.";
+  if(pick_==="Rectangle"&&f.kind==="Square")return "It is a rectangle, but all four sides are equal too. Give the most precise name.";
+  if(pick_==="Rhombus"&&f.kind==="Square")return "It is a rhombus, but it has right angles too. Give the most precise name.";
+  if(pick_==="Parallelogram")return "It is a parallelogram, but there's a more precise name. Check for right angles and equal sides.";
+  if(pick_==="Trapezoid")return two?"Both pairs of opposite sides are parallel, so it's more than a trapezoid.":"A trapezoid needs exactly one pair of parallel sides.";
+  if(pick_==="Kite")return f.par02||f.par13?"A kite has no parallel sides, and this shape has some.":"A kite needs two pairs of equal neighbouring sides.";
+  return "Check the slopes and lengths again.";
+}
+function lenH(n){return isSq(n)?String(Math.sqrt(n)):radH(n)}
+function genClassify(L){
+  const doTri=Math.random()<(L===0?.4:.3);
+  if(doTri){
+    const kinds=["Right isosceles","Right scalene","Isosceles (no right angle)","Scalene (no right angle)"];
+    const ci=ri(0,3);
+    const raw=ci===0?makeRightTri(L,true):ci===1?makeRightTri(L,false):makeNoRightTri(ci===2);
+    if(!raw)return genClassify(L);
+    const labels=["A","B","C"],rows=slopeRows(raw,labels);
+    const right=rows.some((r,i)=>dot(r.s,rows[(i+1)%3].s)===0),iso=rows.some((r,i)=>r.s.n===rows[(i+1)%3].s.n);
+    const why=kinds.map((k,i)=>{const kr=i<2,ki=i===0||i===2;if(kr&&!right)return "No two slopes are negative reciprocals, so there is no right angle.";if(!kr&&right)return "Two slopes are negative reciprocals. Look again for a right angle.";if(ki&&!iso)return "No two sides are the same length.";if(!ki&&iso)return "Two sides are the same length.";return ""});
+    const perpTxt=right?(()=>{for(let i=0;i<3;i++)if(dot(rows[i].s,rows[(i+1)%3].s)===0)return `${rows[i].name} ⊥ ${rows[(i+1)%3].name}, so there is a right angle at ${labels[(i+1)%3]}`})():"No two slopes are negative reciprocals: no right angle";
+    const eqTxt=iso?(()=>{for(let i=0;i<3;i++)if(rows[i].s.n===rows[(i+1)%3].s.n)return `${rows[i].name} = ${rows[(i+1)%3].name}, so two sides are equal`})():"All three lengths are different";
+    return{skill:"shape",text:`<p>The engineers marked a triangular stone yard at Jones Falls. Classify the triangle by its sides and its angles.</p>`,
+      fig:{type:"grid",min:0,max:10,polys:[raw],pts:raw.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+      ans:{type:"choice",opts:kinds,correct:ci,why},
+      steps:[["Find each side's slope and length",TBL(rows.map(r=>[r.name,fh(r.s.m),lenH(r.s.n)]),["Side","Slope","Length"])],["Angles",perpTxt],["Sides",eqTxt],["Conclusion",`∴ ${kinds[ci]} triangle`]],
+      hint:"Make a table of slopes and lengths. Negative reciprocal slopes mean a right angle. Equal lengths mean isosceles."};
+  }
+  const kind=pick(L===0?["Square","Rectangle","Parallelogram","Trapezoid"]:QUADS);
+  const pts=buildQuad(kind);if(!pts)return genClassify(L);
+  const labels=["A","B","C","D"],f=quadFacts(pts),rows=slopeRows(pts,labels);
+  const parTxt=[f.par02?"AB ∥ CD":"",f.par13?"BC ∥ DA":""].filter(Boolean).join(" and ")||"none";
+  const perpTxt=f.perp.length?f.perp.map(i=>`${rows[i].name} ⊥ ${rows[(i+1)%4].name}`).join(", "):"none";
+  const eqTxt=f.allEq?"all four sides are equal":f.oppEq?"opposite sides are equal":f.kite?"two pairs of neighbouring sides are equal":"no pattern of equal sides";
+  return{skill:"shape",text:`<p>Classify the stone footing for the lockmaster's house at Jones Falls. Use slopes and lengths, and give the <span class="hl">most precise name</span>.</p>`,
+    fig:{type:"grid",min:0,max:10,polys:[pts],pts:pts.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+    ans:{type:"choice",opts:QUADS,correct:QUADS.indexOf(kind),why:QUADS.map(q=>q===kind?"":quadWhy(q,f))},
+    steps:[["Find each side's slope and length",TBL(rows.map(r=>[r.name,fh(r.s.m),lenH(r.s.n)]),["Side","Slope","Length"])],["Parallel sides (same slope)",parTxt],["Perpendicular sides (negative reciprocals)",perpTxt],["Equal sides",eqTxt],["Conclusion",`∴ The footing is a ${kind.toLowerCase()}`]],
+    hint:"Make a table of slopes and lengths. Count the parallel pairs first, then check for right angles, then compare lengths."};
+}
+
+/* ---- similar triangles ---- */
+function genSimilar(L){
+  const type=pick(L===0?["prop","shadow","pair"]:L===1?["prop","pair","shadow","nested"]:["prop","pair","nested","pair"]);
+  if(type==="prop"){
+    for(let t=0;t<500;t++){
+      let x,disp,steps,mist=[];
+      if(L===0){x=ri(2,12);const a=ri(2,9);if(x===a)continue;const g=gcd(x,a),r=[x/g,a/g],m=ri(2,4);const b=r[0]*m,c=r[1]*m;if(b===x&&c===a||b>40||c>40)continue;
+        disp=`<span class="fr"><span>x</span><span>${a}</span></span> = <span class="fr"><span>${b}</span><span>${c}</span></span>`;
+        steps=[["Multiply both sides by both denominators",`${c}x = ${b}(${a})`],["Simplify",`${c}x = ${b*a}`],[`Divide by ${c}`,`x = ${x}`]];
+        mist=[{f:0,val:F(c*a,b),msg:"Cross-multiply carefully: the x term times the other denominator."}];
+      }else if(L===1){x=ri(1,12);const p=nz(-5,6),a=ri(2,9);const top=x+p;if(top<=0||top===a)continue;const g=gcd(top,a),m=ri(2,4),b=top/g*m,c=a/g*m;if(b===top||b>40||c>40)continue;
+        disp=`<span class="fr"><span>x ${p<0?M:"+"} ${Math.abs(p)}</span><span>${a}</span></span> = <span class="fr"><span>${b}</span><span>${c}</span></span>`;
+        steps=[["Multiply both sides by both denominators",`${c}(x ${p<0?M:"+"} ${Math.abs(p)}) = ${b}(${a})`],["Expand",`${c}x ${c*p<0?M:"+"} ${Math.abs(c*p)} = ${b*a}`],[`${c*p<0?"Add":"Subtract"} ${Math.abs(c*p)}`,`${c}x = ${b*a-c*p}`],[`Divide by ${c}`,`x = ${x}`]];
+        mist=[{f:0,val:F(b*a-p,c),msg:`Multiply ${c} by both terms in the brackets, not just the x.`}];
+      }else{x=ri(1,9);const p=ri(1,4),q=nz(-6,6),r=ri(1,4),s=nz(-6,6),a=ri(2,7),c=ri(2,7);
+        const L1=p*x+q,R1=r*x+s;if(L1<=0||R1<=0||a===c)continue;if(L1*c!==R1*a)continue;if(p*c===r*a)continue;
+        disp=`<span class="fr"><span>${poly([[p,1],[q,0]])}</span><span>${a}</span></span> = <span class="fr"><span>${poly([[r,1],[s,0]])}</span><span>${c}</span></span>`;
+        const lc=p*c,lk=q*c,rc=r*a,rk=s*a;
+        steps=[["Multiply both sides by both denominators",`${c}(${poly([[p,1],[q,0]])}) = ${a}(${poly([[r,1],[s,0]])})`],["Expand",`${poly([[lc,1],[lk,0]])} = ${poly([[rc,1],[rk,0]])}`],["Collect x-terms on one side and numbers on the other",`${poly([[lc-rc,1]])} = ${sn(rk-lk)}`],["Divide",`x = ${x}`]];
+      }
+      return{skill:"sim",text:`<p>The engineers' notebook has a proportion from two similar triangles. Solve for x.</p><p class="big">${disp}</p>`,
+        ans:{type:"num",fields:[{pre:"x =",label:"x"}],vals:[x]},mistakes:mist,steps,
+        hint:"Multiply both sides by both denominators, then solve like a Unit 1 equation. Keep binomials in brackets."};
+    }
+  }
+  if(type==="shadow"){
+    for(let t=0;t<500;t++){
+      const [p,q]=pick([[3,4],[2,3],[4,5],[1,2],[6,5],[4,3],[3,2],[5,4]]);/* height:shadow ratio */
+      const st=q*ri(2,20);const ht=st*p/q;if(ht<14||ht>20)continue;
+      const S=q*ri(2,12),H=S*p/q;if(S<6||S>45||H<5)continue;
+      const h=ht/10,s=st/10;
+      return{skill:"sim",text:`<p>Near Kingston Mills, a surveyor who is ${h} m tall casts a shadow ${s} m long. At the same time, a tall white pine casts a shadow ${S} m long. How tall is the pine?</p>`,
+        fig:{type:"draw",w:420,h:250,items:[{line:[20,215,410,215],stroke:"grid"},{line:[55,215,55,175],stroke:"amber",w:4},{dot:[55,170]},{line:[55,215,110,215],stroke:"dim",w:6},{line:[55,170,110,215],stroke:"yellow",dash:true},{text:`${h} m`,x:48,y:198,align:"right"},{text:`${s} m`,x:83,y:240},{line:[200,215,200,45],stroke:"green",w:5},{line:[200,215,385,215],stroke:"dim",w:6},{line:[200,45,385,215],stroke:"yellow",dash:true},{text:"pine = ?",x:192,y:130,align:"right"},{text:`${S} m`,x:292,y:240},{ra:[55,215,1,-1]},{ra:[200,215,1,-1]}]},
+        ans:{type:"num",fields:[{pre:"height =",post:"m",label:"height in metres"}],vals:[H]},
+        mistakes:[{f:0,val:Math.round(S*s/h*100)/100,msg:"Match the sides: height over shadow on BOTH sides of the proportion."}],
+        steps:[["The sun's rays hit both at the same angle, and both stand at 90°, so the triangles are similar","height/shadow = height/shadow"],["Set up the proportion",`h/${S} = ${h}/${s}`],["Multiply by both denominators",`${s}h = ${h}(${S})`],["Divide",`h = ${Math.round(h*S*100)/100} ÷ ${s} = ${H}`],["Conclusion",`∴ The pine is ${H} m tall`]],
+        hint:"Height goes with height and shadow goes with shadow: h ÷ (pine's shadow) = (surveyor's height) ÷ (surveyor's shadow)."};
+    }
+  }
+  if(type==="pair"){
+    for(let t=0;t<500;t++){
+      const k=ri(2,5),b1=ri(2,8),b2=k*b1;
+      if(L===0){const h1=ri(2,9),h2=k*h1;
+        return{skill:"sim",text:`<p>Surveyors can't cross the Cataraqui River, so they set up two similar right triangles on the shore. The large triangle's height is the width of the river. How wide is the river?</p>`,
+          fig:pairFig(`${b1} m`,`${h1} m`,`${b2} m`,"?"),
+          ans:{type:"num",fields:[{pre:"width =",post:"m",label:"river width"}],vals:[h2]},
+          steps:[["Match the sides",`height/height = base/base`],["Set up the proportion",`x/${h1} = ${b2}/${b1}`],["Multiply by both denominators",`${b1}x = ${h1}(${b2})`],["Solve",`x = ${h1*b2} ÷ ${b1} = ${h2}`],["Conclusion",`∴ The river is ${h2} m wide`]],
+          hint:"Large height ÷ small height = large base ÷ small base."};}
+      const x=ri(2,10),p=ri(1,5),a=pick([2,3,4,5,6]);if(a===k)continue;const q=k*(x+p)-a*x;if(q===0||Math.abs(q)>30)continue;
+      const h1=x+p,h2=a*x+q,ask2=Math.random()<.7;
+      const hs=poly([[1,1],[p,0]]),Hs=poly([[a,1],[q,0]]);
+      const lhs=b1*a,lk=b1*q,rhs=b2,rk=b2*p;
+      return{skill:"sim",text:`<p>Surveyors can't cross the Cataraqui River, so they set up two similar right triangles on the shore. The small triangle has base ${b1} m and height (${hs}) m. The large triangle has base ${b2} m and height (${Hs}) m, which is the width of the river. ${ask2?"How wide is the river?":"How tall is the small triangle?"}</p>`,
+        fig:pairFig(`${b1} m`,`(${hs}) m`,`${b2} m`,`(${Hs}) m`),
+        ans:{type:"num",fields:[{pre:ask2?"width =":"height =",post:"m",label:ask2?"river width":"small height"}],vals:[ask2?h2:h1]},
+        mistakes:[{f:0,val:x,msg:`That's x. Substitute it into (${ask2?Hs:hs}) to get the ${ask2?"width":"height"}.`}],
+        steps:[["base/base = height/height",`${b1}/${b2} = (${hs})/(${Hs})`],["Multiply by both denominators",`${b1}(${Hs}) = ${b2}(${hs})`],["Expand",`${poly([[lhs,1],[lk,0]])} = ${poly([[rhs,1],[rk,0]])}`],["Solve for x",`${poly([[lhs-rhs,1]])} = ${sn(rk-lk)}, so x = ${x}`],[ask2?"River width":"Small height",ask2?`${a}(${x}) ${q<0?M:"+"} ${Math.abs(q)} = ${h2}`:`${x} + ${p} = ${h1}`],["Conclusion",ask2?`∴ The river is ${h2} m wide`:`∴ The small triangle is ${h1} m tall`]],
+        hint:"Set up base/base = height/height, multiply by both denominators, solve for x, then substitute x back in."};
+    }
+  }
+  /* nested */
+  const pp=pick([2,3]),q=pick([2,3,4,5]),k=ri(3,8);const CD=q,CE=q*k,DE=CE-CD,BD=pp,AE=pp*k;
+  return{skill:"sim",text:`<p>To find the height of a cliff at Kingston Mills, a surveyor stands a ${BD} m pole BD so its top lines up with the top of the cliff, A. The pole is ${CD} m from C and the cliff is ${DE} m beyond the pole. How tall is the cliff, AE?</p>`,
+    fig:{type:"draw",w:420,h:250,items:[{line:[20,205,410,205],stroke:"grid"},{line:[40,205,380,45],stroke:"amber",w:2},{line:[380,45,380,205],stroke:"green",w:5},{line:[180,205,180,139],stroke:"cyan",w:4},{ra:[180,205,-1,-1]},{ra:[380,205,-1,-1]},{text:"A",x:392,y:45,align:"left",color:"paper"},{text:"B",x:170,y:132,align:"right",color:"paper"},{text:"C",x:36,y:228,color:"paper"},{text:"D",x:180,y:228,color:"paper"},{text:"E",x:380,y:228,color:"paper"},{text:`${CD} m`,x:110,y:228},{text:`${DE} m`,x:280,y:228},{text:`${BD} m`,x:188,y:178,align:"left",color:"cyan"},{text:"cliff = ?",x:370,y:130,align:"right"},{dot:[380,45]},{dot:[180,139]}]},
+    ans:{type:"num",fields:[{pre:"AE =",post:"m",label:"cliff height"}],vals:[AE]},
+    mistakes:[{f:0,val:Math.round(BD*DE/CD*100)/100,msg:"CE is the whole bottom side: CD + DE. Use CE, not DE."}],
+    steps:[["△CDB ~ △CEA: they share ∠C and both have a right angle","BD/AE = CD/CE"],["Find CE",`CE = ${CD} + ${DE} = ${CE}`],["Set up the proportion",`${BD}/AE = ${CD}/${CE}`],["Multiply by both denominators",`${CD}(AE) = ${BD}(${CE}) = ${BD*CE}`],["Divide",`AE = ${BD*CE} ÷ ${CD} = ${AE}`],["Conclusion",`∴ The cliff is ${AE} m tall`]],
+    hint:"The small triangle is CDB and the big one is CEA. CE = CD + DE. Then pole/cliff = CD/CE."};
+}
+function pairFig(b1,h1,b2,h2){
+  return{type:"draw",w:420,h:250,items:[{poly:[[40,200],[40,120],[130,200]],stroke:"amber"},{ra:[40,200,1,-1]},{text:b1,x:85,y:226},{text:h1,x:46,y:110,align:"left"},{poly:[[200,215],[200,40],[390,215]],stroke:"amber"},{line:[200,40,200,215],stroke:"cyan",w:4},{ra:[200,215,1,-1]},{text:b2,x:295,y:240},{text:h2,x:192,y:120,align:"right",color:"cyan"},{text:"river width",x:192,y:142,align:"right",color:"dim",size:16},{text:"not to scale",x:410,y:20,align:"right",color:"dim",size:15}]};
+}
+
+const GEN={line:genLine,perp:genPerp,gcf:genGCF,tri:genTri,dist:genDist,shape:genClassify,sim:genSimilar};
+const SKILLNAME={line:"Equation of a line (L1)",perp:"Parallel and perpendicular (L2)",gcf:"Common factoring (L3)",tri:"Factoring trinomials (L4–L5)",dist:"Length of a line (L6)",shape:"Classifying shapes (L7)",sim:"Similar triangles (L8–L9)"};
+
+/* =================== typed expressions =================== */
+const SUPD={"²":2,"³":3,"⁴":4};
+function tokenize(s){
+  s=String(s).replace(/[−–—]/g,"-").replace(/[×·∙]/g,"*").replace(/X/g,"x").replace(/\s+/g,"");
+  const out=[];let i=0;
+  while(i<s.length){const ch=s[i];
+    if(/\d/.test(ch)||(ch==="."&&/\d/.test(s[i+1]||""))){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;const t=s.slice(i,j);if((t.match(/\./g)||[]).length>1)return{err:"bad"};out.push({t:"n",v:parseFloat(t)});i=j;continue}
+    if(ch==="x"){if(/\d/.test(s[i+1]||""))return{err:"xdigit"};out.push({t:"x"});i++;continue}
+    if(SUPD[ch]){out.push({t:"^"});out.push({t:"n",v:SUPD[ch]});i++;continue}
+    if("+-*^()".includes(ch)){out.push({t:ch});i++;continue}
+    if(ch==="["||ch==="{"){out.push({t:"("});i++;continue}
+    if(ch==="]"||ch==="}"){out.push({t:")"});i++;continue}
+    return{err:"char",ch};
+  }
+  return{tk:out};
+}
+function parseExpr(str){
+  const T0=tokenize(str);if(T0.err)return T0;const tk=T0.tk;if(!tk.length)return{err:"empty"};
+  let i=0;const peek=()=>tk[i],eat=t=>{if(tk[i]&&tk[i].t===t){i++;return true}return false};
+  const sign=()=>{let s=1;while(peek()&&(peek().t==="+"||peek().t==="-")){if(peek().t==="-")s=-s;i++}return s};
+  function expr(){const terms=[{s:sign(),n:term()}];while(peek()&&(peek().t==="+"||peek().t==="-"))terms.push({s:sign(),n:term()});
+    return terms.length===1&&terms[0].s===1?terms[0].n:{k:"add",terms}}
+  function term(){const fs=[factor()];for(;;){const p=peek();if(!p)break;if(p.t==="*"){i++;fs.push(factor());continue}if(p.t==="n"||p.t==="x"||p.t==="("){fs.push(factor());continue}break}return fs.length===1?fs[0]:{k:"mul",fs}}
+  function factor(){let b=primary();while(eat("^")){const e=peek();if(!e||e.t!=="n"||!Number.isInteger(e.v)||e.v>6)throw 0;i++;b={k:"pow",b,e:e.v}}return b}
+  function primary(){const p=peek();if(!p)throw 0;if(p.t==="n"){i++;return{k:"num",v:p.v}}if(p.t==="x"){i++;return{k:"x"}}if(p.t==="("){i++;const e=expr();if(!eat(")"))throw 0;return{k:"par",e}}throw 0}
+  try{const e=expr();if(i<tk.length)return{err:"bad"};return{ast:e}}catch(_){return{err:"bad"}}
+}
+const padd=(a,b)=>{const r=[];for(let k=0;k<Math.max(a.length,b.length);k++)r[k]=(a[k]||0)+(b[k]||0);return r};
+const pmul=(a,b)=>{const r=Array(a.length+b.length-1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y));return r};
+const ptrim=a=>{a=a.map(c=>Math.abs(c-Math.round(c))<1e-9?Math.round(c):c);while(a.length>1&&Math.abs(a[a.length-1])<1e-9)a.pop();return a};
+function pev(n){switch(n.k){case"num":return[n.v];case"x":return[0,1];case"par":return pev(n.e);
+  case"pow":{let r=[1];const b=pev(n.b);for(let k=0;k<n.e;k++)r=pmul(r,b);return r}
+  case"mul":return n.fs.reduce((r,f)=>pmul(r,pev(f)),[1]);
+  case"add":return n.terms.reduce((r,t)=>padd(r,pev(t.n).map(c=>c*t.s)),[0])}}
+const peq=(a,b)=>{a=ptrim(a);b=ptrim(b);return a.length===b.length&&a.every((c,i)=>Math.abs(c-b[i])<1e-9)};
+const polyA=a=>poly(ptrim(a).map((c,p)=>[c,p]).reverse());
+const SUPS=["⁰","¹","²","³","⁴","⁵","⁶"];
+function pshow(n){switch(n.k){case"num":return String(n.v);case"x":return"x";case"par":return"("+pshow(n.e)+")";
+  case"pow":return pshow(n.b)+SUPS[n.e];
+  case"mul":return n.fs.map((f,k)=>(k>0&&(f.k==="num"||(f.k==="pow"&&f.b.k==="num"))?"·":"")+pshow(f)).join("");
+  case"add":return n.terms.map((t,k)=>{const b=pshow(t.n);return k===0?(t.s<0?M+b:b):(t.s<0?" "+M+" ":" + ")+b}).join("")}}
+function factorInfo(ast){
+  let sgn=1,node=ast;
+  if(node.k==="add"){if(node.terms.length>1)return{sum:true,k:1,xp:0,br:[]};sgn=node.terms[0].s;node=node.terms[0].n}
+  const flat=[];const walk=f=>{if(f.k==="mul")f.fs.forEach(walk);else if(f.k==="par"&&(f.e.k==="mul"||f.e.k==="par"))walk(f.e);else if(f.k==="par"&&f.e.k==="add"&&f.e.terms.length===1){sgn*=f.e.terms[0].s;walk(f.e.terms[0].n)}else flat.push(f)};walk(node);
+  let k=sgn,xp=0;const br=[];
+  for(const f of flat){const p=ptrim(pev(f));const nzs=p.map((c,i)=>Math.abs(c)>1e-9?i:-1).filter(i=>i>=0);
+    if(nzs.length<=1){if(!nzs.length){k=0;continue}k*=p[nzs[0]];xp+=nzs[0]}
+    else{const base=f.k==="pow"?f.b:f,e=f.k==="pow"?f.e:1;br.push({p:ptrim(pev(base)),e})}}
+  return{sum:false,k,xp,br};
+}
+function parseRad(s){
+  if(s==null)return null;s=String(s).trim().toLowerCase().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/,"");if(!s)return null;
+  s=s.replace(/squareroot|sqrt|root/g,"√").replace(/[*×·]/g,"");
+  let m=s.match(/^(\d+)?√\(?(\d+)\)?$/);
+  if(m){const k=m[1]?parseInt(m[1],10):1,r=parseInt(m[2],10);return{v:k*Math.sqrt(r),form:`${k===1?"":k}√${r}`,k,r}}
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s),dec:/\./.test(s)};
+  return{bad:true};
+}
+const BADEXPR="I can't read that. Type it like 3x(2x + 5) or (x + 4)(x − 2), and check your brackets.";
+function checkExpr(q,input){
+  const A=q.ans,r=parseExpr(input);
+  if(r.err==="empty")return{s:"empty",msg:"Type your answer first."};
+  if(r.err==="xdigit")return{s:"empty",msg:"For x squared, type x^2 or use the x² button."};
+  if(r.err==="char")return{s:"empty",msg:/[a-z]/i.test(r.ch)?"Use x as the variable.":BADEXPR};
+  if(r.err)return{s:"empty",msg:BADEXPR};
+  const pv=pev(r.ast),T=A.target,info=factorInfo(r.ast);
+  if(!peq(pv,T)){
+    if(q.exprMiss){const m=q.exprMiss(info,pv);if(m)return{s:"miss",msg:m}}
+    const shown=polyA(pv),want=polyA(T);
+    if(peq(pv,T.map(c=>-c)))return{s:"miss",msg:`Check the signs. Your answer expands to ${shown}, the opposite of ${want}.`};
+    const lt=ptrim(T),lp=ptrim(pv);
+    if(lp.length===lt.length){const r0=lp[lp.length-1]/lt[lt.length-1];if(isFinite(r0)&&r0!==0&&Math.abs(r0-1)>1e-9&&lp.every((c,i)=>Math.abs(c-r0*lt[i])<1e-9))return{s:"miss",msg:`Your answer expands to ${shown}, not ${want}. Check the number out front.`}}
+    return{s:"miss",msg:`Expand your answer: it gives ${shown}, not ${want}.`};
+  }
+  if(A.mode!=="factor")return{s:"ok"};
+  if(info.sum)return{s:"miss",msg:"That's equal to the original, but it isn't factored yet. Write it as a product, like 3x(2x + 5)."};
+  for(const b of info.br){const c=b.p,bs=polyA(c),ints=c.every(Number.isInteger);
+    const g=ints?c.reduce((a,v)=>gcd(a,v),0):1;
+    if(ints&&g>1)return{s:"miss",msg:`They're equal, but (${bs}) still has a common factor of ${g}. Take it out too.`};
+    if(Math.abs(c[0])<1e-9)return{s:"miss",msg:`They're equal, but (${bs}) still has a common factor of x. Take out the greatest common factor.`};
+    if(c.length===3&&ints){const D=c[1]*c[1]-4*c[2]*c[0];if(D>=0&&isSq(D))return{s:"miss",msg:`They're equal, but ${bs} can still be factored.`}}}
+  const negLead=info.br.some(b=>b.p[b.p.length-1]<0);
+  return{s:"ok",note:negLead?`It's neater to take the negative out front: ${A.ans}.`:""};
+}
+function checkRad(q,input){
+  const A=q.ans,r=parseRad(input);
+  if(!r)return{s:"empty",msg:"Type your answer first."};
+  if(r.bad)return{s:"empty",msg:"Type a root like 5√2 (use the √ button or type sqrt), or a decimal like 7.07."};
+  const t=Math.sqrt(A.n),simp=radS(A.n);
+  if(r.form&&Math.abs(r.v-t)<1e-7)return{s:"ok",note:r.form===simp?"":`Simplified, that's ${simp}.`};
+  if(r.dec&&Math.abs(r.v-t)<0.051)return{s:"ok",note:`The exact answer is ${simp} ≈ ${t.toFixed(2)}.`};
+  for(const mk of q.mistakes||[])if(Math.abs(r.v-mk.val)<(r.dec?0.051:1e-7))return{s:"miss",msg:mk.msg};
+  if(r.form&&r.k>1&&r.k*r.k*r.r!==A.n&&Math.abs(r.r-A.n)>0)return{s:"miss",msg:`Check your simplifying: ${r.form} = √${r.k*r.k*r.r}. Which perfect square divides into your number?`};
+  return{s:"miss",msg:"Check each step of d = √((Δx)² + (Δy)²)."};
+}
+
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/i,"").replace(/^\+/,"");
+  if(s==="")return null;
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s)};
+  const m=s.match(/^(-?\d+)\/(-?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2]};
+  return{bad:true};
+}
+const near=(a,b)=>Math.abs(a-b)<0.006;
+function check(q,input){
+  const A=q.ans;
+  if(A.type==="expr")return checkExpr(q,input);
+  if(A.type==="rad")return checkRad(q,input);
+  if(A.type==="choice"){if(input===A.correct)return{s:"ok"};return{s:"miss",msg:A.why[input]||"Check your work and try again."}}
+  if(A.type==="pt"){
+    if(!input)return{s:"empty",msg:"Click a grid point first."};
+    if(input[0]===A.pt[0]&&input[1]===A.pt[1])return{s:"ok"};
+    return{s:"miss",msg:q.ptWhy?q.ptWhy(input[0],input[1]):"Not that point."};
+  }
+  const ps=input.map(parseNum);
+  if(ps.some(p=>!p))return{s:"empty",msg:A.fields.length>1?"Fill in every box first.":"Type an answer first."};
+  if(ps.some(p=>p.bad))return{s:"empty",msg:"Use a whole number, a fraction like 2/3, or a decimal like 2.5."};
+  let v=ps.map(p=>p.v),t=A.vals.map(fv);
+  if(A.orderFree){v=[...v].sort((a,b)=>a-b);t=[...t].sort((a,b)=>a-b)}
+  const ok=v.map((x,i)=>near(x,t[i]));
+  if(ok.every(Boolean))return{s:"ok"};
+  if(q.missFn){const raw=ps.map(p=>p.v);const m=q.missFn(raw);if(m)return{s:"miss",msg:m}}
+  for(const mk of q.mistakes||[]){if(!ok[mk.f]&&near(v[mk.f],fv(mk.val)))return{s:"miss",msg:mk.msg}}
+  if(q.fieldMsg){const wrong=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(wrong.length===1&&q.fieldMsg[wrong[0]])return{s:"miss",msg:q.fieldMsg[wrong[0]]}}
+  return{s:"miss",msg:"Check each step of your work."};
+}
+function correctInput(q){const A=q.ans;if(A.type==="expr"||A.type==="rad")return A.ans;if(A.type==="choice")return A.correct;if(A.type==="pt")return A.pt.slice();return A.vals.map(fa)}
+window.__survey={GEN,check,correctInput};
+
+/* =================== figures =================== */
+const FIGC={amber:"#ffb24a",dim:"#8fa8e8",paper:"#f5f0dc",cyan:"#7ee8ff",yellow:"#ffe066",green:"#8dff7a",red:"#ff6b6b",grid:"#2a4185",axis:"#a9bdf0",bg:"#0f1d4a"};
+function figSize(fig){return fig.type==="grid"?[380,380]:[fig.w,fig.h]}
+function drawFig(cv,fig,st){
+  const [W,H]=figSize(fig),dpr=Math.min(3,window.devicePixelRatio||1);
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle=FIGC.bg;c.fillRect(0,0,W,H);
+  c.lineCap="round";c.lineJoin="round";
+  if(fig.type==="grid")return drawGrid(c,fig,st,W,H);
+  for(const it of fig.items){
+    c.setLineDash(it.dash?[7,6]:[]);
+    if(it.poly){c.beginPath();it.poly.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.strokeStyle=FIGC[it.stroke||"amber"];c.lineWidth=it.w||2;c.stroke()}
+    if(it.line){c.beginPath();c.moveTo(it.line[0],it.line[1]);c.lineTo(it.line[2],it.line[3]);c.strokeStyle=FIGC[it.stroke||"amber"];c.lineWidth=it.w||2;c.stroke()}
+    if(it.ra){const [x,y,sx,sy]=it.ra;c.setLineDash([]);c.beginPath();c.moveTo(x+12*sx,y);c.lineTo(x+12*sx,y+12*sy);c.lineTo(x,y+12*sy);c.strokeStyle=FIGC.paper;c.lineWidth=1.5;c.stroke()}
+    if(it.dot){c.setLineDash([]);c.fillStyle=FIGC.yellow;c.beginPath();c.arc(it.dot[0],it.dot[1],4,0,7);c.fill()}
+    if(it.text!==undefined){c.font=`700 ${Math.round((it.size||22)*.78)}px "Atkinson Hyperlegible", Verdana, sans-serif`;c.fillStyle=FIGC[it.color||"yellow"];c.textAlign=it.align==="left"?"left":it.align==="right"?"right":"center";c.textBaseline="middle";c.fillText(it.text.replace(/−/g,"−"),it.x,it.y)}
+  }
+  c.setLineDash([]);
+}
+function gridMap(fig,W,H){const pad=28,lo=fig.min,hi=fig.max,s=(W-2*pad)/(hi-lo);return{pad,lo,hi,s,X:x=>pad+(x-lo)*s,Y:y=>H-pad-(y-lo)*s}}
+
+/* =================== grid figures (blueprint, or a grass field for stake tasks) =================== */
+function drawGrid(c,fig,st,W,H){
+  const g=gridMap(fig,W,H),{X,Y,lo,hi}=g,field=!!fig.click;
+  if(field){c.fillStyle="#3d8a3a";c.fillRect(0,0,W,H);for(let i=0;i<420;i++){const hx=(i*97+i*i*13)%W,hy=(i*57+i*i*7)%H;c.fillStyle=i%3?"#4c9f46":"#2f7230";c.fillRect(hx,hy,2,2)}}
+  const gridC=field?"rgba(15,45,15,.6)":FIGC.grid,axisC=field?"#5a3c1c":FIGC.axis,lab=field?"#eef7dc":FIGC.dim;
+  const step=hi-lo>12?2:1;
+  c.strokeStyle=gridC;c.lineWidth=1;c.beginPath();
+  for(let i=lo;i<=hi;i++){c.moveTo(X(i),Y(lo));c.lineTo(X(i),Y(hi));c.moveTo(X(lo),Y(i));c.lineTo(X(hi),Y(i))}
+  c.stroke();
+  if(lo<=0&&hi>=0){c.strokeStyle=axisC;c.lineWidth=2.5;c.beginPath();c.moveTo(X(0),Y(lo));c.lineTo(X(0),Y(hi));c.moveTo(X(lo),Y(0));c.lineTo(X(hi),Y(0));c.stroke()}
+  c.font='14px "Atkinson Hyperlegible", Verdana, sans-serif';c.fillStyle=lab;
+  const ax=lo<=0&&hi>=0?0:lo;
+  c.textAlign="center";c.textBaseline="top";for(let i=lo;i<=hi;i+=step){if(i===0&&ax===0)continue;c.fillText(sn(i),X(i),Y(ax)+4)}
+  c.textAlign="right";c.textBaseline="middle";for(let i=lo;i<=hi;i+=step){if(i===0&&ax===0)continue;c.fillText(sn(i),X(ax)-5,Y(i))}
+  if(ax===0){c.textAlign="right";c.textBaseline="top";c.fillText("0",X(0)-3,Y(0)+3)}
+  c.save();c.beginPath();c.rect(X(lo),Y(hi),X(hi)-X(lo),Y(lo)-Y(hi));c.clip();
+  const lineC=field?"#f3e3b5":FIGC.cyan;
+  for(const l of fig.lines||[]){c.strokeStyle=FIGC.yellow;c.lineWidth=2.5;c.beginPath();c.moveTo(X(lo),Y(l.m*lo+l.b));c.lineTo(X(hi),Y(l.m*hi+l.b));c.stroke()}
+  if(fig.legs){c.setLineDash([5,5]);c.strokeStyle=FIGC.dim;c.lineWidth=2;c.beginPath();fig.legs.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.stroke();c.setLineDash([])}
+  for(const pl of fig.polys||[]){c.beginPath();pl.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.closePath();c.fillStyle="rgba(126,232,255,.12)";c.fill();c.strokeStyle=lineC;c.lineWidth=2.5;c.stroke()}
+  for(const sg_ of fig.segs||[]){c.strokeStyle=lineC;c.lineWidth=field?2:2.5;c.beginPath();c.moveTo(X(sg_[0][0]),Y(sg_[0][1]));c.lineTo(X(sg_[1][0]),Y(sg_[1][1]));c.stroke()}
+  c.restore();
+  const stake=(x,y,flag)=>{c.fillStyle="#7a4e24";c.fillRect(X(x)-2,Y(y)-14,4,15);c.fillStyle=flag;c.fillRect(X(x)+2,Y(y)-14,8,5);c.fillStyle="#2a1a0a";c.fillRect(X(x)-3,Y(y),6,2)};
+  const pts=fig.pts||[];
+  const cx0=pts.reduce((s,p)=>s+p.x,0)/(pts.length||1),cy0=pts.reduce((s,p)=>s+p.y,0)/(pts.length||1);
+  for(const p of pts){
+    if(field)stake(p.x,p.y,"#e8413a");else{c.fillStyle=FIGC.yellow;c.beginPath();c.arc(X(p.x),Y(p.y),4.5,0,7);c.fill()}
+    if(p.label){let dx=p.x-cx0,dy=p.y-cy0;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;if(pts.length<3){dx=-.7;dy=.7}
+      c.font='700 19px "Atkinson Hyperlegible", Verdana, sans-serif';c.fillStyle=FIGC.paper;c.textAlign="center";c.textBaseline="middle";
+      c.lineWidth=4;c.strokeStyle=field?"#1f4a1d":FIGC.bg;c.strokeText(p.label,X(p.x)+dx*16,Y(p.y)-dy*16-(field?6:0));c.fillText(p.label,X(p.x)+dx*16,Y(p.y)-dy*16-(field?6:0))}
+  }
+  if(st&&st.cur){c.strokeStyle=FIGC.paper;c.lineWidth=1.5;c.setLineDash([3,3]);c.strokeRect(X(st.cur[0])-9,Y(st.cur[1])-9,18,18);c.setLineDash([])}
+  for(const w of (st&&st.wrong)||[]){c.strokeStyle=FIGC.red;c.lineWidth=2.5;c.beginPath();c.moveTo(X(w[0])-5,Y(w[1])-5);c.lineTo(X(w[0])+5,Y(w[1])+5);c.moveTo(X(w[0])+5,Y(w[1])-5);c.lineTo(X(w[0])-5,Y(w[1])+5);c.stroke()}
+  if(st&&st.sel){
+    if(field){stake(st.sel[0],st.sel[1],st.selColor||FIGC.yellow);c.strokeStyle=st.selColor||FIGC.yellow;c.lineWidth=2;c.beginPath();c.arc(X(st.sel[0]),Y(st.sel[1]),9,0,7);c.stroke()}
+    else{c.strokeStyle=st.selColor||FIGC.red;c.lineWidth=3;c.beginPath();c.arc(X(st.sel[0]),Y(st.sel[1]),8,0,7);c.stroke()}
+  }
+}
+
+/* =================== route & people =================== */
+const ROUTE=[
+  {name:"Bytown",km:0,x:10,npc:{name:"Colonel By",look:"by"},blurb:"In 1826 Lieutenant-Colonel John By of the Royal Engineers set up camp where the Rideau River meets the Ottawa. The camp became Bytown."},
+  {name:"Hog's Back",km:8,x:36,skill:"line",act:"DAM LINE",npc:{name:"Dam foreman",look:"foreman"},blurb:"The Rideau squeezes between ridges of rock here. The engineers planned a high dam. It gave way more than once while it was being built, so the survey lines had to be right.",
+    intro:"The dam line has to be dead straight. Write me the equations of these lines and I'll open the gate.",done:"Straight as a chain. The gate's open. Watch your step by the rapids!"},
+  {name:"Long Island",km:24,x:62,skill:"perp",act:"LOCK PIT",npc:{name:"Lockmaster",look:"lockmaster"},blurb:"Rapids at the head of Long Island, where Manotick is today. A flight of locks will lift boats past them.",
+    intro:"Lock walls must be parallel, and every corner must be square. Check these for me before we pour a single stone.",done:"Parallel and square. On you go, surveyor."},
+  {name:"Burritts Rapids",km:51,x:88,skill:"gcf",act:"LAND GRANTS",npc:{name:"Land agent",look:"agent"},blurb:"Named for Stephen Burritt, one of the first settlers on the Rideau, who arrived in the 1790s. New settlers need their land grants recorded.",
+    intro:"My ledger needs every land grant written in factored form. Lend me a hand?",done:"The ledger balances at last. Thank you kindly."},
+  {name:"Merrickville",km:65,x:114,skill:"tri",act:"MILL LOTS",npc:{name:"Miller",look:"miller"},blurb:"William Merrick built mills here in the 1790s. Mills mean lots to lay out, and a stone blockhouse will later guard the locks.",
+    intro:"Mr. Merrick wants new mill lots laid out. Factor these areas so I know the sides.",done:"Fine lots, every one. Take a sack of flour for the road!",reward:20},
+  {name:"Smiths Falls",km:92,x:140,skill:"dist",act:"CHAINING",npc:{name:"Head chainman",look:"chainman"},blurb:"Surveyors measured by dragging a Gunter's chain, 66 feet (about 20 m) long, through bush and swamp. One chain is one square on your survey plan.",
+    intro:"Dragging the chain through this swamp takes forever. Work these lengths out on paper instead.",done:"That saves us a week in the swamp!"},
+  {name:"Jones Falls",km:160,x:166,skill:"shape",act:"SITE PLAN",npc:{name:"Stonemason",look:"mason"},blurb:"A narrow gorge where the engineers will build a curved stone dam about 19 m high, one of the tallest in North America at the time.",
+    intro:"Before we cut a single stone, check the shapes on the site plan. Give me the most precise names.",done:"Every footing checks out. Good work."},
+  {name:"Kingston Mills",km:197,x:192,skill:"sim",act:"HEIGHTS",npc:{name:"Engineer",look:"engineer"},blurb:"The last flight of locks, cut through a steep granite gorge just north of Kingston. Some heights here can't be measured with a chain.",
+    intro:"Nobody's climbing these cliffs with a chain. Use similar triangles to measure them.",done:"Measured without a single climb. Kingston is just ahead!"},
+  {name:"Kingston",km:202,x:220,skill:"mixed",act:"FINAL REPORT",npc:{name:"Colonel By",look:"by"},blurb:"Lake Ontario and the end of the route. The finished Rideau Canal opened in 1832.",
+    intro:"You made it! Before I accept your survey, answer four last questions from across the whole route.",done:"An excellent survey. The canal will be built on your lines."}
+];
+const TRAVELLERS=[
+  {name:"Settler",look:"settler"},{name:"Timber rafter",look:"rafter"},{name:"Algonquin guide",look:"guide"},
+  {name:"Mail carrier",look:"mail"},{name:"Stonecutter",look:"labourer"},{name:"Teamster",look:"teamster"},{name:"Voyageur",look:"voyageur"}
+];
+const LOOKS={
+  player:{coat:"#2f5fb3",hat:"brim",hatC:"#c9a15a",legs:"#3a2a1a",skin:"#f1c9a5",staff:true},
+  by:{coat:"#c0392b",hat:"bicorne",hatC:"#1a1a1a",legs:"#f0eadc",skin:"#f1c9a5"},
+  foreman:{coat:"#8a5a2b",hat:"cap",hatC:"#4a3a2a",legs:"#3a3a5a",skin:"#d9a066"},
+  lockmaster:{coat:"#2c3e50",hat:"top",hatC:"#1a1a1a",legs:"#2a2a2a",skin:"#f1c9a5"},
+  agent:{coat:"#6c3483",hat:"top",hatC:"#2a1a2a",legs:"#2a2a2a",skin:"#a8714a"},
+  miller:{coat:"#efe7d2",hat:"cap",hatC:"#cfc6b0",legs:"#6b4a2a",skin:"#f1c9a5"},
+  chainman:{coat:"#5d7a2a",hat:"brim",hatC:"#7a5a2a",legs:"#3a2a1a",skin:"#7a4a2a"},
+  mason:{coat:"#8e8e8e",hat:"cap",hatC:"#5a5a5a",legs:"#4a4a4a",skin:"#d9a066"},
+  engineer:{coat:"#c0392b",hat:"cap",hatC:"#1a1a1a",legs:"#2a2a4a",skin:"#a8714a"},
+  settler:{coat:"#a04030",hat:"kerchief",hatC:"#e8d070",legs:"#5a3a2a",skin:"#f1c9a5",dress:true},
+  rafter:{coat:"#b03a2e",hat:"cap",hatC:"#c0392b",legs:"#3a3a5a",skin:"#d9a066"},
+  guide:{coat:"#3b6ea8",hat:"none",hatC:"#1a1a1a",legs:"#5a4030",skin:"#a8714a"},
+  mail:{coat:"#1f4f8a",hat:"top",hatC:"#1a1a1a",legs:"#2a2a2a",skin:"#7a4a2a"},
+  labourer:{coat:"#7a6a4a",hat:"cap",hatC:"#3a5a2a",legs:"#3a3a3a",skin:"#f1c9a5"},
+  teamster:{coat:"#5a3a1a",hat:"brim",hatC:"#3a2a1a",legs:"#2a2a2a",skin:"#d9a066"},
+  voyageur:{coat:"#d8d0b8",hat:"cap",hatC:"#c0392b",legs:"#3a3a5a",skin:"#d9a066",sash:true},
+  ferryman:{coat:"#4a6a8a",hat:"brim",hatC:"#d8c890",legs:"#2a2a3a",skin:"#d9a066"}
+};
+const ROLES=[
+  {name:"Chainman",level:0,money:200,mult:1,food:400,kits:4,desc:"Support questions. Plenty of money for supplies."},
+  {name:"Surveyor",level:1,money:120,mult:2,food:300,kits:3,desc:"On-track questions, like your worksheets. Points ×2."},
+  {name:"Royal Engineer",level:2,money:80,mult:3,food:250,kits:2,desc:"Challenge questions. Little money. Points ×3."}
+];
+const DEFAULT_NAMES=["Thomas","Mary","John","Bridget","James","Margaret","Patrick","Ann","William","Catherine"];
+const FOOD_PRICE=0.2,KIT_PRICE=10,EAT=10,KMDAY=14;
+const DEATHS={line:"a slope written upside down",perp:"a forgotten negative reciprocal",gcf:"a common factor left behind",tri:"two numbers that multiplied but didn't add",dist:"a leg in the hypotenuse spot",shape:"a parallelogram called a rhombus",sim:"a proportion matched the wrong way round"};
+
+let S=null;
+function freshState(){const stats={};for(const k in GEN)stats[k]={a:0,f:0};return{mode:"party",role:1,names:[],money:0,food:0,kits:0,health:100,day:0,first:0,asked:0,misses:0,stats,bonusFood:0,lastMiss:"line",arrived:[true],done:[true],crossed:[],events:[],tools:[],cards:[],zone:Object.fromEntries(ROUTE.map((_,i)=>[i,{t:0,hits:0,cleared:false,seen:false}]))}}
+class GameOver extends Error{constructor(cause){super("over");this.cause=cause}}
+
+/* =================== sound =================== */
+let sound=false,actx=null;
+function beep(freq,dur,type="square",vol=.05){if(!sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=vol;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur)}catch(e){}}
+const sfx={ok(){beep(660,.08);setTimeout(()=>beep(990,.12),90)},bad(){beep(160,.25,"sawtooth",.04)},key(){beep(1200,.02,"square",.02)},talk(){beep(880,.015,"square",.015)},bump(){beep(120,.05,"square",.03)},arrive(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.12),i*120))},gate(){[392,523].forEach((f,i)=>setTimeout(()=>beep(f,.1),i*110))}};
+const soundBtn=document.getElementById("soundBtn");
+function toggleSound(){sound=!sound;soundBtn.textContent="Sound: "+(sound?"on":"off");soundBtn.setAttribute("aria-pressed",String(sound));if(sound)sfx.key()}
+soundBtn.addEventListener("click",e=>{toggleSound();e.currentTarget.blur()});
+
+/* =================== world =================== */
+/* The route winds: each stretch between stations has a horizontal run (with an obstacle zone),
+   a detour up or down, and a run into the next station. The river follows the road's lower side. */
+const T=16,VW=20,VH=13,WH=28,SEG=46;
+const YS=[12,12,17,10,15,19,12,9,14],YM=[0,8,21,7,20,8,8,18,21];
+ROUTE.forEach((s,i)=>{s.x=10+i*SEG;s.y=YS[i]});
+const WW=ROUTE[ROUTE.length-1].x+14;
+const TL={G:0,TREE:1,FOREST:2,ROAD:3,SAND:4,WATER:5,FOAM:6,BRIDGE:7,FENCE:8,GATEC:9,GATEO:10,ROCK:11,CLIFF:12,STONE:13,FLOWER:14,
+  BRUSH:15,MUD:16,SWAMP:17,CHUTE:18,DOCK:19,GRAVEL:20,LOGB:21,BERRY:22,STEP:23,REEDS:24};
+const SOLID=new Set([1,2,5,6,8,9,11,12,13,17,22]);
+let tiles,blocked,buildings,npcs,objs,stones,ferry=null;
+const hsh=(x,y)=>{let h=(x*374761393+y*668265263)|0;h=Math.imul(h^(h>>>13),1274126177);return (h^(h>>>16))>>>0};
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const tAt=(x,y)=>x<0||y<0||x>=WW||y>=WH?TL.FOREST:tiles[y*WW+x];
+const setT=(x,y,v)=>{if(x>=0&&y>=0&&x<WW&&y<WH)tiles[y*WW+x]=v};
+function addB(x,y,w,h,kind){buildings.push({x,y,w,h,kind});for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)blocked[j*WW+i]=1}
+const segA=i=>ROUTE[i-1].x+3;
+const creekX=i=>ROUTE[i].x-14;
+const eventX=i=>segA(i)+20;
+
+/* ---- obstacle zones (one per stretch) ---- */
+const ZKIND=[null,"rocks","logs","swamp","bridge","bear","ferry","blast","stones"];
+const ZNAME={rocks:"ROCK SLIDE",logs:"TIMBER SLIDE",swamp:"CEDAR SWAMP",bridge:"WASHED-OUT BRIDGE",bear:"BLUEBERRY PATCH",ferry:"BIG RIDEAU LAKE",blast:"BLASTING CREW",stones:"CATARAQUI RAPIDS"};
+const ZTIP={rocks:"Walk into a boulder to push it. Press R to start over.",logs:"Timber is coming down the slides. Cross between the logs.",swamp:"Mosquito swarms! Slip past them.",bridge:"The bridge washed out. Push a log into the creek. Press R to start over.",bear:"A black bear is eating berries. Sneak by on the far side.",ferry:"Walk into the ferryman to cross the lake.",blast:"Stand clear of the red marks!",stones:"Wobbly stones sink if you stop on them. Keep moving!"};
+const ZHIT={logs:["WHACK!","A log knocks you back."],swamp:["BZZZZ!","The mosquitoes drive you back."],bear:["GRRR!","The bear chases you back."],blast:["BOOM!","The blast throws you back."],stones:["SPLASH!","You fall in and swim back."]};
+const PUZ={
+  rocks:["############","###..#..####","....o.o.....","###..#..####","############"],
+  bridge:["##...#w#####","#.L..#w.####","....#.w.....","#..L..w..###","###...w#####"],
+  swamp:["mmSSmmmrSSmm","mmmmmrmmmmmm","mmmmmmmmmmmm","mmrmmmmmmrmm","SSmmmSSmmmSS"],
+  stones:["~~~~~~~~~~~~","~~~WWWS~~~~~",".WWS~~WWS~S.","~~~WW~~~WWW~","~~~~~~~~~~~~"]};
+function zone(i){const A=segA(i),y0=YS[i-1];return{i,kind:ZKIND[i],A,x0:A+4,x1:A+15,y0,top:y0-2,bot:y0+2}}
+const inZone=(z,x,y)=>x>=z.x0-1&&x<=z.x1&&y>=z.top&&y<=z.bot;
+const BEAR_LOOP=(()=>{const p=[];for(let c=2;c<9;c++)p.push([c,0]);for(let r=0;r<4;r++)p.push([9,r]);for(let c=9;c>2;c--)p.push([c,4]);for(let r=4;r>0;r--)p.push([2,r]);return p})();
+const BLAST={cycle:4800,groups:[[2,3],[5,6],[8,9]],off:[0,1600,3200],warn:1100,boom:500};
+function blastPhase(g,now){const t=((now-BLAST.off[g])%BLAST.cycle+BLAST.cycle)%BLAST.cycle;return t<BLAST.warn?"warn":t<BLAST.warn+BLAST.boom?"boom":null}
+const LOGCH=[{c:3,spd:2.6,ph:0},{c:6,spd:3.4,ph:4},{c:9,spd:3,ph:9}];
+function logTops(z,ch,now){const out=[];for(let k=0;k<2;k++){const y=z.top-3+((now/1000*ch.spd+ch.ph+7*k)%14);if(y<z.bot+1.5)out.push(y)}return out}
+const SWARMS=[{c:3,w:2.2,ph:0},{c:6,w:1.7,ph:2},{c:9,w:2.6,ph:4}];
+const swarmY=(z,s,now)=>z.top+2+2*Math.sin(now/1000*s.w+s.ph);
+function bearPos(now){const L=BEAR_LOOP.length,f=(now/1000*3.2)%L,k=Math.floor(f),a=BEAR_LOOP[k],b=BEAR_LOOP[(k+1)%L],t=f-k;return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,b[0]-a[0]]}
+function stoneSunk(s,now){return s.t>0&&now-s.t>=900&&now-s.t<2700}
+
+function placePuzzle(z){
+  const m=PUZ[z.kind];
+  objs=objs.filter(o=>!(o.zone===z.i&&(o.kind==="rock"||o.kind==="log")));
+  for(let r=0;r<5;r++)for(let c=0;c<12;c++){const x=z.x0+c,y=z.top+r,ch=m[r][c];
+    if(ch==="#")setT(x,y,z.kind==="rocks"?TL.CLIFF:TL.FOREST);
+    else if(ch==="w")setT(x,y,TL.WATER);
+    else setT(x,y,r===2?TL.ROAD:TL.G);
+    if(ch==="o")objs.push({kind:"rock",x,y,zone:z.i});
+    if(ch==="L")objs.push({kind:"log",x,y,zone:z.i});}
+}
+function buildZone(i){
+  const z=zone(i);
+  if(z.kind==="rocks"||z.kind==="bridge")return placePuzzle(z);
+  if(z.kind==="swamp"||z.kind==="stones"){const m=PUZ[z.kind];
+    for(let r=0;r<5;r++)for(let c=0;c<12;c++){const x=z.x0+c,y=z.top+r,ch=m[r][c];
+      const t={m:TL.MUD,S:TL.SWAMP,r:TL.REEDS,"~":TL.FOAM,W:TL.STEP,".":TL.G}[ch]??TL.G;setT(x,y,t);
+      if(ch==="W"||(ch==="S"&&z.kind==="stones")){setT(x,y,TL.STEP);stones[x+","+y]={safe:ch==="S",t:0}}}
+    return}
+  if(z.kind==="logs"){for(const ch of LOGCH)for(let y=z.top;y<=z.bot;y++)setT(z.x0+ch.c,y,TL.CHUTE);return}
+  if(z.kind==="bear"){for(let r=0;r<5;r++)for(let c=0;c<12;c++){const x=z.x0+c,y=z.top+r;setT(x,y,c>=3&&c<=8&&r>=1&&r<=3?TL.BERRY:(r===2&&(c<3||c>8))?TL.ROAD:TL.G)}return}
+  if(z.kind==="blast"){for(let r=0;r<5;r++)for(let c=0;c<12;c++)setT(z.x0+c,z.top+r,r===2?TL.ROAD:TL.GRAVEL);for(let c=-1;c<=12;c++)if(tAt(z.x0+c,z.top-1)===TL.FOREST)setT(z.x0+c,z.top-1,TL.CLIFF);return}
+  if(z.kind==="ferry"){for(let x=z.x0;x<=z.x1;x++)for(let y=z.y0-4;y<=z.y0+5;y++)setT(x,y,TL.WATER);setT(z.x0-1,z.y0,TL.DOCK);setT(z.x1+1,z.y0,TL.DOCK);
+    npcs.push({x:z.x0,y:z.y0,dir:"right",look:"ferryman",name:"Ferryman",kind:"ferry",i});}
+}
+function clearZone(i){const z=zone(i);
+  if(z.kind==="rocks")objs=objs.filter(o=>!(o.zone===i&&o.kind==="rock"));
+  if(z.kind==="bridge"){objs=objs.filter(o=>!(o.zone===i&&o.kind==="log"));setT(z.x0+6,z.y0,TL.LOGB)}}
+function resetPuzzle(i){const z=zone(i);placePuzzle(z);placePlayer(z.A+3,z.y0,"right");showBanner("START OVER","The rocks and logs are back where they began.")}
+
+function buildWorld(){
+  tiles=new Uint8Array(WW*WH).fill(TL.FOREST);blocked=new Uint8Array(WW*WH);buildings=[];npcs=[];objs=[];stones={};ferry=null;
+  const way=[[1,YS[0]]];
+  for(let i=1;i<ROUTE.length;i++){const A=segA(i);way.push([A+17,YS[i-1]],[A+17,YM[i]],[A+25,YM[i]],[A+25,YS[i]])}
+  way.push([WW-4,YS[YS.length-1]]);
+  const road=[];
+  for(let k=1;k<way.length;k++){const [x0,y0]=way[k-1],[x1,y1]=way[k];const dx=Math.sign(x1-x0),dy=Math.sign(y1-y0);let x=x0,y=y0;road.push([x,y]);while(x!==x1||y!==y1){x+=dx;y+=dy;road.push([x,y])}}
+  const onRoad=new Set(road.map(([x,y])=>x+","+y));
+  for(const [x,y] of road)for(let j=-2;j<=2;j++)for(let i=-2;i<=2;i++)setT(x+i,y+j,TL.G);
+  /* decoration on the corridor edges */
+  const R=rng(1827),nearRoad=(x,y)=>{for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++)if(onRoad.has((x+i)+","+(y+j)))return true;return false};
+  for(let y=0;y<WH;y++)for(let x=0;x<WW;x++)if(tAt(x,y)===TL.G&&!nearRoad(x,y)){const r=R();if(r<.2)setT(x,y,TL.TREE);else if(r<.24)setT(x,y,TL.ROCK);else if(r<.3)setT(x,y,TL.FLOWER)}
+  else if(tAt(x,y)===TL.G&&R()<.05&&!onRoad.has(x+","+y))setT(x,y,TL.FLOWER);
+  /* river */
+  const lev=new Array(WW).fill(YS[0]);
+  for(let k=1;k<way.length;k++){const [x0,y0]=way[k-1],[x1,y1]=way[k];if(y0===y1)for(let x=x0;x<=x1&&x<WW;x++)lev[x]=y0}
+  for(let x=way[way.length-1][0];x<WW;x++)lev[x]=way[way.length-1][1];
+  const RL=lev.slice();
+  for(let k=1;k<way.length;k++){const [x0,y0]=way[k-1],[x1,y1]=way[k];if(x0===x1&&y0!==y1){if(y1<y0)for(let x=x0;x<=x0+2;x++)RL[x]=y0;else for(let x=x0-3;x<=x0-1;x++)RL[x]=y1}}
+  for(let i=1;i<ROUTE.length;i++){const A=segA(i);if(YM[i]<Math.min(YS[i-1],YS[i])){for(let x=A+17;x<=A+21;x++)RL[x]=YS[i-1];for(let x=A+22;x<=A+24;x++)RL[x]=YS[i]}}
+  for(let x=0;x<WW;x++){for(let y=RL[x]+3;y<=RL[x]+5;y++)setT(x,y,TL.WATER);
+    if(x>0&&RL[x]!==RL[x-1])for(let y=Math.min(RL[x],RL[x-1])+3;y<=Math.max(RL[x],RL[x-1])+5;y++)setT(x,y,TL.WATER);
+    const t2=tAt(x,RL[x]+2);if(t2===TL.G||t2===TL.FLOWER||t2===TL.TREE||t2===TL.ROCK)setT(x,RL[x]+2,TL.SAND)}
+  for(const [x,y] of road)setT(x,y,TL.ROAD);
+  /* stations */
+  const clear=(x0,x1,y0,y1)=>{for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)setT(x,y,TL.G)};
+  const foam=(x0,x1,y0,y1)=>{for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)if(tAt(x,y)===TL.WATER&&hsh(x,y)%3)setT(x,y,TL.FOAM)};
+  ROUTE.forEach((s,i)=>{const sx=s.x,y=s.y,x0=i===0?0:sx-9,x1=i===0?15:i===ROUTE.length-1?WW-4:sx+1;
+    clear(x0,x1,y-6,y+1);for(let x=x0;x<=x1;x++){setT(x,y,TL.ROAD);if(tAt(x,y+2)!==TL.WATER)setT(x,y+2,TL.SAND)}});
+  const SX=i=>ROUTE[i].x,SY=i=>ROUTE[i].y;
+  {const y=SY(0);addB(1,y-6,6,5,"fort");addB(7,y-5,3,3,"store");addB(12,y-4,2,2,"tent");addB(14,y-5,2,2,"tent")}
+  {const sx=SX(1),y=SY(1);addB(sx-7,y-5,3,3,"cabin");foam(sx-4,sx+3,y+3,y+5);for(let yy=y+3;yy<=y+5;yy++)setT(sx+5,yy,TL.STONE);setT(sx-3,y-3,TL.ROCK);setT(sx-1,y-4,TL.ROCK)}
+  {const sx=SX(2),y=SY(2);addB(sx-7,y-5,3,3,"stonehouse");for(let x=sx-5;x<=sx+1;x++){setT(x,y+3,TL.STONE);setT(x,y+5,TL.STONE)}setT(sx-5,y+4,TL.STONE);setT(sx+1,y+4,TL.STONE)}
+  {const sx=SX(3),y=SY(3);addB(sx-9,y-6,3,3,"cabin");addB(sx-5,y-4,3,3,"office");for(let x=sx-9;x<=sx-6;x++)setT(x,y-2,TL.FLOWER)}
+  {const sx=SX(4),y=SY(4);addB(sx-7,y-5,4,4,"mill");foam(sx-3,sx+1,y+3,y+4)}
+  {const sx=SX(5),y=SY(5);addB(sx-8,y-4,3,3,"cabin");addB(sx-4,y-3,2,2,"tent");foam(sx-2,sx,y+3,y+5)}
+  {const sx=SX(6),y=SY(6);addB(sx-8,y-4,3,3,"stonehouse");for(let x=sx-9;x<=sx+1;x++){setT(x,y-6,TL.CLIFF);if(x%2)setT(x,y-5,TL.CLIFF)}for(let yy=y+3;yy<=y+5;yy++)for(let x=sx-1;x<=sx+1;x++)setT(x,yy,TL.STONE)}
+  {const sx=SX(7),y=SY(7);for(let x=sx-9;x<=sx+1;x++)for(let yy=y-6;yy<=y-3;yy++)if(!(x>=sx-6&&x<=sx-3&&yy>=y-4))setT(x,yy,TL.CLIFF);addB(sx-6,y-4,3,3,"stonehouse");for(let x=sx-4;x<=sx+1;x++){setT(x,y+3,TL.STONE);setT(x,y+5,TL.STONE)}}
+  {const sx=SX(8),y=SY(8);addB(sx-8,y-6,3,3,"town");addB(sx-4,y-5,3,3,"town");addB(sx+2,y-6,4,4,"town");addB(sx+7,y-5,3,3,"town");
+    for(let x=sx+1;x<WW;x++)for(let yy=y+2;yy<WH;yy++)setT(x,yy,TL.WATER);for(let x=WW-2;x<WW;x++)for(let yy=0;yy<WH;yy++)setT(x,yy,TL.WATER)}
+  /* gates */
+  for(let i=1;i<ROUTE.length-1;i++){const gx=SX(i)+2;for(let y=0;y<WH;y++){if(y===SY(i))setT(gx,y,TL.GATEC);else if(!SOLID.has(tAt(gx,y)))setT(gx,y,TL.FENCE)}}
+  /* creeks with a bridge */
+  for(let i=2;i<ROUTE.length;i++){const cx=creekX(i),yr=SY(i);for(let y=0;y<=RL[cx]+2;y++)setT(cx,y,y===yr?TL.BRIDGE:TL.WATER)}
+  /* obstacle zones */
+  for(let i=1;i<ROUTE.length;i++)buildZone(i);
+  /* hidden tools up a brushy side trail, and history cards by the road */
+  for(let i=1;i<ROUTE.length;i++){const A=segA(i),ym=YM[i];
+    for(let y=ym-5;y<=ym-2;y++)setT(A+21,y,TL.BRUSH);setT(A+21,ym-6,TL.G);setT(A+20,ym-6,TL.TREE);setT(A+22,ym-6,TL.TREE);
+    objs.push({kind:"tool",i,x:A+21,y:ym-6});
+    if(tAt(A+23,ym-1)!==TL.ROAD)setT(A+23,ym-1,TL.G);objs.push({kind:"card",i,x:A+23,y:ym-1});}
+  /* people */
+  ROUTE.forEach((s,i)=>{const last=i===ROUTE.length-1;npcs.push({x:s.x,y:last?s.y:s.y-1,dir:last?"left":"down",look:s.npc.look,name:s.npc.name,kind:"station",i})});
+  for(let i=2;i<ROUTE.length;i++){const t=TRAVELLERS[i-2];npcs.push({x:creekX(i),y:SY(i),dir:"left",look:t.look,name:t.name,kind:"traveller",i})}
+}
+const npcAt=(x,y)=>npcs.find(n=>n.x===x&&n.y===y&&!n.hidden);
+const pushAt=(x,y)=>objs.find(o=>o.x===x&&o.y===y&&(o.kind==="rock"||o.kind==="log"));
+function walkable(x,y){
+  if(x<0||y<0||x>=WW||y>=WH)return false;const t=tAt(x,y);
+  if(SOLID.has(t)||blocked[y*WW+x]||npcAt(x,y)||pushAt(x,y))return false;
+  if(t===TL.STEP){const s=stones[x+","+y];if(s&&stoneSunk(s,performance.now()))return false}
+  return true;
+}
+function tryPush(o,dx,dy){
+  const bx=o.x+dx,by=o.y+dy,z=zone(o.zone);
+  if(!inZone(z,bx,by)||bx<z.x0)return false;
+  if(o.kind==="log"&&tAt(bx,by)===TL.WATER){objs.splice(objs.indexOf(o),1);setT(bx,by,TL.LOGB);sfx.gate();showBanner("A NEW BRIDGE!","The log fits across the creek.");return true}
+  if(!walkable(bx,by)||objs.some(p=>p.x===bx&&p.y===by))return false;
+  o.x=bx;o.y=by;sfx.bump();return true;
+}
+
+/* =================== drawing =================== */
+const cvs=document.getElementById("map"),g=cvs.getContext("2d");g.imageSmoothingEnabled=false;
+const R_=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h)};
+function grass(sx,sy,x,y,base="#5bb04f",dk="#4a9a42",lt="#74c85f"){R_(sx,sy,T,T,base);const h=hsh(x,y);for(let k=0;k<4;k++){R_(sx+((h>>>(k*4))&15),sy+((h>>>(k*4+16))&15),1,1,k%2?dk:lt)}}
+function pine(sx,sy,c1,c2){R_(sx+7,sy+12,2,4,"#6b4423");R_(sx+6,sy+1,4,3,c1);R_(sx+4,sy+4,8,3,c1);R_(sx+3,sy+7,10,3,c1);R_(sx+2,sy+10,12,2,c1);R_(sx+6,sy+2,2,2,c2);R_(sx+5,sy+5,2,2,c2);R_(sx+4,sy+8,2,2,c2)}
+function water(sx,sy,x,y,t,base="#2e6fc4",hi="#5f9be0"){R_(sx,sy,T,T,base);const o=((t/220|0)+hsh(x,y))%13;R_(sx+o,sy+4,3,1,hi);R_(sx+(o+7)%13,sy+11,3,1,hi)}
+function mud(sx,sy,x,y){R_(sx,sy,T,T,"#6f7a3c");const h=hsh(x,y);R_(sx+(h&11),sy+((h>>4)&11),4,2,"#5a6430");R_(sx+((h>>8)&13),sy+((h>>12)&13),2,1,"#8a9450")}
+function drawTile(t,sx,sy,x,y,time){
+  switch(t){
+    case TL.G:grass(sx,sy,x,y);break;
+    case TL.FLOWER:grass(sx,sy,x,y);{const h=hsh(x,y);R_(sx+(h&7)+2,sy+((h>>3)&7)+2,2,2,h&1?"#ffe066":"#ff8fb1");R_(sx+((h>>6)&7)+5,sy+((h>>9)&7)+5,2,2,"#ffffff")}break;
+    case TL.TREE:grass(sx,sy,x,y);pine(sx,sy,"#2f7d3a","#45a04c");break;
+    case TL.FOREST:grass(sx,sy,x,y,"#2f6b33","#28602c","#3a7a3e");pine(sx,sy,"#1f5a2a","#2f7d3a");break;
+    case TL.ROAD:{R_(sx,sy,T,T,"#c8a46a");const h=hsh(x,y);R_(sx+(h&15),sy+((h>>4)&15),2,1,"#a98a55");R_(sx+((h>>8)&15),sy+((h>>12)&15),1,1,"#e2c58f")}break;
+    case TL.SAND:{R_(sx,sy,T,T,"#dcc48c");const h=hsh(x,y);R_(sx+(h&15),sy+((h>>4)&15),1,1,"#c4ab72");R_(sx+((h>>8)&15),sy+((h>>12)&15),1,1,"#efdcab")}break;
+    case TL.WATER:water(sx,sy,x,y,time);break;
+    case TL.FOAM:water(sx,sy,x,y,time);for(let k=0;k<4;k++)R_(sx+((hsh(x,y)+k*5+(time/110|0))%13),sy+k*4+1,4,1,"#e8f6ff");break;
+    case TL.BRIDGE:water(sx,sy,x,y,time);R_(sx,sy+1,T,14,"#a0703c");for(let i=0;i<T;i+=4)R_(sx+i,sy+1,1,14,"#7a5228");R_(sx,sy+1,T,1,"#5a3a1a");R_(sx,sy+14,T,1,"#5a3a1a");break;
+    case TL.FENCE:grass(sx,sy,x,y);R_(sx+6,sy,4,T,"#8b5a2b");R_(sx+5,sy+2,6,3,"#a9743a");R_(sx+5,sy+10,6,3,"#a9743a");R_(sx+6,sy,1,T,"#6b4423");break;
+    case TL.GATEC:{const p=ROUTE.findIndex(s=>s.x+2===x);drawTile(TL.ROAD,sx,sy,x,y,time);R_(sx+6,sy,4,3,"#8b5a2b");R_(sx+6,sy+13,4,3,"#8b5a2b");for(let i=0;i<5;i++)R_(sx+6,sy+3+i*2,4,2,i%2?"#f5f0dc":"#d33b2c");if(p>=0&&blinkOn(time)){R_(sx+11,sy+4,3,3,"#ffd34d")}}break;
+    case TL.GATEO:drawTile(TL.ROAD,sx,sy,x,y,time);R_(sx+6,sy,4,3,"#8b5a2b");R_(sx+6,sy+13,4,3,"#8b5a2b");break;
+    case TL.ROCK:grass(sx,sy,x,y);R_(sx+3,sy+6,10,8,"#8d8a80");R_(sx+4,sy+5,8,1,"#a5a297");R_(sx+5,sy+7,3,2,"#b8b5aa");R_(sx+3,sy+13,10,1,"#5f5d56");break;
+    case TL.CLIFF:{R_(sx,sy,T,T,"#7d776b");const h=hsh(x,y);R_(sx+(h&7),sy+((h>>3)&7)+2,6,1,"#5f5a50");R_(sx+((h>>6)&7)+4,sy+((h>>9)&7)+6,5,1,"#5f5a50");R_(sx+((h>>12)&7)+2,sy+((h>>15)&3)+1,3,1,"#9a9486")}break;
+    case TL.STONE:R_(sx,sy,T,T,"#9a958a");for(let j=0;j<4;j++){R_(sx,sy+j*4,T,1,"#6f6a60");R_(sx+((j%2)?4:10),sy+j*4,1,4,"#6f6a60")}break;
+    case TL.BRUSH:grass(sx,sy,x,y,"#4a9a42","#3f8a39","#5bb04f");R_(sx+1,sy+2,6,5,"#2f7d3a");R_(sx+8,sy+6,7,6,"#2f7d3a");R_(sx+2,sy+9,5,5,"#3a8a3e");R_(sx+3,sy+3,2,1,"#5fae55");R_(sx+10,sy+7,2,1,"#5fae55");break;
+    case TL.MUD:mud(sx,sy,x,y);break;
+    case TL.REEDS:mud(sx,sy,x,y);for(let k=0;k<4;k++){R_(sx+2+k*4,sy+3+(k%2)*2,1,10,"#3d6b2a");R_(sx+2+k*4,sy+2+(k%2)*2,1,3,"#7a4a22")}break;
+    case TL.SWAMP:water(sx,sy,x,y,time,"#3d5a3a","#56785a");{const h=hsh(x,y);R_(sx+(h&9)+1,sy+((h>>4)&9)+2,5,3,"#5f9a4a");R_(sx+(h&9)+3,sy+((h>>4)&9)+2,1,1,"#3d5a3a")}break;
+    case TL.CHUTE:R_(sx,sy,T,T,"#7a5228");R_(sx+3,sy,10,T,"#3a7cc8");R_(sx+5+((time/80|0)%4),sy,1,T,"#7fb2ea");R_(sx+2,sy,1,T,"#5a3a1a");R_(sx+13,sy,1,T,"#5a3a1a");break;
+    case TL.DOCK:water(sx,sy,x,y,time);R_(sx,sy+1,T,14,"#9c6e3a");for(let j=0;j<T;j+=4)R_(sx,sy+1+j,T,1,"#6e4a24");R_(sx+1,sy+14,2,2,"#4a2f16");R_(sx+13,sy+14,2,2,"#4a2f16");break;
+    case TL.GRAVEL:{R_(sx,sy,T,T,"#a59e8c");const h=hsh(x,y);for(let k=0;k<5;k++)R_(sx+((h>>(k*3))&15),sy+((h>>(k*3+12))&15),2,1,k%2?"#857e6c":"#c4bdaa")}break;
+    case TL.LOGB:water(sx,sy,x,y,time);R_(sx,sy+3,T,10,"#8a5a2b");R_(sx,sy+3,T,2,"#a9743a");R_(sx,sy+11,T,2,"#5e3c1c");R_(sx+1,sy+5,3,5,"#c79a5e");R_(sx+2,sy+6,1,3,"#8a5a2b");break;
+    case TL.BERRY:grass(sx,sy,x,y);R_(sx+1,sy+2,14,12,"#2f6e33");R_(sx+3,sy+1,10,2,"#2f6e33");{const h=hsh(x,y);for(let k=0;k<6;k++)R_(sx+2+((h>>(k*4))&11),sy+3+((h>>(k*4+2))&9),2,2,"#3b4fd0")}break;
+    case TL.STEP:{const s=stones[x+","+y];water(sx,sy,x,y,time);for(let k=0;k<3;k++)R_(sx+((hsh(x,y)+k*5+(time/110|0))%13),sy+k*5+1,4,1,"#e8f6ff");
+      if(s&&stoneSunk(s,time+time0)){R_(sx+4,sy+7,8,2,"#7fb2ea");break}
+      const wob=s&&s.t>0&&!s.safe?((time/60|0)%2):0;const c1=s&&s.safe?"#9a958a":"#a8a08e",c2=s&&s.safe?"#6f6a60":"#7d7462";
+      R_(sx+2+wob,sy+3,12,10,c1);R_(sx+3+wob,sy+2,10,1,c1);R_(sx+3+wob,sy+13,10,1,c2);R_(sx+4+wob,sy+4,4,2,"#c9c3b4");if(s&&!s.safe){R_(sx+8+wob,sy+6,1,4,c2);R_(sx+9+wob,sy+9,2,1,c2)}}break;
+  }
+}
+const blinkOn=t=>((t/500)|0)%2===0;
+function drawBuilding(b,cx,cy,time){
+  const x=b.x*T-cx,y=b.y*T-cy,w=b.w*T,h=b.h*T;
+  if(b.kind==="fort"){R_(x,y+6,w,h-6,"#8b5a2b");for(let i=0;i<w;i+=4){R_(x+i,y+6,3,h-6,i%8?"#9c6a35":"#7a4c22");R_(x+i,y+3,3,3,"#7a4c22");R_(x+i+1,y+1,1,2,"#7a4c22")}R_(x+w/2-6,y+h-14,12,14,"#2a1a0a");R_(x+w-10,y-14,2,22,"#ddd");R_(x+w-8,y-14,12,8,"#c0392b");R_(x+w-8,y-14,5,4,"#1f3a8a");return}
+  if(b.kind==="tent"){g.fillStyle="#efe7d2";g.beginPath();g.moveTo(x+2,y+h-2);g.lineTo(x+w/2,y+4);g.lineTo(x+w-2,y+h-2);g.fill();R_(x+w/2-3,y+h-12,6,10,"#8a7a5a");R_(x+w/2,y+2,1,4,"#6b4423");return}
+  const roof=b.kind==="stonehouse"||b.kind==="mill"?"#4a4f5a":b.kind==="town"?"#5a2a24":b.kind==="office"?"#3a5a7a":"#5a3a20";
+  const wall=b.kind==="stonehouse"||b.kind==="mill"?"#a9a396":b.kind==="town"?"#a0523d":b.kind==="office"?"#e8e0c8":"#8b5a2b";
+  R_(x+2,y+T,w-4,h-T-2,wall);
+  if(b.kind==="cabin"||b.kind==="store")for(let j=y+T+3;j<y+h-2;j+=4)R_(x+2,j,w-4,1,"#6e4420");
+  if(b.kind==="stonehouse"||b.kind==="mill")for(let j=y+T+4;j<y+h-2;j+=5){R_(x+2,j,w-4,1,"#857f72");for(let i=x+((j/5|0)%2?4:9);i<x+w-2;i+=10)R_(i,j-4,1,4,"#857f72")}
+  if(b.kind==="town")for(let j=y+T+4;j<y+h-2;j+=4)R_(x+2,j,w-4,1,"#8a4332");
+  g.fillStyle=roof;g.beginPath();g.moveTo(x-2,y+T+3);g.lineTo(x+w/2,y+1);g.lineTo(x+w+2,y+T+3);g.closePath();g.fill();R_(x-2,y+T+1,w+4,3,roof);
+  R_(x+w/2-4,y+h-14,8,12,"#3a2410");
+  const win=(wx)=>{R_(wx,y+T+7,6,6,"#ffd86b");R_(wx+2,y+T+7,1,6,"#6e4420");R_(wx,y+T+9,6,1,"#6e4420")};
+  win(x+6);if(w>=48)win(x+w-12);
+  if(b.kind==="store"){R_(x+w/2-12,y+T-2,24,7,"#f5f0dc");R_(x+w/2-10,y+T,20,1,"#5a3a20");R_(x+w/2-10,y+T+2,14,1,"#5a3a20")}
+  if(b.kind==="office"){R_(x+w-6,y+T-8,2,14,"#ddd");R_(x+w-4,y+T-8,8,5,"#c0392b")}
+  if(b.kind==="mill"){const wx=x+w+2,wy=y+h-12,a=time/600;g.strokeStyle="#6b4423";g.lineWidth=2;g.beginPath();g.arc(wx,wy,11,0,7);g.stroke();for(let k=0;k<4;k++){const an=a+k*Math.PI/4;g.beginPath();g.moveTo(wx-Math.cos(an)*11,wy-Math.sin(an)*11);g.lineTo(wx+Math.cos(an)*11,wy+Math.sin(an)*11);g.stroke()}}
+}
+function drawPerson(px,py,look,dir,frame){
+  const L=LOOKS[look]||LOOKS.player,P=(x,y,w,h,c)=>R_(px+x,py+y,w,h,c);
+  g.fillStyle="rgba(0,0,0,.25)";g.beginPath();g.ellipse(px+8,py+15,6,2,0,0,7);g.fill();
+  const a=frame%2;P(5,12+a,2,3-a,L.legs);P(9,13-a,2,2+a,L.legs);
+  P(4,7,8,L.dress?8:6,L.coat);P(3,8,1,4,L.coat);P(12,8,1,4,L.coat);P(3,12,1,1,L.skin);P(12,12,1,1,L.skin);P(4,7,8,1,"rgba(255,255,255,.18)");
+  if(L.sash)P(4,11,8,1,"#c0392b");
+  P(5,2,6,5,L.skin);
+  const hc=L.hatC;
+  if(L.hat==="bicorne"){P(3,1,10,2,hc);P(6,0,4,1,hc);P(7,1,2,1,"#ffd34d")}
+  else if(L.hat==="brim"){P(3,2,10,1,hc);P(5,0,6,2,hc)}
+  else if(L.hat==="cap"){P(5,1,6,2,hc);P(4,2,1,1,hc)}
+  else if(L.hat==="top"){P(5,-2,6,4,hc);P(4,2,8,1,hc)}
+  else if(L.hat==="kerchief"){P(5,1,6,2,hc);P(4,2,1,3,hc);P(11,2,1,3,hc)}
+  else{P(5,1,6,2,"#1a1a1a");P(4,2,1,4,"#1a1a1a");P(11,2,1,4,"#1a1a1a")}
+  if(dir==="up")P(5,3,6,3,L.hat==="none"?"#1a1a1a":hc);
+  else if(dir==="left")P(6,4,1,1,"#1a1a1a");
+  else if(dir==="right")P(9,4,1,1,"#1a1a1a");
+  else{P(6,4,1,1,"#1a1a1a");P(9,4,1,1,"#1a1a1a")}
+  if(L.staff){const sx=dir==="left"?2:13;for(let k=0;k<6;k++)P(sx,3+k*2,1,2,k%2?"#f5f0dc":"#d33b2c")}
+}
+function drawBoat(px,py){R_(px-3,py+8,22,6,"#7a4c22");R_(px-1,py+14,18,2,"#5a3a1a");R_(px-3,py+8,22,1,"#a9743a");R_(px+16,py+4,2,8,"#a9743a")}
+function drawLog(px,py,vertical){if(vertical){R_(px+3,py,10,2*T,"#8a5a2b");R_(px+3,py,2,2*T,"#a9743a");R_(px+11,py,2,2*T,"#5e3c1c");R_(px+4,py+1,8,4,"#c79a5e");R_(px+6,py+2,4,2,"#8a5a2b")}
+  else{R_(px,py+4,T,9,"#8a5a2b");R_(px,py+4,T,2,"#a9743a");R_(px,py+11,T,2,"#5e3c1c");R_(px+1,py+5,4,7,"#c79a5e");R_(px+2,py+7,2,3,"#8a5a2b")}}
+function drawBoulder(px,py){R_(px+1,py+3,14,12,"#7b776c");R_(px+3,py+1,10,2,"#7b776c");R_(px+3,py+3,5,3,"#a7a397");R_(px+1,py+14,14,2,"#4f4c45");R_(px+10,py+8,3,1,"#4f4c45")}
+function drawSwarm(px,py,time){for(let k=0;k<11;k++){const a=time/90+k*2.3,r=3+((k*7)%5);R_(px+8+Math.cos(a)*r,py+8+Math.sin(a*1.3)*r,2,2,k%3?"#1a1a1a":"#4a4a4a")}}
+function drawBear(px,py,dx){R_(px+1,py+5,14,9,"#1c1a1a");R_(px+2,py+13,3,3,"#1c1a1a");R_(px+11,py+13,3,3,"#1c1a1a");const hx=dx<0?px-2:px+10;R_(hx,py+3,8,7,"#1c1a1a");R_(hx+(dx<0?0:5),py+6,3,3,"#8a6a4a");R_(hx+(dx<0?1:4),py+1,2,2,"#1c1a1a");R_(hx+(dx<0?5:1),py+1,2,2,"#1c1a1a");R_(hx+(dx<0?2:5),py+5,1,1,"#ffffff")}
+function drawTool(px,py,time){const tw=((time/180|0)%6);R_(px+5,py+9,6,4,"#c9a15a");R_(px+6,py+8,4,1,"#e8c77a");R_(px+7,py+10,2,2,"#5a3a1a");if(tw<3){R_(px+7,py+1,2,6,"#fff7c0");R_(px+5,py+3,6,2,"#fff7c0")}else R_(px+7,py+3,2,2,"#ffe066")}
+function drawCard(px,py,time){const b=(time/400|0)%2;R_(px+3,py+4-b,10,8,"#f5f0dc");R_(px+4,py+6-b,8,1,"#8a7a5a");R_(px+4,py+8-b,6,1,"#8a7a5a");R_(px+9,py+9-b,3,3,"#c0392b")}
+
+let cam={x:0,y:0},time0=performance.now();
+const player={x:5,y:YS[0],px:5*T,py:YS[0]*T,dir:"right",moving:false,fx:0,fy:0,tx:0,ty:0,t:0,frame:0};
+let invuln=0,flashUntil=0;
+function draw(now){
+  const time=now-time0;
+  const tx=player.px+8-VW*T/2,ty=player.py+8-VH*T/2;
+  cam.x=Math.round(Math.max(0,Math.min(WW*T-VW*T,tx)));cam.y=Math.round(Math.max(0,Math.min(WH*T-VH*T,ty)));
+  const x0=Math.floor(cam.x/T),y0=Math.floor(cam.y/T);
+  for(let y=y0;y<=y0+VH;y++)for(let x=x0;x<=x0+VW;x++)drawTile(tAt(x,y),x*T-cam.x,y*T-cam.y,x,y,time);
+  for(const b of buildings)if(b.x*T-cam.x<VW*T+16&&(b.x+b.w)*T-cam.x>-16)drawBuilding(b,cam.x,cam.y,time);
+  const vis=(x,y)=>x*T-cam.x>-2*T&&x*T-cam.x<(VW+2)*T&&y*T-cam.y>-3*T&&y*T-cam.y<(VH+2)*T;
+  for(const o of objs){if(!vis(o.x,o.y))continue;const px=o.x*T-cam.x,py=o.y*T-cam.y;
+    if(o.kind==="rock")drawBoulder(px,py);else if(o.kind==="log")drawLog(px,py,false);else if(o.kind==="tool")drawTool(px,py,time);else if(o.kind==="card")drawCard(px,py,time)}
+  /* zone hazards that sit on the ground */
+  for(let i=1;i<ROUTE.length;i++){const z=zone(i);if(!vis(z.x0,z.y0)&&!vis(z.x1,z.y0))continue;
+    if(z.kind==="blast"){for(let c=-1;c<=12;c+=3){R_((z.x0+c)*T-cam.x+4,(z.top-1)*T-cam.y+6,8,9,"#5a3a1a");R_((z.x0+c)*T-cam.x+4,(z.top-1)*T-cam.y+8,8,1,"#2a1a0a");R_((z.x0+c)*T-cam.x+4,(z.top-1)*T-cam.y+12,8,1,"#2a1a0a")}
+      BLAST.groups.forEach((gr,gi)=>{const ph=blastPhase(gi,now);if(!ph)return;for(const c of gr)for(let r=0;r<5;r++){const px=(z.x0+c)*T-cam.x,py=(z.top+r)*T-cam.y;
+        if(ph==="warn"){if(blinkOn(time*2.2)){R_(px+3,py+3,2,2,"#e8413a");R_(px+5,py+5,2,2,"#e8413a");R_(px+7,py+7,2,2,"#e8413a");R_(px+9,py+9,2,2,"#e8413a");R_(px+11,py+11,2,2,"#e8413a");R_(px+11,py+3,2,2,"#e8413a");R_(px+9,py+5,2,2,"#e8413a");R_(px+5,py+9,2,2,"#e8413a");R_(px+3,py+11,2,2,"#e8413a")}}
+        else{const k=(time/70|0)%3;R_(px+1-k,py+1-k,14+2*k,14+2*k,k%2?"#ffb24a":"#ffe066");R_(px+5,py+5,6,6,"#fff7c0")}}})}}
+  const ppl=npcs.filter(n=>!n.hidden&&Math.abs(n.x*T-cam.x-VW*T/2)<VW*T).map(n=>({y:n.y*T,f:()=>{
+    const nx=(n.fx??n.x)*T-cam.x,ny=n.y*T-cam.y;
+    if(n.kind==="ferry"){drawBoat(nx,ny);drawPerson(nx-3,ny-2,n.look,n.dir,0);return}
+    drawPerson(nx,ny,n.look,n.dir,0);
+    if(n.kind==="station"&&!S?.done?.[n.i]&&n.i>0&&blinkOn(time)){R_(nx+6,ny-9,4,6,"#ffd34d");R_(nx+6,ny-2,4,2,"#ffd34d")}
+    if(n.kind==="traveller"&&!S?.crossed?.[n.i]&&blinkOn(time)){R_(nx+6,ny-9,4,6,"#7ee8ff");R_(nx+6,ny-2,4,2,"#7ee8ff")}}}));
+  for(let i=1;i<ROUTE.length;i++){const z=zone(i);if(!vis(z.x0,z.y0)&&!vis(z.x1,z.y0))continue;
+    if(z.kind==="logs")for(const ch of LOGCH)for(const ly of logTops(z,ch,now))ppl.push({y:ly*T+T,f:()=>{g.save();g.beginPath();g.rect((z.x0+ch.c)*T-cam.x,(z.top-3)*T-cam.y,T,(z.bot-z.top+4)*T);g.clip();drawLog((z.x0+ch.c)*T-cam.x,ly*T-cam.y,true);g.restore()}});
+    if(z.kind==="swamp")for(const s of SWARMS){const sy=swarmY(z,s,now);ppl.push({y:sy*T+T,f:()=>drawSwarm((z.x0+s.c)*T-cam.x,sy*T-cam.y,time)})}
+    if(z.kind==="bear"){const [bx,by,dx]=bearPos(now);ppl.push({y:(z.top+by)*T,f:()=>drawBear((z.x0+bx)*T-cam.x,(z.top+by)*T-cam.y,dx)})}}
+  const blink=now<flashUntil&&((now/80|0)%2);
+  ppl.push({y:player.py+(ferry?1:0),f:()=>{if(!blink)drawPerson(player.px-cam.x+(ferry?8:0),player.py-cam.y-(ferry?3:0),"player",player.dir,player.moving?player.frame:0)}});
+  ppl.sort((a,b)=>a.y-b.y).forEach(p=>p.f());
+}
+
+/* =================== input & movement =================== */
+let state="title",keyHandler=null,bumpLock=false;
+const held=[];
+const DIRKEY={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",W:"up",s:"down",S:"down",a:"left",A:"left",d:"right",D:"right"};
+const DV={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+document.addEventListener("keydown",e=>{
+  const inInput=e.target&&e.target.tagName==="INPUT";
+  if(inInput&&e.key!=="Enter")return;
+  if((e.key==="m"||e.key==="M")&&!inInput){toggleSound();return}
+  if(state==="walk"){
+    const d=DIRKEY[e.key];if(d){e.preventDefault();if(!held.includes(d))held.push(d);return}
+    if(e.key===" "||e.key==="Enter"){e.preventDefault();talkFacing();return}
+    if(e.key==="r"||e.key==="R"){e.preventDefault();resetHere();return}
+  }
+  if(keyHandler)keyHandler(e);
+});
+document.addEventListener("keyup",e=>{const d=DIRKEY[e.key];if(d){const i=held.indexOf(d);if(i>=0)held.splice(i,1);if(!held.length)bumpLock=false}});
+document.querySelectorAll(".pad [data-dir]").forEach(b=>{
+  const d=b.dataset.dir;const up=()=>{const i=held.indexOf(d);if(i>=0)held.splice(i,1);if(!held.length)bumpLock=false};
+  b.addEventListener("pointerdown",e=>{e.preventDefault();if(state==="walk"&&!held.includes(d))held.push(d)});
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,up));
+});
+document.getElementById("abtn").addEventListener("click",()=>{if(state==="walk")talkFacing();else if(keyHandler)keyHandler({key:" ",preventDefault(){},target:document.body})});
+document.getElementById("rbtn").addEventListener("click",e=>{e.currentTarget.blur();if(state==="walk")resetHere()});
+function curZone(){for(let i=1;i<ROUTE.length;i++){const z=zone(i);if(inZone(z,player.x,player.y))return z}return null}
+function resetHere(){const z=curZone();if(z&&(z.kind==="rocks"||z.kind==="bridge")&&S&&!S.zone[z.i].cleared)resetPuzzle(z.i);else showBanner("NOTHING TO RESET","R starts a push puzzle over.")}
+function talkFacing(){const [dx,dy]=DV[player.dir];const n=npcAt(player.x+dx,player.y+dy);if(n)interact(n);else if(tAt(player.x+dx,player.y+dy)===TL.GATEC)gateBump(player.x+dx)}
+function hit(z){
+  const now=performance.now();if(now<invuln||!S)return;
+  invuln=now+1400;flashUntil=now+900;sfx.bad();
+  const zs=S.zone[z.i];zs.hits++;
+  if(S.mode==="party"){S.health=Math.max(10,S.health-3);renderStatus()}
+  const [t,sub]=ZHIT[z.kind];showBanner(t,sub+(S.mode==="party"?" (−3 health)":""));
+  held.length=0;bumpLock=false;placePlayer(z.A+3,z.y0,"right");
+}
+function hazards(now){
+  if(now<invuln)return;
+  const z=curZone()||(player.moving?(()=>{for(let i=1;i<ROUTE.length;i++){const zz=zone(i);if(inZone(zz,player.tx,player.ty))return zz}return null})():null);if(!z)return;
+  const bx=player.px+4,by=player.py+4,bw=8,bh=9;const ov=(x,y,w,h)=>bx<x+w&&bx+bw>x&&by<y+h&&by+bh>y;
+  if(z.kind==="logs"){for(const ch of LOGCH)for(const ly of logTops(z,ch,now))if(ov((z.x0+ch.c)*T+3,ly*T+1,10,2*T-2))return hit(z)}
+  else if(z.kind==="swamp"){for(const s of SWARMS)if(ov((z.x0+s.c)*T+2,swarmY(z,s,now)*T+2,12,12))return hit(z)}
+  else if(z.kind==="bear"){const [x,y]=bearPos(now);if(ov((z.x0+x)*T+1,(z.top+y)*T+3,14,12))return hit(z)}
+  else if(z.kind==="blast"){const col=Math.floor((player.px+8)/T)-z.x0,row=Math.floor((player.py+8)/T);if(row>=z.top&&row<=z.bot)BLAST.groups.forEach((gr,gi)=>{if(gr.includes(col)&&blastPhase(gi,now)==="boom")hit(z)})}
+  else if(z.kind==="stones"&&!player.moving){const s=stones[player.x+","+player.y];if(s&&stoneSunk(s,now))return hit(z)}
+}
+function update(dt){
+  const now=performance.now();
+  for(const k in stones){const s=stones[k];if(s.t&&now-s.t>=2700)s.t=0}
+  if(ferry){const f=ferry,t=Math.min(1,(now-f.t0)/f.dur);f.n.fx=f.from+(f.to-f.from)*t;player.px=f.n.fx*T;player.py=f.y*T;if(t>=1){f.n.x=f.to;f.n.fx=undefined;ferry=null;f.done()}return}
+  if(state!=="walk"){held.length=0;return}
+  hazards(now);
+  if(S){const z=curZone();if(z&&z.kind!=="ferry"&&!S.zone[z.i].cleared){const zs=S.zone[z.i];zs.t+=dt;if(zs.t>60000||zs.hits>=4){zs.t=0;zs.hits=0;run(()=>offerHelp(z.i));return}}}
+  if(!player.moving){
+    const d=held[held.length-1];if(!d)return;
+    player.dir=d;const [dx,dy]=DV[d],nx=player.x+dx,ny=player.y+dy;
+    const n=npcAt(nx,ny);
+    if(n){if(!bumpLock){bumpLock=true;interact(n)}return}
+    if(tAt(nx,ny)===TL.GATEC){if(!bumpLock){bumpLock=true;gateBump(nx)}return}
+    const o=pushAt(nx,ny);
+    if(walkable(nx,ny)||(o&&tryPush(o,dx,dy))){player.moving=true;player.fx=player.x;player.fy=player.y;player.tx=nx;player.ty=ny;player.t=0;player.frame++}
+    else if(!bumpLock){bumpLock=true;sfx.bump()}
+  }else{
+    player.t+=dt/130;
+    if(player.t>=1){player.x=player.tx;player.y=player.ty;player.px=player.x*T;player.py=player.y*T;player.moving=false;onStep()}
+    else{player.px=(player.fx+(player.tx-player.fx)*player.t)*T;player.py=(player.fy+(player.ty-player.fy)*player.t)*T;if(player.t>.5&&player.frame%2===1)player.frame++}
+  }
+}
+function kmAt(x){for(let i=1;i<ROUTE.length;i++){const a=ROUTE[i-1],b=ROUTE[i];if(x<=b.x)return a.km+(b.km-a.km)*Math.max(0,(x-a.x))/(b.x-a.x)}return ROUTE[ROUTE.length-1].km}
+function onStep(){
+  if(!S)return;renderStatus();
+  const now=performance.now();
+  const st=stones[player.x+","+player.y];if(st&&!st.safe&&!st.t)st.t=now;
+  for(let i=1;i<ROUTE.length;i++){const z=zone(i),zs=S.zone[i];
+    if(!zs.seen&&inZone(z,player.x,player.y)){zs.seen=true;showBanner(ZNAME[z.kind],ZTIP[z.kind])}
+    if(!zs.cleared&&player.x>=z.x1+1&&player.x<=z.x1+12){zs.cleared=true}}
+  const o=objs.find(o=>(o.kind==="tool"||o.kind==="card")&&o.x===player.x&&o.y===player.y);
+  if(o){objs.splice(objs.indexOf(o),1);run(()=>pickup(o));return}
+  for(let i=1;i<ROUTE.length;i++){
+    if(!S.events[i]&&player.x>=eventX(i)&&player.x<ROUTE[i].x-8){S.events[i]=true;if(Math.random()<.6){run(flavourEvent);return}}
+    if(!S.arrived[i]&&player.x>=ROUTE[i].x-7){S.arrived[i]=true;run(()=>arrive(i));return}
+  }
+}
+let last=performance.now();
+function loop(now){const dt=Math.min(50,now-last);last=now;update(dt);draw(now);requestAnimationFrame(loop)}
+
+/* =================== obstacles: help, ferry, pickups =================== */
+async function offerHelp(i){
+  const z=zone(i),who=crew();
+  const yes=await menu(`<h2>${ZNAME[z.kind]}</h2><p>${esc(who)}: "Having trouble? The crew can get you past this one."</p>`,
+    [{key:"1",label:`Yes, help me past${S.mode==="party"?` <span class="dim">· costs 1 day</span>`:""}`,value:true},{key:"2",label:"No, I'll keep trying",value:false}]);
+  hidePanel();if(!yes)return;
+  if(S.mode==="party")spendDays(1,ZNAME[z.kind].toLowerCase());
+  clearZone(i);S.zone[i].cleared=true;placePlayer(z.x1+1,z.y0,"right");
+  await say(who,["There you go. Onward!"]);
+}
+async function ferryRide(n){
+  const z=zone(n.i),east=player.x>n.x;
+  await say("Ferryman",[east?"Back across? Hop in!":"Big Rideau Lake is too wide to walk around. Hop in and I'll row you across."]);
+  const to=east?z.x0:z.x1;player.dir=east?"left":"right";n.dir=player.dir;
+  await new Promise(res=>{ferry={n,from:n.x,to,y:n.y,t0:performance.now(),dur:Math.abs(to-n.x)*260,done:res}});
+  placePlayer(east?z.x0-1:z.x1+1,z.y0,east?"left":"right");
+  if(!east)S.zone[n.i].cleared=true;
+}
+const TOOLS=[
+  {name:"brass compass",d:"for taking bearings through the bush"},{name:"surveyor's level",d:"for checking that a canal bed drops evenly"},
+  {name:"plumb bob",d:"a weight on a string that hangs perfectly straight down"},{name:"field book",d:"where every measurement gets written down"},
+  {name:"measuring rod",d:"for short lengths the chain can't handle"},{name:"telescope",d:"for sighting a far-off stake"},
+  {name:"pair of dividers",d:"for measuring distances on a map"},{name:"map case",d:"Colonel By's own plans of the route"}];
+const CARDS=[
+  "The Rideau Canal was built from 1826 to 1832. Britain wanted a supply route from Montreal to Kingston that stayed away from the American border on the St. Lawrence River.",
+  "Thousands of labourers built the canal, many of them Irish immigrants and French Canadians. Skilled stonemasons, many from Scotland, built the locks.",
+  "Each summer, malaria (\"swamp fever\") swept through the work camps. About 1,000 workers died while the canal was being built, most of them from disease.",
+  "Colonel By didn't dig one long ditch. He built dams to raise the rivers so boats could float over the rapids. This is called a slackwater canal.",
+  "Bytown grew up around Colonel By's camp. In 1855 it was renamed Ottawa, and in 1857 Queen Victoria chose it as the capital.",
+  "The stone arch dam at Jones Falls is about 19 m high. When it was built it was the tallest dam in North America.",
+  "Lock gates on the Rideau are still opened by hand, by lockmasters turning cranks, the way they were in 1832.",
+  "In 2007 the Rideau Canal became a UNESCO World Heritage Site. In winter, 7.8 km of it in Ottawa becomes the Rideau Canal Skateway."];
+async function pickup(o){
+  sfx.arrive();
+  if(o.kind==="tool"){const t=TOOLS[o.i-1];S.tools.push(o.i);renderStatus();
+    await say("Field journal",[`You found a lost ${t.name}, ${t.d}! (${S.tools.length} of ${TOOLS.length} lost tools found)`])}
+  else{S.cards.push(o.i);renderStatus();await say(`History card ${S.cards.length} of ${CARDS.length}`,[CARDS[o.i-1]])}
+}
+
+/* =================== windows =================== */
+const panel=document.getElementById("panel"),dialog=document.getElementById("dialog"),sayEl=document.getElementById("say"),whoEl=document.getElementById("who"),moreEl=document.getElementById("more"),banner=document.getElementById("banner");
+const statsEl=document.getElementById("hudStats"),trailEl=document.getElementById("trail");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function showPanel(html,cls=""){panel.className="win"+(cls?" "+cls:"");panel.hidden=false;panel.innerHTML=html;panel.scrollTop=0}
+function hidePanel(){panel.hidden=true;panel.innerHTML=""}
+function menu(html,options,cls=""){
+  showPanel(html+`<div class="menu">${options.map(o=>`<button data-k="${o.key}"><span class="k">${o.key}.</span> ${o.label}</button>`).join("")}</div>`,cls);
+  const first=panel.querySelector(".menu button");if(first)first.focus({preventScroll:true});
+  return new Promise(res=>{
+    panel.querySelectorAll(".menu button").forEach(b=>b.addEventListener("click",()=>{keyHandler=null;sfx.key();res(options.find(o=>o.key===b.dataset.k).value)}));
+    keyHandler=e=>{const o=options.find(o=>o.key===e.key);if(o){e.preventDefault();keyHandler=null;sfx.key();res(o.value)}};
+  });
+}
+function pressSpace(html,label="Press SPACE to continue"){
+  showPanel(html+`<p><button class="btn" id="contBtn">${label}</button></p>`);
+  const b=document.getElementById("contBtn");b.focus({preventScroll:true});
+  return new Promise(res=>{const done=()=>{keyHandler=null;res()};b.addEventListener("click",done);keyHandler=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();done()}}});
+}
+function say(who,pages){
+  if(typeof pages==="string")pages=[pages];
+  dialog.hidden=false;whoEl.textContent=who||"";whoEl.hidden=!who;
+  return new Promise(res=>{
+    let i=0,timer=null,full="",shown=0;
+    const show=()=>{full=pages[i];shown=0;sayEl.textContent="";moreEl.hidden=true;clearInterval(timer);
+      if(reduce){sayEl.textContent=full;moreEl.hidden=false;return}
+      timer=setInterval(()=>{shown=Math.min(full.length,shown+2);sayEl.textContent=full.slice(0,shown);if(shown%6===0)sfx.talk();if(shown>=full.length){clearInterval(timer);timer=null;moreEl.hidden=false}},18)};
+    const next=()=>{if(timer){clearInterval(timer);timer=null;sayEl.textContent=full;moreEl.hidden=false;return}i++;if(i>=pages.length){dialog.hidden=true;keyHandler=null;dialog.onclick=null;res();return}show()};
+    keyHandler=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();next()}};
+    dialog.onclick=next;
+    show();
+  });
+}
+let bannerTimer=null;
+function showBanner(title,sub){banner.innerHTML=`${esc(title)}${sub?`<small>${esc(sub)}</small>`:""}`;banner.hidden=false;banner.style.opacity="1";clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>{banner.style.opacity="0";setTimeout(()=>banner.hidden=true,600)},2600)}
+function dateStr(d){const dt=new Date(Date.UTC(1827,4,1)+d*864e5);return ["January","February","March","April","May","June","July","August","September","October","November","December"][dt.getUTCMonth()]+" "+dt.getUTCDate()+", 1827"}
+function healthWord(h){return h>75?"Good":h>50?"Fair":h>25?"Poor":"Very poor"}
+function renderStatus(){
+  if(!S){statsEl.innerHTML="";trailEl.hidden=true;return}
+  const km=Math.round(kmAt(player.x));
+  statsEl.innerHTML=`${dateStr(S.day)} · Provisions <b>${Math.max(0,Math.round(S.food))} lbs</b> · Spare chains <b>${S.kits}</b> · Health <b>${healthWord(S.health)}</b> · Tools <b>${S.tools.length}/8</b> · <b>${km}</b> / 202 km`;
+  trailEl.hidden=false;
+  trailEl.innerHTML=`<span>Bytown</span><span class="bar"><span class="fill" style="width:${km/202*100}%"></span>${ROUTE.slice(1).map((r,i)=>`<span class="stop${S.done[i+1]?" done":""}" style="left:${r.km/202*100}%" title="${esc(r.name)}"></span>`).join("")}</span><span>Kingston</span>`;
+}
+function spendDays(n,reason){
+  S.day+=n;S.food-=EAT*n;
+  if(S.mode==="practice"&&S.food<30){S.food+=60;S.bonusFood++}
+  renderStatus();
+  if(S.mode==="party"&&S.food<=0)throw new GameOver({why:"food",reason});
+}
+function hurt(n,reason){S.health=Math.max(0,Math.min(100,S.health-n));if(S.mode==="practice"&&S.health<15)S.health=15;renderStatus();if(S.mode==="party"&&S.health<=0)throw new GameOver({why:"health",reason})}
+const crew=()=>pick(S.names.slice(1));
+
+/* =================== question window =================== */
+const MISS_LINES=[
+  ["The line runs into a cedar swamp. You lose a day re-running it.",1,4],
+  ["Wrong stake! You backtrack and lose a day.",1,4],
+  ["The crew argues over the field notes. Lose a day.",1,5],
+  ["NAME slips on wet rock while checking the measurement.",1,8],
+  ["Mosquitoes swarm the camp while you redo the work.",1,6],
+  ["The plan goes back for corrections. Lose a day.",1,3]
+];
+async function ask(q,ctx){
+  S.stats[q.skill].a++;S.asked++;window.__q=q;
+  let attempts=0,shown=false;
+  const A=q.ans;let ansHTML="";
+  if(A.type==="num")ansHTML=`<form class="answer" id="ans" autocomplete="off">${A.fields.map((f,i)=>`${f.pre?`<span class="lbl">${f.pre}</span>`:""}<input id="i${i}" aria-label="${esc(f.label)}" autocomplete="off" spellcheck="false">${f.post?`<span class="lbl">${f.post}</span>`:""}`).join("")}<button class="btn" type="submit"><span class="k">ENTER</span> check</button></form>`;
+  else if(A.type==="expr"||A.type==="rad"){const keys=A.type==="expr"?[["x²","x²"],["(","("],[")",")"]]:[["√","√"]];
+    ansHTML=`<form class="answer" id="ans" autocomplete="off">${A.pre?`<span class="lbl">${A.pre}</span>`:""}<input id="i0" class="wide" aria-label="${esc(A.label)}" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">${A.post?`<span class="lbl">${A.post}</span>`:""}<span class="keys">${keys.map(([l,v])=>`<button type="button" class="key" data-ins="${v}" aria-label="Type ${l==="√"?"square root":l==="x²"?"x squared":l}">${l}</button>`).join("")}</span><button class="btn" type="submit"><span class="k">ENTER</span> check</button></form><p class="preview" id="pv" aria-live="polite">${A.type==="expr"?"Type it like 3x(2x + 5) or (x + 4)(x − 2). Use ^ or the x² button for squares.":"Type an exact root like 3√5 (√ button or sqrt), or a decimal."}</p>`;}
+  else if(A.type==="choice")ansHTML=`<div class="choices" id="ans" role="group" aria-label="Answer choices">${A.opts.map((o,i)=>`<button type="button" class="opt" data-i="${i}"><span class="k">${i+1}.</span> ${o}</button>`).join("")}</div>`;
+  else ansHTML=`<form class="answer" id="ans" autocomplete="off"><span class="lbl">Stake D:</span><span id="selTxt" class="gold">tap the field</span><button class="btn" type="submit"><span class="k">ENTER</span> hammer it in</button></form>`;
+  showPanel(`<h2>${ctx.header}</h2>${ctx.who?`<p class="dim small">${esc(ctx.who)}</p>`:""}<div class="qwrap${q.fig?"":" nofig"}"><div class="qtext">${q.text}${ansHTML}<div id="fb"></div></div>${q.fig?`<div class="figwrap"><canvas id="fig" class="${q.fig.click?"click":""}" ${q.fig.click?'tabindex="0" aria-label="Survey field. Use the arrow keys to move, then press Enter."':'aria-hidden="true"'}></canvas>${q.fig.click?'<p class="dim small">Tap a grid point, or use the arrow keys and ENTER.</p>':""}</div>`:""}</div><div id="st"></div>`);
+  const fb=(cls,html)=>{document.getElementById("fb").innerHTML=`<div class="msg ${cls}">${html}</div>`};
+  const figEl=document.getElementById("fig");
+  const fst={sel:null,cur:null,wrong:[]};
+  const redraw=()=>{if(figEl)drawFig(figEl,q.fig,fst)};
+  redraw();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
+  return new Promise((res,rej)=>{
+    let finished=false;
+    const finish=first=>{
+      finished=true;
+      panel.querySelectorAll("#ans input,#ans button").forEach(el=>el.disabled=true);
+      document.getElementById("st").insertAdjacentHTML("beforeend",`<p><button class="btn" id="go">Press SPACE to continue</button></p>`);
+      const go=document.getElementById("go");go.focus({preventScroll:true});
+      const done=()=>{keyHandler=null;res(first)};go.addEventListener("click",done);
+      keyHandler=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();done()}};
+    };
+    const submit=input=>{
+      if(finished)return;
+      const r=check(q,input);
+      if(r.s==="empty"){fb("hint",r.msg);return}
+      if(r.s==="ok"){
+        sfx.ok();const first=attempts===0&&!shown;
+        if(first){S.first++;S.stats[q.skill].f++;S.health=Math.min(100,S.health+3)}
+        renderStatus();
+        if(A.type==="choice"){const b=panel.querySelector(`.opt[data-i="${input}"]`);b&&b.classList.add("right")}
+        if(A.type==="pt"){fst.selColor=FIGC.green;redraw()}
+        fb("good",`CORRECT!${first?"":" Good recovery."}${r.note?` <span class="ink">${r.note}</span>`:""}`);
+        finish(first);return;
+      }
+      attempts++;S.misses++;S.lastMiss=q.skill;sfx.bad();
+      if(A.type==="choice"){const b=panel.querySelector(`.opt[data-i="${input}"]`);if(b)b.disabled=true}
+      if(A.type==="pt"){fst.wrong.push(input.slice());fst.sel=null;redraw();document.getElementById("selTxt").textContent="tap the field"}
+      const line=pick(MISS_LINES);
+      let html=`NOT QUITE. <span class="ink">${r.msg}</span><br>${line[0].replace("NAME",esc(crew()))}`;
+      try{spendDays(line[1],ctx.where);hurt(line[2],ctx.where)}catch(err){keyHandler=null;rej(err);return}
+      if(attempts===2)html+=`<br><span class="gold">HINT: ${q.hint}</span>`;
+      fb("bad",html);
+      if(attempts>=3){
+        shown=true;
+        if(A.type==="choice"){const b=panel.querySelector(`.opt[data-i="${A.correct}"]`);b&&b.classList.add("right")}
+        if(A.type==="pt"){fst.sel=A.pt;fst.selColor=FIGC.green;redraw()}
+        document.getElementById("st").innerHTML=`<div class="steps"><span class="sky">WORKED STEPS</span><ol>${q.steps.map(s=>`<li><span class="why">${s[0]}</span><br><span class="work">${s[1]}</span></li>`).join("")}</ol></div>`;
+        finish(false);
+      }else if(A.type==="num"||A.type==="expr"||A.type==="rad"){const i0=document.getElementById("i0");i0.focus();i0.select()}
+    };
+    if(A.type==="num"){
+      const f=document.getElementById("ans"),ins=[...f.querySelectorAll("input")];ins[0].focus({preventScroll:true});
+      f.addEventListener("submit",e=>{e.preventDefault();submit(ins.map(i=>i.value))});
+      keyHandler=null;
+    }else if(A.type==="expr"||A.type==="rad"){
+      const f=document.getElementById("ans"),inp=document.getElementById("i0"),pv=document.getElementById("pv");inp.focus({preventScroll:true});
+      const preview=()=>{const v=inp.value.trim();if(!v){return}
+        if(A.type==="expr"){const r=parseExpr(v);pv.innerHTML=r.ast?`You typed: <span class="gold">${esc(pshow(r.ast))}</span>`:`<span class="dim">You typed: ${esc(v)}</span>`}
+        else{const r=parseRad(v);pv.innerHTML=r&&!r.bad?`You typed: <span class="gold">${esc(r.form||v)}</span>`:`<span class="dim">You typed: ${esc(v)}</span>`}};
+      inp.addEventListener("input",preview);
+      f.querySelectorAll(".key").forEach(kb=>kb.addEventListener("click",()=>{const v=kb.dataset.ins,a0=inp.selectionStart??inp.value.length,b0=inp.selectionEnd??a0;
+        inp.value=inp.value.slice(0,a0)+v+inp.value.slice(b0);inp.focus();inp.setSelectionRange(a0+v.length,a0+v.length);preview()}));
+      f.addEventListener("submit",e=>{e.preventDefault();submit(inp.value)});
+      keyHandler=null;
+    }else if(A.type==="choice"){
+      panel.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>submit(+b.dataset.i)));
+      keyHandler=e=>{const n=parseInt(e.key,10);if(n>=1&&n<=A.opts.length){const b=panel.querySelector(`.opt[data-i="${n-1}"]`);if(b&&!b.disabled){e.preventDefault();submit(n-1)}}};
+    }else{
+      const f=document.getElementById("ans");
+      const setSel=p=>{fst.sel=p;fst.selColor=null;redraw();document.getElementById("selTxt").textContent=`(${sn(p[0])}, ${sn(p[1])})`};
+      figEl.addEventListener("click",e=>{if(finished)return;const r=figEl.getBoundingClientRect(),[W,H]=figSize(q.fig),gm=gridMap(q.fig,W,H);
+        const lx=(e.clientX-r.left)/r.width*W,ly=(e.clientY-r.top)/r.height*H;
+        const x=Math.round((lx-gm.pad)/gm.s+gm.lo),y=Math.round((H-gm.pad-ly)/gm.s+gm.lo);
+        if(x<gm.lo||x>gm.hi||y<gm.lo||y>gm.hi)return;sfx.key();setSel([x,y]);fst.cur=null});
+      figEl.addEventListener("keydown",e=>{if(finished)return;const k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];
+        if(k){e.preventDefault();e.stopPropagation();const mid=Math.round((q.fig.min+q.fig.max)/2),c0=fst.sel||[mid,mid];
+          setSel([Math.max(q.fig.min,Math.min(q.fig.max,c0[0]+k[0])),Math.max(q.fig.min,Math.min(q.fig.max,c0[1]+k[1]))])}
+        else if(e.key==="Enter"){e.preventDefault();e.stopPropagation();submit(fst.sel)}});
+      f.addEventListener("submit",e=>{e.preventDefault();submit(fst.sel)});
+      keyHandler=null;
+    }
+  });
+}
+
+/* =================== story beats =================== */
+const FLAVOUR=[
+  ()=>({t:"Clear skies and dry ground. Your crew runs a long survey line and gains a day.",fn(){S.day=Math.max(0,S.day-1);S.food+=EAT}}),
+  ()=>({t:"A settler family shares bread and potatoes. +25 lbs of provisions.",fn(){S.food+=25}}),
+  ()=>({t:"Heavy rain floods the low ground. You wait it out. Lose 1 day.",fn(){spendDays(1,"the rain")}}),
+  ()=>({t:"Mosquitoes in the cedar swamp! Everyone is miserable.",fn(){hurt(6,"mosquitoes")}}),
+  ()=>({t:`${esc(crew())} starts a song around the fire. The crew feels better.`,fn(){S.health=Math.min(100,S.health+8)}}),
+  ()=>({t:"The survey chain snaps on a sharp rock.",fn(){if(S.kits>0){S.kits--;this.t+=" You swap in a spare chain."}else{this.t+=" With no spare, you lose 2 days repairing it.";spendDays(2,"a broken chain")}}}),
+  ()=>({t:"Swamp fever (malaria) spreads through the camp. You rest for a day.",fn(){spendDays(1,"swamp fever");hurt(8,"swamp fever")}}),
+  ()=>({t:"Algonquin guides show you a trail around a beaver pond. You save a day.",fn(){S.day=Math.max(0,S.day-1);S.food+=EAT}}),
+  ()=>({t:`${esc(crew())} catches a string of pike. +20 lbs of provisions.`,fn(){S.food+=20}})
+];
+async function flavourEvent(){const ev=pick(FLAVOUR)();ev.fn();renderStatus();await say("Field journal",[`${dateStr(S.day)}. ${ev.t}`])}
+async function arrive(i){
+  const L=ROUTE[i],prev=ROUTE[i-1];
+  spendDays(Math.max(1,Math.round((L.km-prev.km)/KMDAY)),L.name);
+  sfx.arrive();showBanner(L.name,`${dateStr(S.day)} · ${L.km} km from Bytown`);
+  await say("Field journal",[L.blurb,`Talk to the ${L.npc.name.toLowerCase()} by the gate.`]);
+}
+async function interact(n){
+  if(n.kind==="station")return run(()=>stationTask(n.i));
+  if(n.kind==="traveller")return run(()=>traveller(n));
+  if(n.kind==="ferry")return run(()=>ferryRide(n));
+}
+function gateBump(x){const i=ROUTE.findIndex(s=>s.x+2===x);if(i>0)run(()=>stationTask(i))}
+const lvl=()=>ROLES[S.role].level;
+async function stationTask(i){
+  const L=ROUTE[i],n=npcs.find(p=>p.kind==="station"&&p.i===i);
+  n.dir=player.x<n.x?"left":player.x>n.x?"right":player.y<n.y?"up":"down";
+  if(i===0){await say(L.npc.name,["Kingston is east along the road. The gate at each lock station opens once you finish its task."]);return}
+  if(S.done[i]){await say(L.npc.name,[i===ROUTE.length-1?L.done:"The way is open. Safe travels!"]);return}
+  await say(L.npc.name,[L.intro]);
+  const skills=L.skill==="mixed"?[pick(["line","perp"]),pick(["gcf","tri"]),pick(["dist","shape"]),"sim"]:[L.skill,L.skill,L.skill];
+  for(let k=0;k<skills.length;k++){
+    await ask(GEN[skills[k]](lvl()),{header:`${L.name.toUpperCase()} · ${L.act} · ${k+1} OF ${skills.length}`,who:L.skill==="mixed"?SKILLNAME[skills[k]]:SKILLNAME[L.skill],where:L.name});
+  }
+  hidePanel();S.done[i]=true;renderStatus();
+  if(i===ROUTE.length-1){await say(L.npc.name,[L.done]);await win();return}
+  setT(L.x+2,L.y,TL.GATEO);sfx.gate();
+  if(L.reward){S.food+=L.reward;renderStatus()}
+  await say(L.npc.name,[L.done+(L.reward?` (+${L.reward} lbs of provisions)`:"")]);
+}
+async function traveller(n){
+  const i=n.i;n.dir=player.x<n.x?"left":"right";
+  if(S.crossed[i]){await say(n.name,["Safe travels, surveyor!"]);return}
+  const pool=[];for(let k=1;k<i;k++)if(ROUTE[k].skill&&ROUTE[k].skill!=="mixed")pool.push(k);
+  const k=pick(pool),sk=ROUTE[k].skill;
+  await say(n.name,[`Hold on, surveyor! Before you cross my bridge, check my figures? It's the same kind of work they had you do at ${ROUTE[k].name}.`]);
+  const first=await ask(GEN[sk](lvl()),{header:`${n.name.toUpperCase()} · BRIDGE · REVIEW`,who:SKILLNAME[sk],where:"a creek bridge"});
+  hidePanel();S.crossed[i]=true;
+  n.x=n.x+1;n.y=n.y-1;n.dir="down";
+  if(first){S.food+=15;renderStatus()}
+  await say(n.name,[first?"Much obliged! Take some provisions for the road. (+15 lbs)":"That sorted it out. Thank you. On you go!"]);
+}
+async function run(fn){
+  if(state!=="walk")return;
+  state="busy";held.length=0;
+  try{await fn();if(state==="busy")state="walk"}
+  catch(e){
+    hidePanel();dialog.hidden=true;
+    if(e instanceof GameOver){await lose(e.cause);titleLoop()}
+    else{console.error(e);state="walk"}
+  }
+}
+
+/* =================== screens =================== */
+function score(){
+  const r=ROLES[S.role];
+  const parts=[["Questions right on the first try",S.first*100],["Lost tools found",S.tools.length*50],["History cards found",S.cards.length*25],["Crew health",S.health*2],["Provisions left (lbs)",Math.max(0,Math.round(S.food))],["Spare chains left",S.kits*20],["Money left",Math.round(S.money)]];
+  const sub=parts.reduce((s,p)=>s+p[1],0);
+  return{parts,mult:r.mult,total:sub*r.mult};
+}
+function reportHTML(){
+  const keys=Object.keys(S.stats).filter(k=>S.stats[k].a>0);
+  const rows=keys.map(k=>{const s=S.stats[k];const ok=s.f*3>=s.a*2;return `<tr><td>${SKILLNAME[k]}</td><td>${s.f} of ${s.a}</td><td class="${ok?"green":"red"}">${ok?"Ready":"Review this"}</td></tr>`}).join("");
+  const weak=keys.filter(k=>S.stats[k].f*3<S.stats[k].a*2).map(k=>SKILLNAME[k]);
+  return `<h2>SURVEY REPORT</h2><table class="report"><tr><th>Skill</th><th>First try</th><th></th></tr>${rows}</table>
+    <p>${weak.length?`Before the test, review: <span class="gold">${weak.join(", ")}</span>. Use the unit summary and the worksheet for that lesson.`:"You got most questions on the first try in every skill. You're ready for the test."}</p>`;
+}
+async function win(){
+  state="busy";sfx.arrive();
+  const sc=score();
+  await pressSpace(`<h1>SURVEY COMPLETE!</h1><p class="center">${dateStr(S.day)} · ${S.day} days on the Rideau</p>
+    <p>Well done, ${esc(S.names[0])}! Colonel By has your survey of the route from Bytown to Kingston${S.mode==="practice"&&S.bonusFood?` (with help from ${S.bonusFood} supply boat${S.bonusFood>1?"s":""} along the way)`:""}.</p>
+    <p>Lost tools found: <span class="gold">${S.tools.length} of 8</span> · History cards: <span class="gold">${S.cards.length} of 8</span>${S.tools.length===8&&S.cards.length===8?` · <span class="green">EAGLE-EYED SURVEYOR!</span>`:S.tools.length===8?` · <span class="green">NOTHING LEFT BEHIND!</span>`:""}</p>
+    <table class="report">${sc.parts.map(p=>`<tr><td>${p[0]}</td><td class="gold">${p[1]}</td></tr>`).join("")}<tr><td>Bonus for being a ${ROLES[S.role].name.toLowerCase()}</td><td class="gold">×${sc.mult}</td></tr><tr><td>TOTAL SCORE</td><td class="gold">${sc.total}</td></tr></table>`);
+  await pressSpace(reportHTML(),"Press SPACE for the title screen");
+  titleLoop();
+}
+async function lose(cause){
+  const what=cause.why==="food"?"ran out of provisions":"was too sick to go on";
+  await pressSpace(`<div class="stone"><p>HERE LIES THE SURVEY OF</p><p class="gold">${esc(S.names[0])}'s party</p><p>${dateStr(S.day)}</p><p class="dim">near ${esc(cause.reason||"the Rideau")}</p><p>Undone by ${DEATHS[S.lastMiss]||DEATHS.line}</p></div>
+    <p class="center">Your party ${what} after ${Math.round(kmAt(player.x))} km. Try again, or switch to the practice survey.</p>`);
+  await pressSpace(reportHTML(),"Press SPACE for the title screen");
+}
+function placePlayer(x,y,dir){player.x=x;player.y=y;player.px=x*T;player.py=y*T;player.dir=dir;player.moving=false}
+async function titleLoop(){
+  state="title";S=null;renderStatus();dialog.hidden=true;buildWorld();placePlayer(6,YS[0],"right");
+  for(;;){
+    const c=await menu(`<h1>BYTOWN<br>SURVEYOR</h1><p class="center">A Unit 2 review · Bytown to Kingston, 1827</p><p class="center dim">Walk the Rideau for Colonel By. Every lock station has a survey task, and every bridge has a traveller with a question.</p>`,
+      [{key:"1",label:"Start the survey",value:"go"},{key:"2",label:"Learn about the route",value:"learn"},{key:"3",label:"How to play",value:"how"}],"title");
+    if(c==="go")break;
+    if(c==="learn")await pressSpace(`<h2>THE RIDEAU ROUTE</h2><p>Your survey party walks about 202 km from Bytown to Kingston, along a river and lake route the Algonquin people had travelled long before. Each lock station is a lesson from Unit 2:</p>
+      <p class="gold">Hog's Back · equation of a line (L1)<br>Long Island · parallel and perpendicular (L2)<br>Burritts Rapids · common factoring (L3)<br>Merrickville · factoring trinomials (L4–L5)<br>Smiths Falls · length of a line (L6)<br>Jones Falls · classifying shapes (L7)<br>Kingston Mills · similar triangles (L8–L9)<br>Kingston · Colonel By's final report</p>
+      <p>Travellers on the creek bridges ask review questions from stations you've already passed.</p>
+      <p>Between stations you'll meet a rock slide, a timber slide, a cedar swamp, a washed-out bridge, a black bear, a lake ferry, a blasting crew and the Cataraqui rapids. Eight lost survey tools are hidden up side trails, and eight history cards lie by the road.</p>`);
+    if(c==="how")await pressSpace(`<h2>HOW TO PLAY</h2>
+      <p><span class="gold">Walk:</span> arrow keys or WASD, or the pad under the map. <span class="gold">Talk:</span> walk into a person, or face them and press SPACE. People with a <span class="gold">!</span> have a task for you.</p>
+      <p><span class="gold">Type it:</span> type in the boxes and press ENTER. Negatives <span class="gold">-3</span>, fractions <span class="gold">2/3</span>, decimals <span class="gold">2.5</span>. For y = mx + b, slope in the first box and b in the second.</p>
+      <p><span class="gold">Factor it:</span> type it the way you would on paper, like <span class="gold">3x(2x + 5)</span> or <span class="gold">(x + 4)(x - 2)</span>. Use <span class="gold">^</span> or the x² button for squares.</p>
+      <p><span class="gold">Roots:</span> type <span class="gold">5√2</span> with the √ button (or type sqrt). A decimal like 7.07 works too.</p>
+      <p><span class="gold">Choose it:</span> click an answer or press its number key.</p>
+      <p><span class="gold">Stake it:</span> tap a point on the survey field, or use the arrow keys, then press ENTER.</p>
+      <p><span class="gold">Obstacles:</span> dodge logs, mosquitoes, the bear and the blasts. Push boulders and logs by walking into them, and press <span class="gold">R</span> to start a push puzzle over. Stuck for a minute? Your crew offers to help.</p>
+      <p><span class="gold">Explore:</span> look for brushy side trails. Lost survey tools are hidden at the end.</p>
+      <p>A wrong answer costs a day of provisions and some health. In the survey party, bumping into an obstacle costs a little health. After a 2nd miss you get a hint, and after a 3rd you see the worked steps. Press M for sound.</p>`);
+  }
+  await setup();
+}
+async function setup(){
+  S=freshState();
+  S.mode=await menu(`<h2>CHOOSE YOUR SURVEY</h2>`,[
+    {key:"1",label:`Survey party <span class="dim">· run out of provisions or health and the survey ends</span>`,value:"party"},
+    {key:"2",label:`Practice survey <span class="dim">· everyone reaches Kingston</span>`,value:"practice"}]);
+  S.role=await menu(`<h2>COLONEL BY NEEDS MANY HANDS. YOU MAY:</h2>`,ROLES.map((r,i)=>({key:String(i+1),label:`Be a ${r.name.toLowerCase()} <span class="dim">· ${r.desc}</span>`,value:i})));
+  const r=ROLES[S.role];S.money=r.money;
+  const defs=shuffle(DEFAULT_NAMES.slice()).slice(0,5);
+  showPanel(`<h2>NAME YOUR SURVEY PARTY</h2><p class="dim small">Names stay on this screen only. Nothing is saved.</p>
+    <form id="nf" class="menu" autocomplete="off">${[0,1,2,3,4].map(i=>`<label class="row"><span style="min-width:7em">${i?"Crew "+i:"Your name"}:</span><input class="name" id="n${i}" maxlength="12" value="${esc(defs[i])}" spellcheck="false"></label>`).join("")}
+    <p><button class="btn" type="submit"><span class="k">ENTER</span> this is my party</button></p></form>`);
+  document.getElementById("n0").focus();document.getElementById("n0").select();
+  await new Promise(res=>{document.getElementById("nf").addEventListener("submit",e=>{e.preventDefault();S.names=[0,1,2,3,4].map(i=>(document.getElementById("n"+i).value.trim()||defs[i]).slice(0,12));res()})});
+  let food=r.food,kits=r.kits;
+  await new Promise(res=>{
+    const drawStore=()=>{const cost=food*FOOD_PRICE+kits*KIT_PRICE;
+      showPanel(`<h2>THE GENERAL STORE AT BYTOWN</h2><p>You have <span class="gold">$${r.money}</span>. Your crew eats about ${EAT} lbs a day, and the survey takes 2 to 3 weeks. Wrong answers cost extra days.</p>
+      <table class="store"><tr><td>Provisions (20¢ a lb)</td><td><button id="f-" aria-label="less food">−</button> <span class="gold">${food} lbs</span> <button id="f+" aria-label="more food">+</button></td><td>$${(food*FOOD_PRICE).toFixed(0)}</td></tr>
+      <tr><td>Spare chains ($${KIT_PRICE} each)</td><td><button id="k-" aria-label="fewer chains">−</button> <span class="gold">${kits}</span> <button id="k+" aria-label="more chains">+</button></td><td>$${kits*KIT_PRICE}</td></tr>
+      <tr><td>Total</td><td></td><td class="${cost>r.money?"red":"gold"}">$${cost.toFixed(0)}</td></tr></table>
+      <p class="dim small">F / G = more or less food · K / J = more or fewer chains</p>
+      <p><button class="btn" id="buy" ${cost>r.money?"disabled":""}><span class="k">ENTER</span> buy and set out</button></p>`);
+      const can=(df,dk)=>food+df>=0&&kits+dk>=0&&(food+df)*FOOD_PRICE+(kits+dk)*KIT_PRICE<=r.money;
+      const ch=(df,dk)=>{if(can(df,dk)){food+=df;kits+=dk;sfx.key();drawStore();const b=document.getElementById(df>0?"f+":df<0?"f-":dk>0?"k+":"k-");b&&b.focus()}};
+      document.getElementById("f-").onclick=()=>ch(-50,0);document.getElementById("f+").onclick=()=>ch(50,0);
+      document.getElementById("k-").onclick=()=>ch(0,-1);document.getElementById("k+").onclick=()=>ch(0,1);
+      document.getElementById("buy").onclick=()=>{keyHandler=null;res()};
+      keyHandler=e=>{const k=e.key.toLowerCase();if(k==="f")ch(50,0);else if(k==="g")ch(-50,0);else if(k==="k")ch(0,1);else if(k==="j")ch(0,-1);else if(k==="enter"&&e.target.tagName!=="BUTTON"){keyHandler=null;res()}};
+      document.getElementById("buy").focus({preventScroll:true});
+    };drawStore();
+  });
+  S.food=food;S.kits=kits;S.money-=food*FOOD_PRICE+kits*KIT_PRICE;
+  hidePanel();renderStatus();state="busy";
+  showBanner("Bytown",dateStr(0));
+  await say("Colonel By",[`Welcome to Bytown, ${S.names[0]}. I need the whole route to Kingston surveyed: 202 km of river, swamp and rock.`,`Walk east along the road. At each lock station, someone with a ! has a survey task, and their gate opens when it's done.`,`Travellers on the creek bridges may ask for help too. ${S.names.slice(1).join(", ")}, keep your leader fed. Off you go!`]);
+  state="walk";if(document.activeElement&&document.activeElement!==document.body)document.activeElement.blur();
+}
+
+/* =================== debug hooks for testing =================== */
+window.__game={state:()=>state,player,S:()=>S,teleport(x,y){placePlayer(x,y,"right")},npcs:()=>npcs,tAt,walkable,held:()=>held.slice(),bump:()=>bumpLock,
+  objs:()=>objs,zone,ZKIND,ROUTE,YS,YM,WW,WH,segA,creekX,stones:()=>stones,skipZone(i){clearZone(i);if(S)S.zone[i].cleared=true;const z=zone(i);placePlayer(z.x1+1,z.y0,"right")},invuln:()=>invuln,setInvuln(t){invuln=t},setHeld(d){held.length=0;bumpLock=false;if(d)held.push(d)}};
+
+buildWorld();requestAnimationFrame(loop);titleLoop();
+})();
+</script>
+</body>
+</html>

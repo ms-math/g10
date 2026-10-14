@@ -1,0 +1,1010 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Self-checking practice for Grade 10 Unit 2: equations of lines, factoring, length of a line, classifying shapes and similar triangles.">
+<meta name="robots" content="noindex">
+<title>Unit 2 Lines, Factoring & Triangles Practice</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one centred column on graph paper — controls, then a single question card (text, figure, answer), then the worked steps in "blue pen". Same look as the Unit 1 practice page. */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0; --pen-soft:#e7eefb; --pen-ink:#ffffff;
+  --good:#17703f; --good-soft:#e2f3e9; --bad:#b0302a; --bad-soft:#fbe8e6; --hl:#fff0a0; --hl-ink:#3d3300;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-pen:"Kalam", "Comic Sans MS", "Segoe Print", cursive;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:1.9rem;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 .pen{font-family:var(--f-pen);color:var(--pen);font-weight:700}
+.lede{margin:4px 0 0;color:var(--muted);max-width:52ch}
+.score{display:flex;gap:14px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.score b{color:var(--ink);font-size:1.15rem}
+.controls{display:flex;flex-direction:column;gap:10px}
+.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.95rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--pen);border-color:var(--pen);color:var(--pen-ink)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.levelnote{font-size:.88rem;color:var(--muted);margin:4px 0 0}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:22px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px}
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qtag{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pen)}
+.rule{font-size:.9rem;color:var(--muted)}
+.prompt{font-size:1.05rem;display:flex;flex-direction:column;gap:8px}
+.prompt p{margin:0}
+.prompt .hl{font-weight:700;background:linear-gradient(transparent 58%,var(--hl) 58%);padding-inline:1px}
+.big{font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}
+.figwrap{display:flex;flex-direction:column;gap:4px}
+#fig{display:block;width:100%;height:auto;border:1.5px solid var(--line);border-radius:8px;background:var(--card);touch-action:manipulation}
+#fig.click{cursor:crosshair}
+#fig:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.fignote{font-size:.85rem;color:var(--muted);margin:0}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:1.3rem;font-weight:700}
+.answer .fld{display:inline-flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.answer input{font:inherit;font-weight:700;width:5.2em;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);text-align:center}
+.answer input:focus{outline:none;border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.answer input.ok{border-color:var(--good)} .answer input.no{border-color:var(--bad)}
+.answer .pt{font-variant-numeric:tabular-nums;color:var(--pen)}
+.answer input.wide{width:min(11em,100%);text-align:left}
+.keys{display:inline-flex;gap:6px}
+.key{font:inherit;font-weight:700;font-size:1.05rem;min-width:2.3em;padding:5px 10px;border:1.5px solid var(--pen);border-radius:8px;background:var(--pen-soft);color:var(--pen);cursor:pointer}
+.key:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.preview{flex-basis:100%;margin:0;font-size:.95rem;font-weight:400;color:var(--muted)}
+.preview b{color:var(--pen)}
+.choices{display:flex;flex-direction:column;gap:8px;width:100%;font-size:1.15rem}
+.opt{font:inherit;font-weight:700;text-align:left;padding:9px 14px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
+.opt .key{font-size:.8rem;color:var(--muted);min-width:1.2em}
+.opt:hover{border-color:var(--pen)}
+.opt[aria-checked="true"]{border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.opt.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.no{border-color:var(--bad);color:var(--bad);text-decoration:line-through;opacity:.7;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:.98rem;padding:9px 16px;border-radius:8px;border:1.5px solid var(--pen);background:var(--card);color:var(--pen);cursor:pointer}
+.btn.primary{background:var(--pen);color:var(--pen-ink)}
+.btn.quiet{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px;padding-inline:6px}
+.btn:focus-visible,.seg button:focus-visible,.opt:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.feedback{border-radius:8px;padding:12px 14px;font-size:1rem}
+.feedback.good{background:var(--good-soft);color:var(--good)}
+.feedback.bad{background:var(--bad-soft);color:var(--bad)}
+.feedback.hint{background:var(--hl);color:var(--hl-ink)}
+.feedback strong{display:block;margin-bottom:2px}
+.steps{border-top:1.5px dashed var(--line);padding-top:14px}
+.steps h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.steps ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.steps li::marker{color:var(--muted);font-size:.9rem}
+.why{display:block;font-size:.9rem;color:var(--muted)}
+.work{display:block;font-family:var(--f-pen);color:var(--pen);font-size:1.3rem;line-height:1.35;overflow-x:auto}
+.work.final{display:inline;background:linear-gradient(transparent 55%,var(--hl) 55%);padding-inline:2px}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.8em;line-height:1.05;text-align:center;margin:0 .1em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+table.tbl,table.box{border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums}
+table.tbl th{font-family:var(--f-body);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:left;padding:0 18px 2px 0}
+table.tbl td{padding:0 18px 0 0}
+table.box td{padding:4px 14px;text-align:center}
+table.box tr:first-child td{border-bottom:2px solid var(--pen)}
+table.box td:first-child{border-right:2px solid var(--pen)}
+.yellow{color:var(--pen);font-weight:700;margin-right:2px}
+footer{font-size:.85rem;color:var(--muted)}
+@media (max-width:480px){h1{font-size:1.55rem}.big{font-size:1.25rem}.answer{font-size:1.15rem}.answer input{width:4.4em}.choices{font-size:1.05rem}}
+@media (prefers-reduced-motion:no-preference){.feedback,.steps{animation:rise .18s ease-out}@keyframes rise{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Unit 2 <span class="pen">Lines, Factoring &amp; Triangles</span></h1>
+      <p class="lede">Pick a skill and a level. Answer the question and press Check. If you get it wrong, try the hint, then the full steps.</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <span><b id="sFirst">0</b> first try</span>
+      <span><b id="sDone">0</b> done</span>
+      <span><b id="sStreak">0</b> streak</span>
+    </div>
+  </header>
+
+  <section class="controls" aria-label="Choose practice">
+    <div>
+      <div class="label" id="skillLbl">Skill</div>
+      <div class="seg" id="skills" role="group" aria-labelledby="skillLbl">
+        <button data-skill="line">Equation of a line <small>L1</small></button>
+        <button data-skill="perp">Parallel &amp; perpendicular <small>L2</small></button>
+        <button data-skill="gcf">Common factoring <small>L3</small></button>
+        <button data-skill="tri">Factoring trinomials <small>L4–5</small></button>
+        <button data-skill="dist">Length of a line <small>L6</small></button>
+        <button data-skill="shape">Classifying shapes <small>L7</small></button>
+        <button data-skill="sim">Similar triangles <small>L8–9</small></button>
+        <button data-skill="mixed">Mixed review</button>
+      </div>
+    </div>
+    <div>
+      <div class="label" id="levelLbl">Level</div>
+      <div class="seg" id="levels" role="group" aria-labelledby="levelLbl">
+        <button data-level="0">Support</button>
+        <button data-level="1">On track</button>
+        <button data-level="2">Challenge</button>
+      </div>
+      <p class="levelnote" id="levelNote"></p>
+    </div>
+  </section>
+
+  <main class="card" id="card">
+    <div class="qtop"><span class="qtag" id="qtag"></span><span class="rule" id="rule"></span></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="figwrap" id="figwrap" hidden><canvas id="fig"></canvas><p class="fignote" id="fignote" hidden>Click a grid point, or use the arrow keys and press Enter.</p></div>
+    <form class="answer" id="answer" autocomplete="off"></form>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn" type="button">Check</button>
+      <button class="btn" id="hintBtn" type="button">Hint</button>
+      <button class="btn quiet" id="stepsBtn" type="button">Show steps</button>
+      <button class="btn" id="nextBtn" type="button">New question</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="steps" id="steps" hidden></div>
+  </main>
+
+  <footer>Type whole numbers, negatives (−3 or -3), fractions (2/3 or -2/3) or decimals. For a line, a negative b goes in the box as −4. Type factored answers the way you would on paper, like 3x(2x + 5) or (x + 4)(x − 2). Type roots like 5√2 with the √ button (or sqrt); √50 and decimals like 7.07 are accepted too. Every question is new, so you can keep practising.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* =================== math helpers =================== */
+const M="−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const sn=n=>n<0?M+Math.abs(n):String(n);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fv=x=>typeof x==="number"?x:x.n/x.d;
+const fneg=x=>typeof x==="number"?-x:F(-x.n,x.d);
+const fa=x=>typeof x==="number"?String(x):(x.d===1?String(x.n):x.n+"/"+x.d);
+function fh(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}<span class="fr"><span>${Math.abs(x.n)}</span><span>${x.d}</span></span>`}
+function cxv(c,v="x"){const val=fv(c);if(val===1)return v;if(val===-1)return M+v;return fh(c)+v}
+function lineH(m,b){
+  const mv=fv(m),bv=fv(b);let s="y = ";
+  if(mv!==0){s+=cxv(m);if(bv>0)s+=" + "+fh(b);else if(bv<0)s+=" "+M+" "+fh(fneg(b));}
+  else s+=fh(b);
+  return s;
+}
+const SUP=["","","²","³","⁴"];
+const xp=p=>p===0?"":p===1?"x":"x"+SUP[p];
+function poly(ts){let s="";for(const [c,p] of ts){if(c===0)continue;const a=Math.abs(c);const body=p===0?String(a):(a===1?"":a)+xp(p);s+=s===""?(c<0?M:"")+body:(c<0?" "+M+" ":" + ")+body}return s||"0"}
+const bin=p=>`(x ${p<0?M:"+"} ${Math.abs(p)})`;
+const sg=n=>(n<0?M:"+")+Math.abs(n);
+function primes(n){n=Math.abs(n);const out=[];for(let p=2;p*p<=n;p++)while(n%p===0){out.push(p);n/=p}if(n>1)out.push(n);return out}
+function rad(n){let k=1,r=n;for(let i=Math.floor(Math.sqrt(n));i>1;i--){if(n%(i*i)===0){k=i;r=n/(i*i);break}}return{k,r}}
+function radH(n){const {k,r}=rad(n);if(r===1)return String(k);if(k===1)return `√${n}`;return `√${n} = ${k}√${r}`}
+const isSq=n=>Number.isInteger(Math.sqrt(n));
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const P=(x,y)=>`(${sn(x)}, ${sn(y)})`;
+function side(Pp,Qq){const dx=Qq[0]-Pp[0],dy=Qq[1]-Pp[1];return{dx,dy,m:F(dy,dx),n:dx*dx+dy*dy}}
+const dot=(a,b)=>a.dx*b.dx+a.dy*b.dy, cross=(a,b)=>a.dx*b.dy-a.dy*b.dx;
+const inBox=(pts,lo,hi)=>pts.every(p=>p[0]>=lo&&p[0]<=hi&&p[1]>=lo&&p[1]<=hi);
+function fitBox(pts,lo,hi){
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const w=Math.max(...xs)-Math.min(...xs),h=Math.max(...ys)-Math.min(...ys);
+  if(w>hi-lo||h>hi-lo)return null;
+  const ox=ri(lo,hi-w)-Math.min(...xs),oy=ri(lo,hi-h)-Math.min(...ys);
+  return pts.map(p=>[p[0]+ox,p[1]+oy]);
+}
+function boxH(p,q,k){/* box method table for (x+p)(x+q), optional leading factor shown outside */
+  return `${k&&k!==1?`<span class="yellow">${k===-1?M:sn(k)}</span>`:""}<table class="box" style="display:inline-table;vertical-align:middle"><tr><td>×</td><td>x</td><td>${sg(q)}</td></tr><tr><td>x</td><td>x²</td><td>${poly([[q,1]])}</td></tr><tr><td>${sg(p)}</td><td>${poly([[p,1]])}</td><td>${sn(p*q)}</td></tr></table>`;
+}
+function expand(k,a1,b1,a2,b2){return[k*a1*a2,k*(a1*b2+b1*a2),k*b1*b2]}
+const triStr=c=>poly([[c[0],2],[c[1],1],[c[2],0]]);
+function toCo(ts){const a=[];for(const [c,p] of ts)a[p]=(a[p]||0)+c;for(let i=0;i<a.length;i++)a[i]=a[i]||0;return a}
+function radS(n){const {k,r}=rad(n);return r===1?String(k):k===1?`√${n}`:`${k}√${r}`}
+
+/* =================== question generators =================== */
+/* Each returns {skill, text, fig?, ans:{type,...}, steps, hint, mistakes?, fieldMsg?, missFn?} */
+const LINEF=[{pre:"y =",post:"x +",label:"slope m"},{label:"y-intercept b"}];
+
+function genLine(L){
+  for(let t=0;t<500;t++){
+    const type=pick(L===0?["graph","graph","slopept","twopts"]:["graph","slopept","twopts","twopts"]);
+    let m;
+    if(L===0)m=F(pick([1,2,3,-1,-2]));
+    else if(L===1)m=pick([F(nz(-4,4)),F(pick([1,-1]),2),F(pick([1,2,-1,-2]),3),F(pick([3,-3]),2)]);
+    else m=pick([F(pick([2,-2,1,-1]),pick([3,5])),F(pick([3,-3,1,-1]),4),F(pick([3,5,-3,-5]),2),F(nz(-5,5))]);
+    const d=m.d;let q;
+    if(type==="graph"){
+      const b=ri(-4,4),dir=(L>0&&Math.random()<.4)?-1:1;
+      const k=d===1?(Math.abs(m.n)>=3?1:pick([1,2])):1;
+      const x2=dir*d*k,y2=b+dir*m.n*k;
+      if(Math.abs(x2)>6||Math.abs(y2)>6)continue;
+      const rise=y2-b,run=x2;
+      q={text:`<p>Write the equation of the line in the form y = mx + b.</p>`,
+        fig:{type:"grid",min:-6,max:6,lines:[{m:fv(m),b}],pts:[{x:0,y:b},{x:x2,y:y2}]},
+        steps:[["Pick two points where the line crosses the grid exactly",`(0, ${sn(b)}) and ${P(x2,y2)}`],["Count the rise and the run",`rise = ${sn(rise)}, run = ${sn(run)}`],["Slope = rise ÷ run",`m = ${sn(rise)}/${sn(run)} = ${fh(m)}`],["Read b where the line crosses the y-axis",`b = ${sn(b)}`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:`Start at (0, ${sn(b)}) and count to the other marked point: how far up or down (rise), and how far across (run)?`,
+        vals:[m,b]};
+    }else if(type==="slopept"){
+      const x1=L===0?ri(1,6):d*nz(-3,3),y1=L===0?ri(1,15):ri(-9,12);
+      const mx=m.n*x1/d,b=y1-mx;
+      if(!Number.isInteger(b)||Math.abs(b)>25)continue;
+      q={text:`<p>A line has a slope of <span class="hl">${fh(m)}</span> and passes through <span class="hl">${P(x1,y1)}</span>. Write its equation.</p>`,
+        steps:[[`Put m = ${fh(m)} into y = mx + b`,`y = ${cxv(m)} + b`],[`Sub ${P(x1,y1)} to get b`,`${sn(y1)} = ${fh(m)}(${sn(x1)}) + b`],["Multiply",`${sn(y1)} = ${sn(mx)} + b`],[`${mx>=0?"Subtract":"Add"} ${Math.abs(mx)} ${mx>=0?"from":"to"} both sides`,`${sn(b)} = b`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:`Write y = ${cxv(m)} + b, then replace x with ${sn(x1)} and y with ${sn(y1)} and solve for b.`,
+        vals:[m,b],mistakes:y1+mx!==b?[{f:1,val:y1+mx,msg:`When ${sn(mx)} moves across the equals sign, it changes sign. Check that step.`}]:[]};
+    }else{
+      const sgn=(L>0&&Math.random()<.4)?-1:1,k=pick([1,2]);
+      const x1=L===0?ri(0,5):d*ri(-3,3),y1=L===0?ri(0,8):ri(-8,8);
+      const run=sgn*d*k,rise=sgn*m.n*k,x2=x1+run,y2=y1+rise;
+      if(L===0&&(x2<0||y2<0||y2>20))continue;
+      if(Math.abs(x2)>12||Math.abs(y2)>20)continue;
+      const b=y1-m.n*x1/d;if(!Number.isInteger(b)||Math.abs(b)>25)continue;
+      const mx=m.n*x1/d;
+      const mistakes=[];
+      if(rise!==0&&fv(F(run,rise))!==fv(m))mistakes.push({f:0,val:F(run,rise),msg:"Slope is rise over run: the change in y goes on top."});
+      mistakes.push({f:0,val:fneg(m),msg:"Check the sign of the slope. Subtract the coordinates in the same order on the top and the bottom."});
+      q={text:`<p>A line passes through A${P(x1,y1)} and B${P(x2,y2)}. Write its equation.</p>`,
+        steps:[["Find the run and the rise",`run = ${sn(x2)} ${M} ${x1<0?`(${sn(x1)})`:x1} = ${sn(run)}, rise = ${sn(y2)} ${M} ${y1<0?`(${sn(y1)})`:y1} = ${sn(rise)}`],["Slope = rise ÷ run",`m = ${sn(rise)}/${sn(run)} = ${fh(m)}`],[`Sub A${P(x1,y1)} into y = ${cxv(m)} + b`,`${sn(y1)} = ${sn(mx)} + b, so b = ${sn(b)}`],[`Check with B: ${fh(m)}(${sn(x2)}) + ${b<0?`(${sn(b)})`:b}`,`= ${sn(y2)} ✓`],["Write the equation",`∴ ${lineH(m,b)}`]],
+        hint:"Find the slope first: (y₂ − y₁) over (x₂ − x₁). Then sub either point into y = mx + b to get b.",
+        vals:[m,b],mistakes};
+    }
+    return Object.assign(q,{skill:"line",ans:{type:"num",fields:LINEF,vals:q.vals},
+      fieldMsg:["Your b is right. Check the slope: rise over run.","Your slope is right. Sub a point into y = mx + b to find b."]});
+  }
+}
+
+function makeRightTri(L,iso){
+  for(let t=0;t<400;t++){
+    const a=nz(-4,4),b=nz(-4,4),k=iso?1:pick([2,-2,1,-1]),s=pick([1,-1]);
+    if(!iso&&Math.abs(k)===1&&Math.random()<.7)continue;
+    const B=[0,0],A=[a,b],C=[-b*k*s,a*k*s];
+    const pts=fitBox([A,B,C],0,10);if(!pts)continue;
+    const ss=[side(pts[0],pts[1]),side(pts[1],pts[2]),side(pts[2],pts[0])];
+    if(ss.some(q=>q.dx===0||q.dy===0))continue;
+    if(iso!==undefined&&((ss[0].n===ss[1].n)!==iso))continue;
+    return pts;/* right angle at index 1 */
+  }
+}
+function makeNoRightTri(wantIso){
+  for(let t=0;t<2000;t++){
+    let pts;
+    if(wantIso){
+      const groups=[[[3,4],[4,3],[-3,4],[-4,3],[5,0]],[[1,3],[3,1],[-1,3],[-3,1]],[[2,3],[3,2],[-2,3],[-3,2]],[[1,2],[2,1],[-1,2],[-2,1]]];
+      const g=pick(groups);const u=pick(g),v=pick(g);
+      pts=fitBox([[u[0],u[1]],[0,0],[v[0],v[1]]],0,10);
+    }else pts=[[ri(0,10),ri(0,10)],[ri(0,10),ri(0,10)],[ri(0,10),ri(0,10)]];
+    if(!pts)continue;
+    const ss=[side(pts[0],pts[1]),side(pts[1],pts[2]),side(pts[2],pts[0])];
+    if(ss.some(q=>q.dx===0||q.dy===0||q.n<5))continue;
+    if(Math.abs(cross(ss[0],ss[1]))<12)continue;
+    if(dot(ss[0],ss[1])===0||dot(ss[1],ss[2])===0||dot(ss[2],ss[0])===0)continue;
+    const iso=ss[0].n===ss[1].n||ss[1].n===ss[2].n||ss[2].n===ss[0].n;
+    if(iso!==!!wantIso)continue;
+    return pts;
+  }
+}
+function slopeRows(pts,names){
+  const n=pts.length,rows=[];
+  for(let i=0;i<n;i++){const s=side(pts[i],pts[(i+1)%n]);rows.push({name:names[i]+names[(i+1)%n],s})}
+  return rows;
+}
+
+function genPerp(L){
+  const type=pick(L===0?["slopes","right","rect"]:L===1?["slopes","right","rect","right"]:["perpline","right","rect"]);
+  if(type==="slopes"){
+    const m=L===0?F(nz(-6,6)):F(pick([1,2,3,-1,-2,-3,4,-4,5]),pick([2,3,4,5]));
+    if(m.d===1&&L>0)return genPerp(L);
+    const b=nz(-9,9),mp=F(-m.d,m.n);
+    const mistakes=[{f:1,val:F(m.d,m.n),msg:"Change the sign too. A perpendicular slope is the negative reciprocal."},{f:1,val:fneg(m),msg:"Flip the fraction as well as changing the sign."},{f:0,val:mp,msg:"Parallel lines have the same slope."}];
+    return{skill:"perp",text:`<p>A line has the equation</p><p class="big">${lineH(m,b)}</p><p>What is the slope of a line <span class="hl">parallel</span> to it, and of a line <span class="hl">perpendicular</span> to it?</p>`,
+      ans:{type:"num",fields:[{pre:"Parallel: m =",label:"parallel slope"},{pre:"Perpendicular: m =",label:"perpendicular slope"}],vals:[m,mp]},
+      steps:[["Slope of the given line",`m = ${fh(m)}`],["Parallel lines have the same slope",`m∥ = ${fh(m)}`],["Perpendicular: flip the fraction and change the sign",`m⊥ = ${fh(mp)}`],["Check: the two slopes multiply to −1",`${fh(m)} × ${fh(mp)} = −1 ✓`]],
+      hint:`The slope is ${fh(m)}. Parallel keeps it the same. Perpendicular flips it upside down and changes the sign.`,mistakes};
+  }
+  if(type==="right"){
+    let none=L>0&&Math.random()<.3;
+    let raw=none?makeNoRightTri(Math.random()<.5):null;
+    if(!raw){none=false;raw=makeRightTri(L)}
+    const order=shuffle([0,1,2]);const labels=["A","B","C"];
+    /* assign labels: vertex raw[i] gets label labels[order[i]]; then sort by label */
+    const byLabel=[0,1,2].map(li=>raw[order.indexOf(li)]);
+    const rightLabel=none?3:order[1];
+    const rows=slopeRows(byLabel,labels);
+    let found="No two slopes are negative reciprocals, so there is no right angle.";
+    if(!none){for(let i=0;i<3;i++){const r1=rows[i],r2=rows[(i+1)%3];if(dot(r1.s,r2.s)===0)found=`${r1.name} and ${r2.name} have slopes ${fh(r1.s.m)} and ${fh(r2.s.m)}: negative reciprocals, so they meet at a right angle at ${labels[(i+1)%3]}.`}}
+    const opts=["Right angle at A","Right angle at B","Right angle at C","No right angle"];
+    const why=opts.map((o,i)=>i===3?"Two of the slopes are negative reciprocals. Find that pair.":none?"Check the slopes again: no pair multiplies to −1.":`The sides that meet at ${labels[i]} are not perpendicular. Compare their slopes.`);
+    return{skill:"perp",text:`<p>Use slopes to decide whether △ABC has a right angle. If it does, where is it?</p>`,
+      fig:{type:"grid",min:0,max:10,polys:[byLabel],pts:byLabel.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+      ans:{type:"choice",opts,correct:rightLabel,why},
+      steps:[["Find the slope of each side",TBL(rows.map(r=>[r.name,fh(r.s.m)]),["Side","Slope"])],["Look for slopes that are negative reciprocals",found],["Conclusion",`∴ ${opts[rightLabel]}`]],
+      hint:"Find the slope of AB, BC and CA. A right angle needs two slopes that multiply to −1."};
+  }
+  if(type==="rect"){
+    const raw=makeRightTri(L,Math.random()<.4?true:undefined)||makeRightTri(L);
+    for(let t=0;t<50;t++){
+      const [A,B,C]=raw;const D=[A[0]+C[0]-B[0],A[1]+C[1]-B[1]];
+      let pts=[A,B,C,D];
+      if(!inBox(pts,0,10)){pts=fitBox(pts,0,10);if(!pts)return genPerp(L)}
+      const [a,b,c,dd]=pts;const ux=a[0]-b[0],uy=a[1]-b[1];
+      const sAB=side(a,b),sAD=side(a,dd);
+      return{skill:"perp",text:`<p>A, B and C are three corners of rectangle ABCD. <span class="hl">Click the grid point where D must go</span>, then press Check.</p>`,
+        fig:{type:"grid",min:0,max:10,click:true,segs:[[a,b],[b,c]],pts:[{x:a[0],y:a[1],label:"A"},{x:b[0],y:b[1],label:"B"},{x:c[0],y:c[1],label:"C"}]},
+        ans:{type:"pt",pt:dd},
+        ptWhy:(x,y)=>{
+          if((x===a[0]+b[0]-c[0]&&y===a[1]+b[1]-c[1])||(x===c[0]+b[0]-a[0]&&y===c[1]+b[1]-a[1]))return "That makes a parallelogram, but D must be across from B. From C, move the same run and rise that take you from B to A.";
+          return "D must be across from B. From C, move the same run and rise that take you from B to A.";},
+        steps:[["Find the run and rise from B to A",`run = ${sn(ux)}, rise = ${sn(uy)}`],["Do the same from C to reach D",`D = (${sn(c[0])} + ${ux<0?`(${sn(ux)})`:ux}, ${sn(c[1])} + ${uy<0?`(${sn(uy)})`:uy}) = ${P(dd[0],dd[1])}`],["Check that AD ⊥ AB",`m(AB) = ${fh(sAB.m)}, m(AD) = ${fh(sAD.m)}: negative reciprocals ✓`],["Conclusion",`∴ D is at ${P(dd[0],dd[1])}`]],
+        hint:"Opposite sides of a rectangle are parallel. DC must match AB, so from C, move the same way you move from B to A."};
+    }
+  }
+  /* perpline (level 2) */
+  for(let t=0;t<300;t++){
+    const m=F(pick([1,2,3,-1,-2,-3,4,-4]),pick([1,2,3,5]));if(fv(m)===0)continue;
+    const b=nz(-6,6),mp=F(-m.d,m.n);
+    const px=m.n*nz(-2,2),py=ri(-6,8);
+    const bp=py-fv(mp)*px;if(!Number.isInteger(bp)||Math.abs(bp)>20)continue;
+    const mpx=fv(mp)*px;
+    return{skill:"perp",text:`<p>Write the equation of the line that is <span class="hl">perpendicular</span> to ${lineH(m,b)} and passes through <span class="hl">${P(px,py)}</span>.</p>`,
+      ans:{type:"num",fields:LINEF,vals:[mp,bp]},
+      mistakes:[{f:0,val:F(m.d,m.n),msg:"Change the sign too. A perpendicular slope is the negative reciprocal."},{f:0,val:m,msg:"That's the parallel slope. Flip it and change the sign."}],
+      fieldMsg:["Your b is right. Check the perpendicular slope.","Your slope is right. Sub the point into y = mx + b to find b."],
+      steps:[["Slope of the given line",`m = ${fh(m)}`],["Perpendicular slope: flip and change the sign",`m⊥ = ${fh(mp)}`],[`Sub ${P(px,py)} into y = ${cxv(mp)} + b`,`${sn(py)} = ${sn(mpx)} + b, so b = ${sn(bp)}`],["Write the equation",`∴ ${lineH(mp,bp)}`]],
+      hint:`First find the negative reciprocal of ${fh(m)}. Then sub ${P(px,py)} to get b.`};
+  }
+}
+
+/* ---- common factoring ---- */
+function factorPack(ts,negGCF){
+  const g=ts.reduce((a,[c])=>gcd(a,c),0),pm=Math.min(...ts.map(t=>t[1]));
+  const sgn=negGCF&&ts[0][0]<0?-1:1,G=sgn*g;
+  const inner=ts.map(([c,p])=>[c/G,p-pm]);
+  const gstr=poly([[G,pm]]);
+  return{g,pm,G,gstr,inner,str:`${gstr}(${poly(inner)})`};
+}
+function genGCF(L){
+  const type=pick(L===0?["num","bin","bin"]:L===1?["bin","binx","rect","binx"]:["negx","tri3","binx","negx"]);
+  if(type==="num"){
+    for(;;){const g=pick([2,3,4,5,6,8,9,10,12]),p=ri(1,6),q=ri(2,7);if(p===q||gcd(p,q)!==1)continue;const a=g*p,b=g*q;if(a>60||b>60)continue;
+      const pa=primes(a),pb=primes(b);
+      return{skill:"gcf",text:`<p>Use prime factorization to find the <span class="hl">greatest common factor</span> of ${a} and ${b}.</p>`,
+        ans:{type:"num",fields:[{pre:`GCF of ${a} and ${b} =`,label:"greatest common factor"}],vals:[g]},
+        mistakes:[{f:0,val:a*b,msg:"That's a common multiple. The GCF is the biggest number that divides into both."}],
+        steps:[["Break each number into primes",`${a} = ${pa.join(" · ")||a}<br>${b} = ${pb.join(" · ")||b}`],["Multiply the primes they share",`GCF = ${primes(g).join(" · ")||g}`],["Conclusion",`∴ GCF = ${g}`]],
+        hint:`Draw a factor tree for ${a} and for ${b}. Circle the primes that appear in both.`}}
+  }
+  let ts,neg=false;
+  for(let t=0;t<300;t++){
+    if(type==="bin"||type==="rect"){const g=ri(2,9),p=ri(1,6),q=nz(-9,9);if(gcd(p,q)!==1||p===1&&Math.random()<.5)continue;ts=[[g*p,1],[g*q,0]];}
+    else if(type==="binx"){const g=ri(1,6),p=ri(1,5),q=nz(-9,9);if(gcd(p,q)!==1)continue;ts=[[g*p,2],[g*q,1]];if(g===1&&p===1&&Math.random()<.6)continue;}
+    else if(type==="negx"){const g=ri(1,5),p=ri(1,4),q=nz(-8,8);if(gcd(p,q)!==1)continue;ts=[[-g*p,2],[-g*q,1]];neg=true;}
+    else{const g=ri(2,6),p=nz(-5,5),q=nz(-6,6);const D=p*p-4*q;if(D>=0&&isSq(D))continue;/* inner trinomial must not factor */
+      ts=[[g,3],[g*p,2],[g*q,1]];if(Math.random()<.3)ts=[[g,4],[g*p,3],[g*q,2]];}
+    break;
+  }
+  const fp=factorPack(ts,neg);
+  const target=poly(ts);
+  const steps=[["Break each term into prime factors",ts.map(([c,p])=>`${poly([[c,p]])} = ${[...(c<0?[M+"1"]:[]),...primes(c),...Array(p).fill("x")].join(" · ")}`).join("<br>")],
+    [neg?"Find what every term shares. The first term is negative, so take out the negative too":"Find what every term shares",`GCF = ${fp.gstr}`],
+    ["Divide each term by the GCF",ts.map(([c,p])=>`${poly([[c,p]])} ÷ ${fp.gstr} = ${poly([[c/fp.G,p-fp.pm]])}`).join("<br>")],
+    ["Conclusion",`∴ ${target} = ${fp.str}`]];
+  if(type==="rect"){
+    const w=fp.gstr,len=poly(fp.inner);
+    return{skill:"gcf",text:`<p>A rectangle has an area of <span class="hl">${target}</span>. Its width is <span class="hl">${w}</span>. What is its length?</p>`,
+      ans:{type:"expr",mode:"poly",target:toCo(fp.inner),ans:len,pre:"length =",label:"length"},
+      steps:[["Area = length × width, so factor the width out of the area",`${target} = ${w}(${len})`],...steps.slice(0,1),["The length is what's left in the bracket",`∴ length = ${len}`]],
+      hint:`Common factor ${w} out of ${target}. What's left in the bracket is the length.`};
+  }
+  return{skill:"gcf",text:`<p><span class="hl">Factor fully.</span></p><p class="big">${target}</p>`,
+    ans:{type:"expr",mode:"factor",target:toCo(ts),ans:fp.str,label:"factored form"},steps,
+    hint:"Factor each term into primes. The GCF is everything every term shares, including x's. Fully factored means nothing in the bracket has a common factor."};
+}
+
+/* ---- factoring trinomials ---- */
+function pairsOf(c){const out=[];const a=Math.abs(c);for(let i=-a;i<=a;i++){if(i===0||c%i!==0)continue;const j=c/i;if(i<=j)out.push([i,j])}return out}
+function genTri(L){
+  const type=pick(L===0?["mulsum","factor","factor"]:L===1?["mulsum","factor","factor","garden"]:["kfactor","kfactor","factor","garden"]);
+  let p,q;
+  for(let t=0;t<300;t++){
+    if(L===0||type==="garden"){p=ri(1,9);q=ri(1,9);if(type==="garden"&&p===q)continue;}
+    else{p=nz(-9,9);q=nz(-9,9);if(p+q===0)continue;if(p>0&&q>0&&Math.random()<.6)continue;}
+    break;
+  }
+  const b=p+q,c=p*q;
+  const missFn=v=>{if(v[0]*v[1]===c)return `${sn(v[0])} × ${sn(v[1])} = ${sn(c)}, but they add to ${sn(v[0]+v[1])}, not ${sn(b)}.`;if(v[0]+v[1]===b)return `Those add to ${sn(b)}, but they multiply to ${sn(v[0]*v[1])}, not ${sn(c)}.`;return null};
+  const stepsCore=[[`Multiply: ${sn(c)}, Add: ${sn(b)}`,`The two numbers are ${sn(p)} and ${sn(q)}`],["Put them in the box",boxH(p,q)],["Read the brackets",`${bin(p)}${bin(q)}`]];
+  if(type==="mulsum")return{skill:"tri",text:`<p>To factor x² ${b<0?M:"+"} ${Math.abs(b)===1?"":Math.abs(b)}x ${c<0?M:"+"} ${Math.abs(c)}, find the two numbers that <span class="hl">multiply to ${sn(c)}</span> and <span class="hl">add to ${sn(b)}</span>.</p>`,
+    ans:{type:"num",fields:[{pre:"",label:"first number"},{pre:"and",label:"second number"}],vals:[p,q],orderFree:true},missFn,
+    steps:[["List factor pairs of "+sn(c),pairsOf(c).filter(([r,s])=>c>0?(b>0?r>0:r<0):true).map(([r,s])=>`${sn(r)} × ${sn(s)} → sum ${sn(r+s)}`).join("<br>")],["Pick the pair that adds to "+sn(b),`${sn(p)} and ${sn(q)}`]],
+    hint:c<0?"The product is negative, so one number is positive and one is negative.":b<0?"The product is positive and the sum is negative, so both numbers are negative.":"List the factor pairs of "+c+" and add each pair."};
+  if(type==="garden"){
+    return{skill:"tri",text:`<p>A square garden has sides of x metres. It is made longer on one side and wider on the other. Its new area is</p><p class="big">(x² + ${b}x + ${c}) m²</p><p>How many metres were added to each side?</p>`,
+      ans:{type:"num",fields:[{pre:"",label:"metres added to one side"},{pre:"and",label:"metres added to the other side"}],vals:[p,q],orderFree:true},missFn,
+      steps:[["The new sides are (x + ?) and (x + ?), so factor the area",`Multiply: ${c}, Add: ${b} → ${p} and ${q}`],["Box method",boxH(p,q)],["Conclusion",`∴ x² + ${b}x + ${c} = ${bin(p)}${bin(q)}, so ${p} m and ${q} m were added`]],
+      hint:`Factor the area. Find two numbers that multiply to ${c} and add to ${b}.`};
+  }
+  const k=type==="kfactor"?pick([2,3,4,5,-1]):1;
+  const tgt=expand(k,1,p,1,q);
+  const kS=k===1?"":k===-1?M:sn(k);
+  const steps=k===1?stepsCore.concat([["Conclusion",`∴ ${triStr(tgt)} = ${bin(p)}${bin(q)}`]])
+    :[[k===-1?"The x² term is negative, so common factor −1 first":`Every term shares ${k}, so common factor first`,`${triStr(tgt)} = ${k===-1?M:k}(${triStr([1,b,c])})`],...stepsCore,["Conclusion",`∴ ${triStr(tgt)} = ${k===-1?M:k}${bin(p)}${bin(q)}`]];
+  const exprMiss=info=>{
+    if(info.sum||!info.br.length)return null;
+    const lin=[];for(const br of info.br){if(br.p.length!==2||br.p[1]!==1)return null;for(let e=0;e<br.e;e++)lin.push(br.p[0])}
+    if(lin.length!==2)return null;const [r,s2]=lin;
+    if(info.k!==k||info.xp!==0){if(k!==1&&info.k===1&&r*s2===c&&r+s2===b)return `Expand it: you get ${triStr([1,b,c])}. The common factor ${k===-1?M+"1":k} is missing.`;return null}
+    if(r*s2===c&&r+s2!==b)return `${sn(r)} × ${sn(s2)} = ${sn(c)}, but ${sn(r)} + ${sn(s2)} = ${sn(r+s2)}, not ${sn(b)}.`;
+    if(r+s2===b&&r*s2!==c)return `${sn(r)} + ${sn(s2)} = ${sn(b)}, but ${sn(r)} × ${sn(s2)} = ${sn(r*s2)}, not ${sn(c)}.`;
+    return null};
+  return{skill:"tri",text:`<p><span class="hl">Factor fully.</span></p><p class="big">${triStr(tgt)}</p>`,
+    ans:{type:"expr",mode:"factor",target:tgt.slice().reverse(),ans:`${kS}${bin(p)}${bin(q)}`,label:"factored form"},steps,exprMiss,
+    hint:k!==1?`Common factor ${k===-1?"−1":k} first. Then find two numbers that multiply to ${sn(c)} and add to ${sn(b)}.`:`Find two numbers that multiply to ${sn(c)} and add to ${sn(b)}.`};
+}
+
+/* ---- length of a line ---- */
+const TRIPLES=[[3,4,5],[6,8,10],[5,12,13],[8,15,17],[9,12,15],[12,16,20],[7,24,25]];
+function genDist(L){
+  const type=pick(L===0?["grid","leg","shortcut","grid"]:L===1?["grid","grid","leg","shortcut"]:["grid","grid","leg"]);
+  if(type==="grid"){
+    for(let t=0;t<500;t++){
+      const lo=L===0?0:-8,hi=L===0?10:8;
+      let dx,dy;
+      if(L===0&&Math.random()<.6){const tr=pick([[3,4],[4,3],[6,8],[8,6]]);dx=tr[0];dy=tr[1];}else{dx=nz(-8,8);dy=nz(-8,8);}
+      if(Math.random()<.5)dx=-dx;if(Math.random()<.5)dy=-dy;
+      const x1=ri(lo,hi),y1=ri(lo,hi),x2=x1+dx,y2=y1+dy;
+      if(x2<lo||x2>hi||y2<lo||y2>hi)continue;
+      if(L>0&&x1>=0&&y1>=0&&x2>=0&&y2>=0&&Math.random()<.7)continue;
+      const n=dx*dx+dy*dy;if(n<10)continue;
+      const steps=[["Find Δx and Δy",`Δx = ${sn(x2)} ${M} ${x1<0?`(${sn(x1)})`:x1} = ${sn(dx)}<br>Δy = ${sn(y2)} ${M} ${y1<0?`(${sn(y1)})`:y1} = ${sn(dy)}`],["d = √((Δx)² + (Δy)²)",`d = √(${dx<0?`(${sn(dx)})`:dx}² + ${dy<0?`(${sn(dy)})`:dy}²) = √(${dx*dx} + ${dy*dy}) = √${n}`],["Conclusion",`∴ AB = ${radH(n)} units`]];
+      const base={skill:"dist",text:`<p>Find the length of the line segment from A${P(x1,y1)} to B${P(x2,y2)}.${isSq(n)?"":" Give the exact answer, like 3√5. A decimal is OK too."}</p>`,
+        fig:{type:"grid",min:lo,max:hi,segs:[[[x1,y1],[x2,y2]]],legs:[[x1,y1],[x2,y1],[x2,y2]],pts:[{x:x1,y:y1,label:"A"},{x:x2,y:y2,label:"B"}]},steps,
+        hint:"Δx and Δy are the legs of a right triangle. Square each one, add them, then take the square root."};
+      if(isSq(n))return Object.assign(base,{ans:{type:"num",fields:[{pre:"AB =",post:"units",label:"length of AB"}],vals:[Math.sqrt(n)]},
+        mistakes:[{f:0,val:Math.abs(dx)+Math.abs(dy),msg:"You added the legs. Square them first, add the squares, then take the square root."},{f:0,val:n,msg:"Don't forget the square root at the end."}]});
+      const mist=[];const add=(v,msg)=>{if(v>0&&Math.abs(v-Math.sqrt(n))>1e-6&&!mist.some(m=>Math.abs(m.val-v)<1e-6))mist.push({val:v,msg})};
+      add(Math.sqrt(Math.abs(dx*dx-dy*dy)),"Add the squares. You only subtract when you are finding a missing leg.");
+      add(Math.abs(dx)+Math.abs(dy),"You added the legs. Square them first, add the squares, then take the square root.");
+      add(n,"Don't forget the square root at the end.");
+      if(x1!==0)add(Math.sqrt((x2+x1)**2+dy*dy),"Δx is x₂ − x₁. Watch the signs when a coordinate is negative.");
+      if(y1!==0)add(Math.sqrt(dx*dx+(y2+y1)**2),"Δy is y₂ − y₁. Watch the signs when a coordinate is negative.");
+      add(Math.sqrt(Math.abs(dx)*Math.abs(dx)+Math.abs(dy)),"Square both Δx and Δy before adding.");
+      return Object.assign(base,{ans:{type:"rad",n,ans:radS(n),pre:"AB =",post:"units",label:"length of AB"},mistakes:mist});
+    }
+  }
+  const [a,b,c]=pick(TRIPLES);
+  if(type==="shortcut"){
+    return{skill:"dist",text:`<p>A rectangular field is ${a} m by ${b} m. Walking around two sides of it is ${a+b} m. How many metres do you save by walking straight across the diagonal?</p>`,
+      fig:{type:"draw",w:420,h:250,items:[{poly:[[60,200],[360,200],[360,50],[60,50]],stroke:"grid"},{line:[60,200,360,200],stroke:"amber",w:4},{line:[360,200,360,50],stroke:"amber",w:4},{line:[60,200,360,50],stroke:"cyan",dash:true,w:3},{text:`${a} m`,x:210,y:228},{text:`${b} m`,x:370,y:130,align:"left"},{text:"diagonal = ?",x:180,y:110,color:"cyan"},{dot:[60,200]},{dot:[360,50]}]},
+      ans:{type:"num",fields:[{pre:"You save",post:"m",label:"metres saved"}],vals:[a+b-c]},
+      mistakes:[{f:0,val:c,msg:"That's the length of the diagonal. Subtract it from the walk around the edges."}],
+      steps:[["The diagonal is the hypotenuse",`c = √(${a}² + ${b}²) = √(${a*a} + ${b*b}) = √${c*c} = ${c}`],["Around the edges",`${a} + ${b} = ${a+b}`],["Subtract",`${a+b} ${M} ${c} = ${a+b-c}`],["Conclusion",`∴ The shortcut saves ${a+b-c} m`]],
+      hint:"Find the diagonal with the Right Angle Theorem, then subtract it from the walk around two sides."};
+  }
+  const s=L===2&&Math.random()<.5?0.5:1;const A=a*s,B=b*s,C=c*s;
+  if(Math.random()<.5){
+    return{skill:"dist",text:`<p>A ${C} m wire runs from the top of a flagpole to a peg in the ground ${A} m from the base of the pole. How tall is the flagpole?</p>`,
+      fig:{type:"draw",w:420,h:250,items:[{line:[90,30,90,210],stroke:"amber",w:5},{line:[40,210,380,210],stroke:"grid"},{line:[90,30,330,210],stroke:"cyan",w:2},{ra:[90,210,1,-1]},{text:"pole = ?",x:80,y:120,align:"right"},{text:`wire ${C} m`,x:230,y:110,color:"cyan",align:"left"},{text:`${A} m`,x:210,y:236},{dot:[330,210]}]},
+      ans:{type:"num",fields:[{pre:"height =",post:"m",label:"height in metres"}],vals:[B]},
+      mistakes:[{f:0,val:Math.sqrt(C*C+A*A),msg:"The wire is the hypotenuse, so subtract: height² = wire² − ground²."},{f:0,val:C*C-A*A,msg:"Don't forget the square root at the end."}],
+      steps:[["The wire is the hypotenuse, so the pole is a missing leg",`a = √(c² − b²)`],["Substitute",`a = √(${C}² − ${A}²) = √(${C*C} − ${A*A}) = √${C*C-A*A}`],["Conclusion",`∴ The flagpole is ${B} m tall`]],
+      hint:"The wire is the longest side (the hypotenuse). For a missing leg, subtract the squares."};
+  }
+  return{skill:"dist",text:`<p>A hiker walks ${A} km east, then ${B} km north. How far is she from her starting point, in a straight line?</p>`,
+    fig:{type:"draw",w:420,h:250,items:[{line:[60,210,320,210],stroke:"amber",w:4},{line:[320,210,320,40],stroke:"amber",w:4},{line:[60,210,320,40],stroke:"cyan",dash:true,w:3},{ra:[320,210,-1,-1]},{text:`${A} km east`,x:190,y:236},{text:`${B} km north`,x:330,y:130,align:"left"},{text:"? ",x:170,y:115,color:"cyan"},{dot:[60,210]},{dot:[320,40]}]},
+    ans:{type:"num",fields:[{pre:"d =",post:"km",label:"distance in km"}],vals:[C]},
+    mistakes:[{f:0,val:A+B,msg:"You added the legs. Square them, add the squares, then take the square root."},{f:0,val:A*A+B*B,msg:"Don't forget the square root at the end."}],
+    steps:[["The straight line is the hypotenuse",`c = √(a² + b²)`],["Substitute",`c = √(${A}² + ${B}²) = √(${A*A} + ${B*B}) = √${A*A+B*B}`],["Conclusion",`∴ She is ${C} km from the start`]],
+    hint:"East and north meet at a right angle, so the straight line is the hypotenuse."};
+}
+
+/* ---- classifying shapes ---- */
+const QUADS=["Square","Rectangle","Rhombus","Parallelogram","Trapezoid","Kite"];
+const LEN={25:[[3,4],[4,3],[-3,4],[-4,3],[5,0]],10:[[1,3],[3,1],[-1,3],[-3,1]],13:[[2,3],[3,2],[-2,3],[-3,2]],5:[[1,2],[2,1],[-1,2],[-2,1]],20:[[2,4],[4,2],[-2,4],[-4,2]]};
+function quadFacts(pts){
+  const s=[0,1,2,3].map(i=>side(pts[i],pts[(i+1)%4]));
+  const par02=cross(s[0],s[2])===0,par13=cross(s[1],s[3])===0;
+  const perp=[0,1,2,3].filter(i=>dot(s[i],s[(i+1)%4])===0);
+  const allEq=s.every(q=>q.n===s[0].n),oppEq=s[0].n===s[2].n&&s[1].n===s[3].n;
+  const kite=(s[0].n===s[1].n&&s[2].n===s[3].n)||(s[1].n===s[2].n&&s[3].n===s[0].n);
+  let kind="Quadrilateral";
+  if(par02&&par13)kind=perp.length?(allEq?"Square":"Rectangle"):(allEq?"Rhombus":"Parallelogram");
+  else if(par02||par13)kind="Trapezoid";else if(kite)kind="Kite";
+  return{s,par02,par13,perp,allEq,oppEq,kite,kind};
+}
+function buildQuad(kind){
+  for(let t=0;t<800;t++){
+    let A=[0,0],u,v,pts;
+    if(kind==="Square"||kind==="Rectangle"){u=[nz(-4,4),nz(-4,4)];const k=kind==="Square"?1:pick([2,-2]);v=[-u[1]*k,u[0]*k];if(kind==="Rectangle"&&Math.random()<.5)u=[u[0]*2,u[1]*2],v=[v[0]/2,v[1]/2];pts=[A,[u[0],u[1]],[u[0]+v[0],u[1]+v[1]],[v[0],v[1]]];}
+    else if(kind==="Rhombus"){const g=LEN[pick([25,10,13,5,20])];u=pick(g);v=pick(g);pts=[A,u,[u[0]+v[0],u[1]+v[1]],v];}
+    else if(kind==="Parallelogram"){u=[nz(-5,5),ri(-4,4)];v=[nz(-4,4),nz(-4,4)];pts=[A,u,[u[0]+v[0],u[1]+v[1]],v];}
+    else if(kind==="Trapezoid"){u=[nz(-3,3),ri(-2,2)];v=[nz(-4,4),nz(-4,4)];const k=pick([2,3]);pts=[A,[k*u[0],k*u[1]],[v[0]+u[0],v[1]+u[1]],v];}
+    else{const w=pick([[1,0],[0,1],[1,1],[1,-1]]),n=[-w[1],w[0]];const a=ri(1,4),c=ri(1,6),m=pick([1,2,3]);if(a===c)continue;
+      pts=[[a*w[0],a*w[1]],[n[0]*m,n[1]*m],[-c*w[0],-c*w[1]],[-n[0]*m,-n[1]*m]];}
+    pts=fitBox(pts,0,10);if(!pts)continue;
+    const f=quadFacts(pts);
+    if(f.kind!==kind)continue;
+    if(f.s.some(q=>q.dx===0||q.n<4))continue;
+    const cs=[0,1,2,3].map(i=>cross(f.s[i],f.s[(i+1)%4]));/* convex, consistent orientation */
+    if(!(cs.every(c=>c>0)||cs.every(c=>c<0)))continue;
+    /* random starting vertex */
+    const r=ri(0,3);pts=pts.slice(r).concat(pts.slice(0,r));
+    return pts;
+  }
+}
+function quadWhy(pick_,f){
+  const two=f.par02&&f.par13;
+  if(["Square","Rectangle","Rhombus","Parallelogram"].includes(pick_)&&!two)return f.par02||f.par13?"Only one pair of sides is parallel. Compare the slopes again.":"No sides are parallel. Compare the slopes again.";
+  if((pick_==="Square"||pick_==="Rectangle")&&!f.perp.length)return "No two neighbouring slopes are negative reciprocals, so there are no right angles.";
+  if((pick_==="Square"||pick_==="Rhombus")&&!f.allEq)return "The four sides are not all the same length.";
+  if(pick_==="Rectangle"&&f.kind==="Square")return "It is a rectangle, but all four sides are equal too. Give the most precise name.";
+  if(pick_==="Rhombus"&&f.kind==="Square")return "It is a rhombus, but it has right angles too. Give the most precise name.";
+  if(pick_==="Parallelogram")return "It is a parallelogram, but there's a more precise name. Check for right angles and equal sides.";
+  if(pick_==="Trapezoid")return two?"Both pairs of opposite sides are parallel, so it's more than a trapezoid.":"A trapezoid needs exactly one pair of parallel sides.";
+  if(pick_==="Kite")return f.par02||f.par13?"A kite has no parallel sides, and this shape has some.":"A kite needs two pairs of equal neighbouring sides.";
+  return "Check the slopes and lengths again.";
+}
+function lenH(n){return isSq(n)?String(Math.sqrt(n)):radH(n)}
+function genClassify(L){
+  const doTri=Math.random()<(L===0?.4:.3);
+  if(doTri){
+    const kinds=["Right isosceles","Right scalene","Isosceles (no right angle)","Scalene (no right angle)"];
+    const ci=ri(0,3);
+    const raw=ci===0?makeRightTri(L,true):ci===1?makeRightTri(L,false):makeNoRightTri(ci===2);
+    if(!raw)return genClassify(L);
+    const labels=["A","B","C"],rows=slopeRows(raw,labels);
+    const right=rows.some((r,i)=>dot(r.s,rows[(i+1)%3].s)===0),iso=rows.some((r,i)=>r.s.n===rows[(i+1)%3].s.n);
+    const why=kinds.map((k,i)=>{const kr=i<2,ki=i===0||i===2;if(kr&&!right)return "No two slopes are negative reciprocals, so there is no right angle.";if(!kr&&right)return "Two slopes are negative reciprocals. Look again for a right angle.";if(ki&&!iso)return "No two sides are the same length.";if(!ki&&iso)return "Two sides are the same length.";return ""});
+    const perpTxt=right?(()=>{for(let i=0;i<3;i++)if(dot(rows[i].s,rows[(i+1)%3].s)===0)return `${rows[i].name} ⊥ ${rows[(i+1)%3].name}, so there is a right angle at ${labels[(i+1)%3]}`})():"No two slopes are negative reciprocals: no right angle";
+    const eqTxt=iso?(()=>{for(let i=0;i<3;i++)if(rows[i].s.n===rows[(i+1)%3].s.n)return `${rows[i].name} = ${rows[(i+1)%3].name}, so two sides are equal`})():"All three lengths are different";
+    return{skill:"shape",text:`<p>Classify △ABC by its sides and its angles. Use slopes and lengths.</p>`,
+      fig:{type:"grid",min:0,max:10,polys:[raw],pts:raw.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+      ans:{type:"choice",opts:kinds,correct:ci,why},
+      steps:[["Find each side's slope and length",TBL(rows.map(r=>[r.name,fh(r.s.m),lenH(r.s.n)]),["Side","Slope","Length"])],["Angles",perpTxt],["Sides",eqTxt],["Conclusion",`∴ ${kinds[ci]} triangle`]],
+      hint:"Make a table of slopes and lengths. Negative reciprocal slopes mean a right angle. Equal lengths mean isosceles."};
+  }
+  const kind=pick(L===0?["Square","Rectangle","Parallelogram","Trapezoid"]:QUADS);
+  const pts=buildQuad(kind);if(!pts)return genClassify(L);
+  const labels=["A","B","C","D"],f=quadFacts(pts),rows=slopeRows(pts,labels);
+  const parTxt=[f.par02?"AB ∥ CD":"",f.par13?"BC ∥ DA":""].filter(Boolean).join(" and ")||"none";
+  const perpTxt=f.perp.length?f.perp.map(i=>`${rows[i].name} ⊥ ${rows[(i+1)%4].name}`).join(", "):"none";
+  const eqTxt=f.allEq?"all four sides are equal":f.oppEq?"opposite sides are equal":f.kite?"two pairs of neighbouring sides are equal":"no pattern of equal sides";
+  return{skill:"shape",text:`<p>Classify quadrilateral ABCD. Use slopes and lengths, and give the <span class="hl">most precise name</span>.</p>`,
+    fig:{type:"grid",min:0,max:10,polys:[pts],pts:pts.map((p,i)=>({x:p[0],y:p[1],label:labels[i]}))},
+    ans:{type:"choice",opts:QUADS,correct:QUADS.indexOf(kind),why:QUADS.map(q=>q===kind?"":quadWhy(q,f))},
+    steps:[["Find each side's slope and length",TBL(rows.map(r=>[r.name,fh(r.s.m),lenH(r.s.n)]),["Side","Slope","Length"])],["Parallel sides (same slope)",parTxt],["Perpendicular sides (negative reciprocals)",perpTxt],["Equal sides",eqTxt],["Conclusion",`∴ ABCD is a ${kind.toLowerCase()}`]],
+    hint:"Make a table of slopes and lengths. Count the parallel pairs first, then check for right angles, then compare lengths."};
+}
+
+/* ---- similar triangles ---- */
+function genSimilar(L){
+  const type=pick(L===0?["prop","shadow","pair"]:L===1?["prop","pair","shadow","nested"]:["prop","pair","nested","pair"]);
+  if(type==="prop"){
+    for(let t=0;t<500;t++){
+      let x,disp,steps,mist=[];
+      if(L===0){x=ri(2,12);const a=ri(2,9);if(x===a)continue;const g=gcd(x,a),r=[x/g,a/g],m=ri(2,4);const b=r[0]*m,c=r[1]*m;if(b===x&&c===a||b>40||c>40)continue;
+        disp=`<span class="fr"><span>x</span><span>${a}</span></span> = <span class="fr"><span>${b}</span><span>${c}</span></span>`;
+        steps=[["Multiply both sides by both denominators",`${c}x = ${b}(${a})`],["Simplify",`${c}x = ${b*a}`],[`Divide by ${c}`,`x = ${x}`]];
+        mist=[{f:0,val:F(c*a,b),msg:"Cross-multiply carefully: the x term times the other denominator."}];
+      }else if(L===1){x=ri(1,12);const p=nz(-5,6),a=ri(2,9);const top=x+p;if(top<=0||top===a)continue;const g=gcd(top,a),m=ri(2,4),b=top/g*m,c=a/g*m;if(b===top||b>40||c>40)continue;
+        disp=`<span class="fr"><span>x ${p<0?M:"+"} ${Math.abs(p)}</span><span>${a}</span></span> = <span class="fr"><span>${b}</span><span>${c}</span></span>`;
+        steps=[["Multiply both sides by both denominators",`${c}(x ${p<0?M:"+"} ${Math.abs(p)}) = ${b}(${a})`],["Expand",`${c}x ${c*p<0?M:"+"} ${Math.abs(c*p)} = ${b*a}`],[`${c*p<0?"Add":"Subtract"} ${Math.abs(c*p)}`,`${c}x = ${b*a-c*p}`],[`Divide by ${c}`,`x = ${x}`]];
+        mist=[{f:0,val:F(b*a-p,c),msg:`Multiply ${c} by both terms in the brackets, not just the x.`}];
+      }else{x=ri(1,9);const p=ri(1,4),q=nz(-6,6),r=ri(1,4),s=nz(-6,6),a=ri(2,7),c=ri(2,7);
+        const L1=p*x+q,R1=r*x+s;if(L1<=0||R1<=0||a===c)continue;if(L1*c!==R1*a)continue;if(p*c===r*a)continue;
+        disp=`<span class="fr"><span>${poly([[p,1],[q,0]])}</span><span>${a}</span></span> = <span class="fr"><span>${poly([[r,1],[s,0]])}</span><span>${c}</span></span>`;
+        const lc=p*c,lk=q*c,rc=r*a,rk=s*a;
+        steps=[["Multiply both sides by both denominators",`${c}(${poly([[p,1],[q,0]])}) = ${a}(${poly([[r,1],[s,0]])})`],["Expand",`${poly([[lc,1],[lk,0]])} = ${poly([[rc,1],[rk,0]])}`],["Collect x-terms on one side and numbers on the other",`${poly([[lc-rc,1]])} = ${sn(rk-lk)}`],["Divide",`x = ${x}`]];
+      }
+      return{skill:"sim",text:`<p>Solve the proportion for x.</p><p class="big">${disp}</p>`,
+        ans:{type:"num",fields:[{pre:"x =",label:"x"}],vals:[x]},mistakes:mist,steps,
+        hint:"Multiply both sides by both denominators, then solve like a Unit 1 equation. Keep binomials in brackets."};
+    }
+  }
+  if(type==="shadow"){
+    for(let t=0;t<500;t++){
+      const [p,q]=pick([[3,4],[2,3],[4,5],[1,2],[6,5],[4,3],[3,2],[5,4]]);/* height:shadow ratio */
+      const st=q*ri(2,20);const ht=st*p/q;if(ht<14||ht>20)continue;
+      const S=q*ri(2,12),H=S*p/q;if(S<6||S>45||H<5)continue;
+      const h=ht/10,s=st/10;
+      return{skill:"sim",text:`<p>A student who is ${h} m tall casts a shadow ${s} m long. At the same time, a tree casts a shadow ${S} m long. How tall is the tree?</p>`,
+        fig:{type:"draw",w:420,h:250,items:[{line:[20,215,410,215],stroke:"grid"},{line:[55,215,55,175],stroke:"amber",w:4},{dot:[55,170]},{line:[55,215,110,215],stroke:"dim",w:6},{line:[55,170,110,215],stroke:"yellow",dash:true},{text:`${h} m`,x:48,y:198,align:"right"},{text:`${s} m`,x:83,y:240},{line:[200,215,200,45],stroke:"green",w:5},{line:[200,215,385,215],stroke:"dim",w:6},{line:[200,45,385,215],stroke:"yellow",dash:true},{text:"tree = ?",x:192,y:130,align:"right"},{text:`${S} m`,x:292,y:240},{ra:[55,215,1,-1]},{ra:[200,215,1,-1]}]},
+        ans:{type:"num",fields:[{pre:"height =",post:"m",label:"height in metres"}],vals:[H]},
+        mistakes:[{f:0,val:Math.round(S*s/h*100)/100,msg:"Match the sides: height over shadow on BOTH sides of the proportion."}],
+        steps:[["The sun's rays hit both at the same angle, and both stand at 90°, so the triangles are similar","height/shadow = height/shadow"],["Set up the proportion",`h/${S} = ${h}/${s}`],["Multiply by both denominators",`${s}h = ${h}(${S})`],["Divide",`h = ${Math.round(h*S*100)/100} ÷ ${s} = ${H}`],["Conclusion",`∴ The tree is ${H} m tall`]],
+        hint:"Height goes with height and shadow goes with shadow: h ÷ (tree's shadow) = (student's height) ÷ (student's shadow)."};
+    }
+  }
+  if(type==="pair"){
+    for(let t=0;t<500;t++){
+      const k=ri(2,5),b1=ri(2,8),b2=k*b1;
+      if(L===0){const h1=ri(2,9),h2=k*h1;
+        return{skill:"sim",text:`<p>To measure across a river without crossing it, a class sets up two similar right triangles on the shore. The large triangle's height is the width of the river. How wide is the river?</p>`,
+          fig:pairFig(`${b1} m`,`${h1} m`,`${b2} m`,"?"),
+          ans:{type:"num",fields:[{pre:"width =",post:"m",label:"river width"}],vals:[h2]},
+          steps:[["Match the sides",`height/height = base/base`],["Set up the proportion",`x/${h1} = ${b2}/${b1}`],["Multiply by both denominators",`${b1}x = ${h1}(${b2})`],["Solve",`x = ${h1*b2} ÷ ${b1} = ${h2}`],["Conclusion",`∴ The river is ${h2} m wide`]],
+          hint:"Large height ÷ small height = large base ÷ small base."};}
+      const x=ri(2,10),p=ri(1,5),a=pick([2,3,4,5,6]);if(a===k)continue;const q=k*(x+p)-a*x;if(q===0||Math.abs(q)>30)continue;
+      const h1=x+p,h2=a*x+q,ask2=Math.random()<.7;
+      const hs=poly([[1,1],[p,0]]),Hs=poly([[a,1],[q,0]]);
+      const lhs=b1*a,lk=b1*q,rhs=b2,rk=b2*p;
+      return{skill:"sim",text:`<p>To measure across a river without crossing it, a class sets up two similar right triangles on the shore. The small triangle has base ${b1} m and height (${hs}) m. The large triangle has base ${b2} m and height (${Hs}) m, which is the width of the river. ${ask2?"How wide is the river?":"How tall is the small triangle?"}</p>`,
+        fig:pairFig(`${b1} m`,`(${hs}) m`,`${b2} m`,`(${Hs}) m`),
+        ans:{type:"num",fields:[{pre:ask2?"width =":"height =",post:"m",label:ask2?"river width":"small height"}],vals:[ask2?h2:h1]},
+        mistakes:[{f:0,val:x,msg:`That's x. Substitute it into (${ask2?Hs:hs}) to get the ${ask2?"width":"height"}.`}],
+        steps:[["base/base = height/height",`${b1}/${b2} = (${hs})/(${Hs})`],["Multiply by both denominators",`${b1}(${Hs}) = ${b2}(${hs})`],["Expand",`${poly([[lhs,1],[lk,0]])} = ${poly([[rhs,1],[rk,0]])}`],["Solve for x",`${poly([[lhs-rhs,1]])} = ${sn(rk-lk)}, so x = ${x}`],[ask2?"River width":"Small height",ask2?`${a}(${x}) ${q<0?M:"+"} ${Math.abs(q)} = ${h2}`:`${x} + ${p} = ${h1}`],["Conclusion",ask2?`∴ The river is ${h2} m wide`:`∴ The small triangle is ${h1} m tall`]],
+        hint:"Set up base/base = height/height, multiply by both denominators, solve for x, then substitute x back in."};
+    }
+  }
+  /* nested */
+  const pp=pick([2,3]),q=pick([2,3,4,5]),k=ri(3,8);const CD=q,CE=q*k,DE=CE-CD,BD=pp,AE=pp*k;
+  return{skill:"sim",text:`<p>To find the height of a cliff, a student stands a ${BD} m pole BD so its top lines up with the top of the cliff, A. The pole is ${CD} m from C and the cliff is ${DE} m beyond the pole. How tall is the cliff, AE?</p>`,
+    fig:{type:"draw",w:420,h:250,items:[{line:[20,205,410,205],stroke:"grid"},{line:[40,205,380,45],stroke:"amber",w:2},{line:[380,45,380,205],stroke:"green",w:5},{line:[180,205,180,139],stroke:"cyan",w:4},{ra:[180,205,-1,-1]},{ra:[380,205,-1,-1]},{text:"A",x:392,y:45,align:"left",color:"paper"},{text:"B",x:170,y:132,align:"right",color:"paper"},{text:"C",x:36,y:228,color:"paper"},{text:"D",x:180,y:228,color:"paper"},{text:"E",x:380,y:228,color:"paper"},{text:`${CD} m`,x:110,y:228},{text:`${DE} m`,x:280,y:228},{text:`${BD} m`,x:188,y:178,align:"left",color:"cyan"},{text:"cliff = ?",x:370,y:130,align:"right"},{dot:[380,45]},{dot:[180,139]}]},
+    ans:{type:"num",fields:[{pre:"AE =",post:"m",label:"cliff height"}],vals:[AE]},
+    mistakes:[{f:0,val:Math.round(BD*DE/CD*100)/100,msg:"CE is the whole bottom side: CD + DE. Use CE, not DE."}],
+    steps:[["△CDB ~ △CEA: they share ∠C and both have a right angle","BD/AE = CD/CE"],["Find CE",`CE = ${CD} + ${DE} = ${CE}`],["Set up the proportion",`${BD}/AE = ${CD}/${CE}`],["Multiply by both denominators",`${CD}(AE) = ${BD}(${CE}) = ${BD*CE}`],["Divide",`AE = ${BD*CE} ÷ ${CD} = ${AE}`],["Conclusion",`∴ The cliff is ${AE} m tall`]],
+    hint:"The small triangle is CDB and the big one is CEA. CE = CD + DE. Then pole/cliff = CD/CE."};
+}
+function pairFig(b1,h1,b2,h2){
+  return{type:"draw",w:420,h:250,items:[{poly:[[40,200],[40,120],[130,200]],stroke:"amber"},{ra:[40,200,1,-1]},{text:b1,x:85,y:226},{text:h1,x:46,y:110,align:"left"},{poly:[[200,215],[200,40],[390,215]],stroke:"amber"},{line:[200,40,200,215],stroke:"cyan",w:4},{ra:[200,215,1,-1]},{text:b2,x:295,y:240},{text:h2,x:192,y:120,align:"right",color:"cyan"},{text:"river width",x:192,y:142,align:"right",color:"dim",size:16},{text:"not to scale",x:410,y:20,align:"right",color:"dim",size:15}]};
+}
+
+const GEN={line:genLine,perp:genPerp,gcf:genGCF,tri:genTri,dist:genDist,shape:genClassify,sim:genSimilar};
+const SKILLNAME={line:"Equation of a line (L1)",perp:"Parallel and perpendicular (L2)",gcf:"Common factoring (L3)",tri:"Factoring trinomials (L4–L5)",dist:"Length of a line (L6)",shape:"Classifying shapes (L7)",sim:"Similar triangles (L8–L9)"};
+
+/* =================== typed expressions =================== */
+const SUPD={"²":2,"³":3,"⁴":4};
+function tokenize(s){
+  s=String(s).replace(/[−–—]/g,"-").replace(/[×·∙]/g,"*").replace(/X/g,"x").replace(/\s+/g,"");
+  const out=[];let i=0;
+  while(i<s.length){const ch=s[i];
+    if(/\d/.test(ch)||(ch==="."&&/\d/.test(s[i+1]||""))){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;const t=s.slice(i,j);if((t.match(/\./g)||[]).length>1)return{err:"bad"};out.push({t:"n",v:parseFloat(t)});i=j;continue}
+    if(ch==="x"){if(/\d/.test(s[i+1]||""))return{err:"xdigit"};out.push({t:"x"});i++;continue}
+    if(SUPD[ch]){out.push({t:"^"});out.push({t:"n",v:SUPD[ch]});i++;continue}
+    if("+-*^()".includes(ch)){out.push({t:ch});i++;continue}
+    if(ch==="["||ch==="{"){out.push({t:"("});i++;continue}
+    if(ch==="]"||ch==="}"){out.push({t:")"});i++;continue}
+    return{err:"char",ch};
+  }
+  return{tk:out};
+}
+function parseExpr(str){
+  const T0=tokenize(str);if(T0.err)return T0;const tk=T0.tk;if(!tk.length)return{err:"empty"};
+  let i=0;const peek=()=>tk[i],eat=t=>{if(tk[i]&&tk[i].t===t){i++;return true}return false};
+  const sign=()=>{let s=1;while(peek()&&(peek().t==="+"||peek().t==="-")){if(peek().t==="-")s=-s;i++}return s};
+  function expr(){const terms=[{s:sign(),n:term()}];while(peek()&&(peek().t==="+"||peek().t==="-"))terms.push({s:sign(),n:term()});
+    return terms.length===1&&terms[0].s===1?terms[0].n:{k:"add",terms}}
+  function term(){const fs=[factor()];for(;;){const p=peek();if(!p)break;if(p.t==="*"){i++;fs.push(factor());continue}if(p.t==="n"||p.t==="x"||p.t==="("){fs.push(factor());continue}break}return fs.length===1?fs[0]:{k:"mul",fs}}
+  function factor(){let b=primary();while(eat("^")){const e=peek();if(!e||e.t!=="n"||!Number.isInteger(e.v)||e.v>6)throw 0;i++;b={k:"pow",b,e:e.v}}return b}
+  function primary(){const p=peek();if(!p)throw 0;if(p.t==="n"){i++;return{k:"num",v:p.v}}if(p.t==="x"){i++;return{k:"x"}}if(p.t==="("){i++;const e=expr();if(!eat(")"))throw 0;return{k:"par",e}}throw 0}
+  try{const e=expr();if(i<tk.length)return{err:"bad"};return{ast:e}}catch(_){return{err:"bad"}}
+}
+const padd=(a,b)=>{const r=[];for(let k=0;k<Math.max(a.length,b.length);k++)r[k]=(a[k]||0)+(b[k]||0);return r};
+const pmul=(a,b)=>{const r=Array(a.length+b.length-1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y));return r};
+const ptrim=a=>{a=a.map(c=>Math.abs(c-Math.round(c))<1e-9?Math.round(c):c);while(a.length>1&&Math.abs(a[a.length-1])<1e-9)a.pop();return a};
+function pev(n){switch(n.k){case"num":return[n.v];case"x":return[0,1];case"par":return pev(n.e);
+  case"pow":{let r=[1];const b=pev(n.b);for(let k=0;k<n.e;k++)r=pmul(r,b);return r}
+  case"mul":return n.fs.reduce((r,f)=>pmul(r,pev(f)),[1]);
+  case"add":return n.terms.reduce((r,t)=>padd(r,pev(t.n).map(c=>c*t.s)),[0])}}
+const peq=(a,b)=>{a=ptrim(a);b=ptrim(b);return a.length===b.length&&a.every((c,i)=>Math.abs(c-b[i])<1e-9)};
+const polyA=a=>poly(ptrim(a).map((c,p)=>[c,p]).reverse());
+const SUPS=["⁰","¹","²","³","⁴","⁵","⁶"];
+function pshow(n){switch(n.k){case"num":return String(n.v);case"x":return"x";case"par":return"("+pshow(n.e)+")";
+  case"pow":return pshow(n.b)+SUPS[n.e];
+  case"mul":return n.fs.map((f,k)=>(k>0&&(f.k==="num"||(f.k==="pow"&&f.b.k==="num"))?"·":"")+pshow(f)).join("");
+  case"add":return n.terms.map((t,k)=>{const b=pshow(t.n);return k===0?(t.s<0?M+b:b):(t.s<0?" "+M+" ":" + ")+b}).join("")}}
+function factorInfo(ast){
+  let sgn=1,node=ast;
+  if(node.k==="add"){if(node.terms.length>1)return{sum:true,k:1,xp:0,br:[]};sgn=node.terms[0].s;node=node.terms[0].n}
+  const flat=[];const walk=f=>{if(f.k==="mul")f.fs.forEach(walk);else if(f.k==="par"&&(f.e.k==="mul"||f.e.k==="par"))walk(f.e);else if(f.k==="par"&&f.e.k==="add"&&f.e.terms.length===1){sgn*=f.e.terms[0].s;walk(f.e.terms[0].n)}else flat.push(f)};walk(node);
+  let k=sgn,xp=0;const br=[];
+  for(const f of flat){const p=ptrim(pev(f));const nzs=p.map((c,i)=>Math.abs(c)>1e-9?i:-1).filter(i=>i>=0);
+    if(nzs.length<=1){if(!nzs.length){k=0;continue}k*=p[nzs[0]];xp+=nzs[0]}
+    else{const base=f.k==="pow"?f.b:f,e=f.k==="pow"?f.e:1;br.push({p:ptrim(pev(base)),e})}}
+  return{sum:false,k,xp,br};
+}
+function parseRad(s){
+  if(s==null)return null;s=String(s).trim().toLowerCase().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/,"");if(!s)return null;
+  s=s.replace(/squareroot|sqrt|root/g,"√").replace(/[*×·]/g,"");
+  let m=s.match(/^(\d+)?√\(?(\d+)\)?$/);
+  if(m){const k=m[1]?parseInt(m[1],10):1,r=parseInt(m[2],10);return{v:k*Math.sqrt(r),form:`${k===1?"":k}√${r}`,k,r}}
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s),dec:/\./.test(s)};
+  return{bad:true};
+}
+const BADEXPR="I can't read that. Type it like 3x(2x + 5) or (x + 4)(x − 2), and check your brackets.";
+function checkExpr(q,input){
+  const A=q.ans,r=parseExpr(input);
+  if(r.err==="empty")return{s:"empty",msg:"Type your answer first."};
+  if(r.err==="xdigit")return{s:"empty",msg:"For x squared, type x^2 or use the x² button."};
+  if(r.err==="char")return{s:"empty",msg:/[a-z]/i.test(r.ch)?"Use x as the variable.":BADEXPR};
+  if(r.err)return{s:"empty",msg:BADEXPR};
+  const pv=pev(r.ast),T=A.target,info=factorInfo(r.ast);
+  if(!peq(pv,T)){
+    if(q.exprMiss){const m=q.exprMiss(info,pv);if(m)return{s:"miss",msg:m}}
+    const shown=polyA(pv),want=polyA(T);
+    if(peq(pv,T.map(c=>-c)))return{s:"miss",msg:`Check the signs. Your answer expands to ${shown}, the opposite of ${want}.`};
+    const lt=ptrim(T),lp=ptrim(pv);
+    if(lp.length===lt.length){const r0=lp[lp.length-1]/lt[lt.length-1];if(isFinite(r0)&&r0!==0&&Math.abs(r0-1)>1e-9&&lp.every((c,i)=>Math.abs(c-r0*lt[i])<1e-9))return{s:"miss",msg:`Your answer expands to ${shown}, not ${want}. Check the number out front.`}}
+    return{s:"miss",msg:`Expand your answer: it gives ${shown}, not ${want}.`};
+  }
+  if(A.mode!=="factor")return{s:"ok"};
+  if(info.sum)return{s:"miss",msg:"That's equal to the original, but it isn't factored yet. Write it as a product, like 3x(2x + 5)."};
+  for(const b of info.br){const c=b.p,bs=polyA(c),ints=c.every(Number.isInteger);
+    const g=ints?c.reduce((a,v)=>gcd(a,v),0):1;
+    if(ints&&g>1)return{s:"miss",msg:`They're equal, but (${bs}) still has a common factor of ${g}. Take it out too.`};
+    if(Math.abs(c[0])<1e-9)return{s:"miss",msg:`They're equal, but (${bs}) still has a common factor of x. Take out the greatest common factor.`};
+    if(c.length===3&&ints){const D=c[1]*c[1]-4*c[2]*c[0];if(D>=0&&isSq(D))return{s:"miss",msg:`They're equal, but ${bs} can still be factored.`}}}
+  const negLead=info.br.some(b=>b.p[b.p.length-1]<0);
+  return{s:"ok",note:negLead?`It's neater to take the negative out front: ${A.ans}.`:""};
+}
+function checkRad(q,input){
+  const A=q.ans,r=parseRad(input);
+  if(!r)return{s:"empty",msg:"Type your answer first."};
+  if(r.bad)return{s:"empty",msg:"Type a root like 5√2 (use the √ button or type sqrt), or a decimal like 7.07."};
+  const t=Math.sqrt(A.n),simp=radS(A.n);
+  if(r.form&&Math.abs(r.v-t)<1e-7)return{s:"ok",note:r.form===simp?"":`Simplified, that's ${simp}.`};
+  if(r.dec&&Math.abs(r.v-t)<0.051)return{s:"ok",note:`The exact answer is ${simp} ≈ ${t.toFixed(2)}.`};
+  for(const mk of q.mistakes||[])if(Math.abs(r.v-mk.val)<(r.dec?0.051:1e-7))return{s:"miss",msg:mk.msg};
+  if(r.form&&r.k>1&&r.k*r.k*r.r!==A.n&&Math.abs(r.r-A.n)>0)return{s:"miss",msg:`Check your simplifying: ${r.form} = √${r.k*r.k*r.r}. Which perfect square divides into your number?`};
+  return{s:"miss",msg:"Check each step of d = √((Δx)² + (Δy)²)."};
+}
+
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/i,"").replace(/^\+/,"");
+  if(s==="")return null;
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s)};
+  const m=s.match(/^(-?\d+)\/(-?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2]};
+  return{bad:true};
+}
+const near=(a,b)=>Math.abs(a-b)<0.006;
+function check(q,input){
+  const A=q.ans;
+  if(A.type==="expr")return checkExpr(q,input);
+  if(A.type==="rad")return checkRad(q,input);
+  if(A.type==="choice"){if(input===A.correct)return{s:"ok"};return{s:"miss",msg:A.why[input]||"Check your work and try again."}}
+  if(A.type==="pt"){
+    if(!input)return{s:"empty",msg:"Click a grid point first."};
+    if(input[0]===A.pt[0]&&input[1]===A.pt[1])return{s:"ok"};
+    return{s:"miss",msg:q.ptWhy?q.ptWhy(input[0],input[1]):"Not that point."};
+  }
+  const ps=input.map(parseNum);
+  if(ps.some(p=>!p))return{s:"empty",msg:A.fields.length>1?"Fill in every box first.":"Type an answer first."};
+  if(ps.some(p=>p.bad))return{s:"empty",msg:"Use a whole number, a fraction like 2/3, or a decimal like 2.5."};
+  let v=ps.map(p=>p.v),t=A.vals.map(fv);
+  if(A.orderFree){v=[...v].sort((a,b)=>a-b);t=[...t].sort((a,b)=>a-b)}
+  const ok=v.map((x,i)=>near(x,t[i]));
+  if(ok.every(Boolean))return{s:"ok"};
+  if(q.missFn){const raw=ps.map(p=>p.v);const m=q.missFn(raw);if(m)return{s:"miss",msg:m}}
+  for(const mk of q.mistakes||[]){if(!ok[mk.f]&&near(v[mk.f],fv(mk.val)))return{s:"miss",msg:mk.msg}}
+  if(q.fieldMsg){const wrong=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(wrong.length===1&&q.fieldMsg[wrong[0]])return{s:"miss",msg:q.fieldMsg[wrong[0]]}}
+  return{s:"miss",msg:"Check each step of your work."};
+}
+function correctInput(q){const A=q.ans;if(A.type==="expr"||A.type==="rad")return A.ans;if(A.type==="choice")return A.correct;if(A.type==="pt")return A.pt.slice();return A.vals.map(fa)}
+window.__u2={GEN,check,correctInput};
+
+
+
+/* =================== figures (theme-aware) =================== */
+const PAL={
+  light:{amber:"#c25a12",dim:"#8391a8",paper:"#15233b",cyan:"#1f4fb0",yellow:"#15233b",green:"#22803f",red:"#b0302a",grid:"#dbe2ed",axis:"#56637a",bg:"#ffffff",fill:"rgba(31,79,176,.08)",gline:"#c25a12",gdot:"#15233b",label:"#56637a",sel:"#1f4fb0"},
+  dark:{amber:"#ffb24a",dim:"#8b97ab",paper:"#e5ebf4",cyan:"#8db0ff",yellow:"#ffe066",green:"#6fd39a",red:"#ff8f86",grid:"#283344",axis:"#9ba8bc",bg:"#161e2a",fill:"rgba(141,176,255,.12)",gline:"#ffb24a",gdot:"#ffe066",label:"#9ba8bc",sel:"#8db0ff"}
+};
+function isDark(){const t=document.documentElement.getAttribute("data-theme");if(t==="dark")return true;if(t==="light")return false;return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
+let FC=PAL.light;
+const FONT='"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+function figSize(fig){return fig.type==="grid"?[380,380]:[fig.w,fig.h]}
+function gridMap(fig,W,H){const pad=28,lo=fig.min,hi=fig.max,s=(W-2*pad)/(hi-lo);return{pad,lo,hi,s,X:x=>pad+(x-lo)*s,Y:y=>H-pad-(y-lo)*s}}
+function drawFig(cv,fig,st){
+  FC=isDark()?PAL.dark:PAL.light;
+  const [W,H]=figSize(fig),dpr=Math.min(3,window.devicePixelRatio||1);
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  cv.style.maxWidth=W+"px";
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle=FC.bg;c.fillRect(0,0,W,H);
+  c.lineCap="round";c.lineJoin="round";
+  if(fig.type==="grid")return drawGrid(c,fig,st,W,H);
+  for(const it of fig.items){
+    c.setLineDash(it.dash?[7,6]:[]);
+    if(it.poly){c.beginPath();it.poly.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();c.strokeStyle=FC[it.stroke||"amber"];c.lineWidth=it.w||2;c.stroke()}
+    if(it.line){c.beginPath();c.moveTo(it.line[0],it.line[1]);c.lineTo(it.line[2],it.line[3]);c.strokeStyle=FC[it.stroke||"amber"];c.lineWidth=it.w||2;c.stroke()}
+    if(it.ra){const [x,y,sx,sy]=it.ra;c.setLineDash([]);c.beginPath();c.moveTo(x+12*sx,y);c.lineTo(x+12*sx,y+12*sy);c.lineTo(x,y+12*sy);c.strokeStyle=FC.paper;c.lineWidth=1.5;c.stroke()}
+    if(it.dot){c.setLineDash([]);c.fillStyle=FC.yellow;c.beginPath();c.arc(it.dot[0],it.dot[1],4,0,7);c.fill()}
+    if(it.text!==undefined){c.font=`700 ${Math.round((it.size||22)*.78)}px ${FONT}`;c.fillStyle=FC[it.color||"yellow"];c.textAlign=it.align==="left"?"left":it.align==="right"?"right":"center";c.textBaseline="middle";c.fillText(it.text,it.x,it.y)}
+  }
+  c.setLineDash([]);
+}
+function drawGrid(c,fig,st,W,H){
+  const g=gridMap(fig,W,H),{X,Y,lo,hi}=g;
+  const step=hi-lo>12?2:1;
+  c.strokeStyle=FC.grid;c.lineWidth=1;c.beginPath();
+  for(let i=lo;i<=hi;i++){c.moveTo(X(i),Y(lo));c.lineTo(X(i),Y(hi));c.moveTo(X(lo),Y(i));c.lineTo(X(hi),Y(i))}
+  c.stroke();
+  if(lo<=0&&hi>=0){c.strokeStyle=FC.axis;c.lineWidth=2;c.beginPath();c.moveTo(X(0),Y(lo));c.lineTo(X(0),Y(hi));c.moveTo(X(lo),Y(0));c.lineTo(X(hi),Y(0));c.stroke()}
+  c.font=`13px ${FONT}`;c.fillStyle=FC.label;
+  const ax=lo<=0&&hi>=0?0:lo;
+  c.textAlign="center";c.textBaseline="top";for(let i=lo;i<=hi;i+=step){if(i===0&&ax===0)continue;c.fillText(sn(i),X(i),Y(ax)+4)}
+  c.textAlign="right";c.textBaseline="middle";for(let i=lo;i<=hi;i+=step){if(i===0&&ax===0)continue;c.fillText(sn(i),X(ax)-5,Y(i))}
+  if(ax===0){c.textAlign="right";c.textBaseline="top";c.fillText("0",X(0)-3,Y(0)+3)}
+  c.save();c.beginPath();c.rect(X(lo),Y(hi),X(hi)-X(lo),Y(lo)-Y(hi));c.clip();
+  for(const l of fig.lines||[]){c.strokeStyle=FC.gline;c.lineWidth=2.5;c.beginPath();c.moveTo(X(lo),Y(l.m*lo+l.b));c.lineTo(X(hi),Y(l.m*hi+l.b));c.stroke()}
+  if(fig.legs){c.setLineDash([5,5]);c.strokeStyle=FC.dim;c.lineWidth=2;c.beginPath();fig.legs.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.stroke();c.setLineDash([])}
+  for(const pl of fig.polys||[]){c.beginPath();pl.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.closePath();c.fillStyle=FC.fill;c.fill();c.strokeStyle=FC.cyan;c.lineWidth=2.5;c.stroke()}
+  for(const s of fig.segs||[]){c.strokeStyle=FC.cyan;c.lineWidth=2.5;c.beginPath();c.moveTo(X(s[0][0]),Y(s[0][1]));c.lineTo(X(s[1][0]),Y(s[1][1]));c.stroke()}
+  c.restore();
+  const pts=fig.pts||[];
+  const cx0=pts.reduce((s,p)=>s+p.x,0)/(pts.length||1),cy0=pts.reduce((s,p)=>s+p.y,0)/(pts.length||1);
+  for(const p of pts){
+    c.fillStyle=FC.gdot;c.beginPath();c.arc(X(p.x),Y(p.y),4.5,0,7);c.fill();
+    if(p.label){let dx=p.x-cx0,dy=p.y-cy0;const L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;if(pts.length<3){dx=-.7;dy=.7}
+      c.font=`700 19px ${FONT}`;c.fillStyle=FC.paper;c.textAlign="center";c.textBaseline="middle";
+      c.lineWidth=4;c.strokeStyle=FC.bg;c.strokeText(p.label,X(p.x)+dx*16,Y(p.y)-dy*16);c.fillText(p.label,X(p.x)+dx*16,Y(p.y)-dy*16)}
+  }
+  if(st&&st.cur){c.strokeStyle=FC.paper;c.lineWidth=1.5;c.setLineDash([3,3]);c.strokeRect(X(st.cur[0])-9,Y(st.cur[1])-9,18,18);c.setLineDash([])}
+  for(const w of (st&&st.wrong)||[]){c.strokeStyle=FC.red;c.lineWidth=2.5;c.beginPath();c.moveTo(X(w[0])-5,Y(w[1])-5);c.lineTo(X(w[0])+5,Y(w[1])+5);c.moveTo(X(w[0])+5,Y(w[1])-5);c.lineTo(X(w[0])-5,Y(w[1])+5);c.stroke()}
+  if(st&&st.sel){const col=st.ok?FC.green:FC.sel;c.fillStyle=col;c.beginPath();c.arc(X(st.sel[0]),Y(st.sel[1]),4.5,0,7);c.fill();c.strokeStyle=col;c.lineWidth=3;c.beginPath();c.arc(X(st.sel[0]),Y(st.sel[1]),9,0,7);c.stroke();
+    if(st.label){c.font=`700 19px ${FONT}`;c.fillStyle=col;c.textAlign="left";c.textBaseline="bottom";c.lineWidth=4;c.strokeStyle=FC.bg;c.strokeText(st.label,X(st.sel[0])+10,Y(st.sel[1])-6);c.fillText(st.label,X(st.sel[0])+10,Y(st.sel[1])-6)}}
+}
+
+/* =================== page =================== */
+const TAG={line:"Equation of a line",perp:"Parallel & perpendicular",gcf:"Common factoring",tri:"Factoring trinomials",dist:"Length of a line",shape:"Classifying shapes",sim:"Similar triangles"};
+const RULE={line:"y = mx + b: find m first, then b",perp:"Parallel: same slope · Perpendicular: negative reciprocal",gcf:"Take out everything every term shares",tri:"Two numbers that multiply to c and add to b",dist:"d = √((Δx)² + (Δy)²)",shape:"Compare slopes and lengths",sim:"Match corresponding sides, then cross-multiply"};
+const SKILLS=Object.keys(TAG);
+const LEVELNOTES=["Support: smaller whole numbers, positive coordinates and friendly slopes.","On track: like the questions on your worksheets.","Challenge: fraction slopes, negatives, a common factor first, and algebra in similar triangles."];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let skill=store.get("u2.skill","line"),level=store.get("u2.level",1);
+if(!SKILLS.includes(skill)&&skill!=="mixed")skill="line";if(![0,1,2].includes(level))level=1;
+const stats={first:0,done:0,streak:0};
+let q=null,attempts=0,revealed=false,finished=false,choice=null;
+const fst={sel:null,cur:null,wrong:[],ok:false,label:""};
+const figEl=$("fig");
+const redraw=()=>{if(q&&q.fig)drawFig(figEl,q.fig,fst)};
+
+function setPressed(){
+  document.querySelectorAll("#skills button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.skill===skill)));
+  document.querySelectorAll("#levels button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.level===level)));
+  $("levelNote").textContent=LEVELNOTES[level];
+}
+function newQ(){
+  const k=skill==="mixed"?pick(SKILLS):skill;
+  q=GEN[k](level);window.__q=q;attempts=0;revealed=false;finished=false;choice=null;
+  Object.assign(fst,{sel:null,cur:null,wrong:[],ok:false,label:""});
+  $("qtag").textContent=TAG[q.skill]+(skill==="mixed"?" · mixed":"");
+  $("rule").textContent=RULE[q.skill];
+  $("prompt").innerHTML=q.text;
+  const A=q.ans,f=$("answer");
+  if(A.type==="num")f.innerHTML=A.fields.map((fd,i)=>`<span class="fld">${fd.pre?`<span>${fd.pre}</span>`:""}<input id="a${i}" aria-label="${esc(fd.label)}" inputmode="text" spellcheck="false" autocomplete="off">${fd.post?`<span>${fd.post}</span>`:""}</span>`).join("");
+  else if(A.type==="expr"||A.type==="rad"){const keys=A.type==="expr"?[["x²","x squared"],["(","open bracket"],[")","close bracket"]]:[["√","square root"]];
+    f.innerHTML=`<span class="fld">${A.pre?`<span>${A.pre}</span>`:""}<input id="a0" class="wide" aria-label="${esc(A.label)}" inputmode="text" spellcheck="false" autocomplete="off" autocapitalize="off">${A.post?`<span>${A.post}</span>`:""}</span><span class="keys">${keys.map(([k,l])=>`<button type="button" class="key" data-ins="${k}" aria-label="Type ${l}">${k}</button>`).join("")}</span><p class="preview" id="pv">${A.type==="expr"?"Type it like 3x(2x + 5) or (x + 4)(x − 2). Use ^ or the x² button for squares.":"Type an exact root like 3√5 (√ button or sqrt), or a decimal."}</p>`;}
+  else if(A.type==="choice")f.innerHTML=`<div class="choices" role="radiogroup" aria-label="Answer choices">${A.opts.map((o,i)=>`<button type="button" class="opt" role="radio" aria-checked="false" data-i="${i}"><span class="key">${"ABCDEF"[i]}</span><span>${o}</span></button>`).join("")}</div>`;
+  else f.innerHTML=`<span class="fld"><span>D =</span><span class="pt" id="ptTxt">click the grid</span></span>`;
+  if(q.fig){
+    $("figwrap").hidden=false;figEl.className=q.fig.click?"click":"";
+    if(q.fig.click){figEl.tabIndex=0;figEl.setAttribute("role","application");figEl.setAttribute("aria-label","Coordinate grid. Use the arrow keys to move, then press Enter to choose a point.");figEl.removeAttribute("aria-hidden")}
+    else{figEl.removeAttribute("tabindex");figEl.removeAttribute("role");figEl.removeAttribute("aria-label");figEl.setAttribute("aria-hidden","true")}
+    $("fignote").hidden=!q.fig.click;redraw();
+  }else $("figwrap").hidden=true;
+  $("fb").innerHTML="";$("steps").hidden=true;$("steps").innerHTML="";
+  $("checkBtn").disabled=false;$("stepsBtn").textContent="Show steps";
+}
+function fb(type,title,msg){$("fb").innerHTML=`<div class="feedback ${type}"><strong>${title}</strong>${msg||""}</div>`}
+function mark(id,ok){const el=$(id);if(el){el.classList.toggle("ok",ok);el.classList.toggle("no",!ok)}}
+function showSteps(){
+  revealed=true;
+  const items=q.steps.map((s,i)=>`<li><span class="why">${s[0]}</span><span class="work${i===q.steps.length-1?" final":""}">${s[1]}</span></li>`).join("");
+  $("steps").innerHTML=`<h2>Worked steps</h2><ol>${items}</ol>`;$("steps").hidden=false;$("stepsBtn").textContent="Steps shown";
+}
+function updateScore(){$("sFirst").textContent=stats.first;$("sDone").textContent=stats.done;$("sStreak").textContent=stats.streak}
+function win(extra){
+  if(!finished){finished=true;stats.done++;if(attempts===0&&!revealed){stats.first++;stats.streak++}else stats.streak=0;updateScore();}
+  const praise=attempts===0&&!revealed?pick(["Correct!","Nailed it.","That's right.","Correct, first try."]):"Correct!";
+  fb("good",praise,extra||"");$("checkBtn").disabled=true;
+  $("answer").querySelectorAll("input,.opt,.key").forEach(el=>el.disabled=true);
+  $("nextBtn").focus({preventScroll:true});
+}
+function miss(msg){attempts++;fb("bad","Not quite.",msg+(attempts>=2&&!revealed?" You can also press Show steps.":""))}
+function answerText(){const A=q.ans;if(A.type!=="num")return "";
+  if(A.fields===LINEF)return lineH(A.vals[0],A.vals[1]);
+  return A.fields.map((fd,i)=>`${fd.pre?fd.pre+" ":""}${fh(A.vals[i])}${fd.post?" "+fd.post:""}`).join(", ");}
+
+function doCheck(){
+  if(finished)return;
+  const A=q.ans;
+  if(A.type==="choice"){
+    if(choice===null)return fb("hint","Pick an answer first.","Click one of the choices, then press Check.");
+    const r=check(q,choice),b=$("answer").querySelector(`.opt[data-i="${choice}"]`);
+    if(r.s==="ok"){b.classList.add("ok");return win("")}
+    b.classList.add("no");b.disabled=true;b.setAttribute("aria-checked","false");choice=null;
+    return miss(r.msg);
+  }
+  if(A.type==="expr"||A.type==="rad"){
+    const r=check(q,$("a0").value);
+    if(r.s==="empty")return fb("hint",r.msg.startsWith("Type your")?"Type your answer first.":"I can't read that.",r.msg.startsWith("Type your")?"":r.msg);
+    if(r.s==="ok"){mark("a0",true);return win(r.note||"")}
+    mark("a0",false);return miss(r.msg);
+  }
+  if(A.type==="pt"){
+    const r=check(q,fst.sel);
+    if(r.s==="empty")return fb("hint","Pick a point first.","Click the grid where D should go, then press Check.");
+    if(r.s==="ok"){fst.ok=true;redraw();return win(`D is at ${P(A.pt[0],A.pt[1])}.`)}
+    fst.wrong.push(fst.sel.slice());fst.sel=null;fst.label="";redraw();$("ptTxt").textContent="click the grid";
+    return miss(r.msg);
+  }
+  const ins=A.fields.map((_,i)=>$("a"+i));
+  const r=check(q,ins.map(i=>i.value));
+  if(r.s==="empty"){const blank=ins.some(i=>!i.value.trim());return fb("hint",blank?(ins.length>1?"Fill in every box.":"Type your answer first."):"I can't read that number.",blank?(ins.length>1?"Each box needs a number.":"Write your answer in the box."):"Use a whole number, a fraction like 2/3, or a decimal like 2.5.")}
+  const t=A.vals.map(fv);
+  if(r.s==="ok"){ins.forEach(i=>mark(i.id,true));return win(A.vals.some(v=>typeof v!=="number"&&v.d!==1)?answerText():"")}
+  if(A.orderFree){ins.forEach(i=>mark(i.id,false))}
+  else ins.forEach((i,k)=>{const p=parseNum(i.value);mark(i.id,!!(p&&!p.bad&&near(p.v,t[k])))});
+  return miss(r.msg);
+}
+
+function preview(){const inp=$("a0"),pv=$("pv");if(!inp||!pv||!q)return;const v=inp.value.trim();if(!v)return;
+  if(q.ans.type==="expr"){const r=parseExpr(v);pv.innerHTML=r.ast?`You typed: <b>${esc(pshow(r.ast))}</b>`:`You typed: ${esc(v)}`}
+  else if(q.ans.type==="rad"){const r=parseRad(v);pv.innerHTML=r&&!r.bad?`You typed: <b>${esc(r.form||v)}</b>`:`You typed: ${esc(v)}`}}
+$("answer").addEventListener("input",preview);
+/* events */
+$("skills").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;skill=b.dataset.skill;store.set("u2.skill",skill);setPressed();newQ();});
+$("levels").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;level=+b.dataset.level;store.set("u2.level",level);setPressed();newQ();});
+$("checkBtn").addEventListener("click",doCheck);
+$("answer").addEventListener("submit",e=>{e.preventDefault();doCheck();});
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();doCheck();}});
+$("answer").addEventListener("click",e=>{const kb=e.target.closest(".key");if(kb){const inp=$("a0");if(!inp||finished)return;const v=kb.dataset.ins,a0=inp.selectionStart??inp.value.length,b0=inp.selectionEnd??a0;
+    inp.value=inp.value.slice(0,a0)+v+inp.value.slice(b0);inp.focus();inp.setSelectionRange(a0+v.length,a0+v.length);preview();return}
+  const b=e.target.closest(".opt");if(!b||b.disabled||finished)return;choice=+b.dataset.i;
+  $("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));});
+document.addEventListener("keydown",e=>{
+  if(!q||q.ans.type!=="choice"||finished)return;if(e.target.closest&&e.target.closest("input"))return;
+  const i="abcdef".indexOf(e.key.toLowerCase());
+  if(i>=0&&i<q.ans.opts.length){const b=$("answer").querySelector(`.opt[data-i="${i}"]`);if(b&&!b.disabled){choice=i;$("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));}}
+  else if(e.key==="Enter"&&choice!==null&&!(e.target.closest&&e.target.closest("button"))){e.preventDefault();doCheck();}
+});
+function setSel(p){fst.sel=p;fst.label="D";redraw();$("ptTxt").textContent=P(p[0],p[1]);}
+figEl.addEventListener("click",e=>{if(!q||!q.fig||!q.fig.click||finished)return;
+  const r=figEl.getBoundingClientRect(),[W,H]=figSize(q.fig),gm=gridMap(q.fig,W,H);
+  const lx=(e.clientX-r.left)/r.width*W,ly=(e.clientY-r.top)/r.height*H;
+  const x=Math.round((lx-gm.pad)/gm.s+gm.lo),y=Math.round((H-gm.pad-ly)/gm.s+gm.lo);
+  if(x<gm.lo||x>gm.hi||y<gm.lo||y>gm.hi)return;fst.cur=null;setSel([x,y]);});
+figEl.addEventListener("keydown",e=>{if(!q||!q.fig||!q.fig.click||finished)return;
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];
+  if(d){e.preventDefault();const lo=q.fig.min,hi=q.fig.max,c=fst.cur||fst.sel||[Math.round((lo+hi)/2),Math.round((lo+hi)/2)];
+    fst.cur=[Math.max(lo,Math.min(hi,c[0]+d[0])),Math.max(lo,Math.min(hi,c[1]+d[1]))];redraw();return}
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();if(fst.cur){setSel(fst.cur.slice())}else if(fst.sel)doCheck();}
+});
+$("hintBtn").addEventListener("click",()=>fb("hint","Hint",q.hint));
+$("stepsBtn").addEventListener("click",()=>{showSteps();if(!finished){stats.streak=0;updateScore();}});
+$("nextBtn").addEventListener("click",()=>{if(!finished&&(revealed||attempts>0)){stats.done++;stats.streak=0;updateScore();}newQ();const a=$("a0");if(a)a.focus({preventScroll:true});});
+if(window.matchMedia){const mq=matchMedia("(prefers-color-scheme: dark)");(mq.addEventListener?mq.addEventListener("change",redraw):mq.addListener(redraw))}
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
+setPressed();newQ();updateScore();
+})();
+</script>
+</body>
+</html>

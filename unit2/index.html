@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Grade 10 math, Unit 2 review: a self-checking practice page and a retro review game.">
+<meta name="robots" content="noindex">
+<title>Unit 2 Review</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("fonts/press-start-2p.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+/* Layout: a short centred column on graph paper with one card per activity. */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif; --f-pen:"Kalam","Segoe Print",cursive; --f-pix:"Press Start 2P","Courier New",monospace;
+  --g-bg:#0b1024; --g-edge:#f5f0dc; --g-shadow:#060a1c; --g-gold:#ffd34d; --g-drop:#14225e; --g-text:#f5f0dc; --g-go:#7ee8ff;
+}
+@media (prefers-color-scheme: dark){:root{--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:40px 56px;display:flex;flex-direction:column;gap:20px}
+h1{font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h1 span{font-family:var(--f-pen);color:var(--pen)}
+.lede{margin:0;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+a.card{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:20px}
+a.card:hover,a.card:focus-visible{border-color:var(--pen);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--pen) 25%,transparent)}
+a.card h2{margin:0;font-size:1.25rem}
+a.card p{margin:0;color:var(--muted)}
+a.card .go{margin-top:auto;font-weight:700;color:var(--pen)}
+a.game{background:var(--g-bg);border:3px solid var(--g-edge);border-radius:6px;box-shadow:0 0 0 3px var(--g-shadow)}
+a.game:hover,a.game:focus-visible{border-color:var(--g-gold);box-shadow:0 0 0 3px var(--g-shadow),0 0 0 6px color-mix(in srgb,var(--g-gold) 45%,transparent)}
+a.game h2{font-family:var(--f-pix);font-size:1rem;line-height:1.6;font-weight:400;color:var(--g-gold);letter-spacing:.04em;text-shadow:3px 3px 0 var(--g-drop)}
+a.game p{color:var(--g-text)}
+a.game .go{color:var(--g-go);font-family:var(--f-pix);font-size:.72rem;font-weight:400;line-height:1.6}
+footer{font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Unit 2 Review <span>Lines, Factoring &amp; Triangles</span></h1>
+    <p class="lede">Equations of lines, parallel and perpendicular slopes, factoring, the length of a line segment, classifying shapes and similar triangles.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="practice/">
+      <h2>Unit 2 Practice</h2>
+      <p>Pick a skill and a level. Every question is new, and you get a hint and the worked steps if you need them.</p>
+      <span class="go">Start practising →</span>
+    </a>
+    <a class="card game" href="surveyor/">
+      <h2>Bytown Surveyor</h2>
+      <p>Walk the Rideau for Colonel By in 1827, from Bytown to Kingston. Solve a survey task at every lock station.</p>
+      <span class="go">&gt; Start the survey</span>
+    </a>
+  </div>
+  <footer>Nothing you type on these pages is sent anywhere.</footer>
+</div>
+</body>
+</html>
