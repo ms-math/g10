@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Self-checking practice for Grade 10 Unit 3: finite differences, key features, the a-value, vertex form, factored form and word problems.">
+<meta name="robots" content="noindex">
+<title>Unit 3 Quadratic Functions Practice</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one centred column on graph paper — controls, then a single question card (text, figure, answer), then the worked steps in "blue pen". Same look as the Unit 1 and Unit 2 practice pages. */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0; --pen-soft:#e7eefb; --pen-ink:#ffffff;
+  --good:#17703f; --good-soft:#e2f3e9; --bad:#b0302a; --bad-soft:#fbe8e6; --hl:#fff0a0; --hl-ink:#3d3300;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-pen:"Kalam", "Comic Sans MS", "Segoe Print", cursive;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:1.9rem;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 .pen{font-family:var(--f-pen);color:var(--pen);font-weight:700}
+.lede{margin:4px 0 0;color:var(--muted);max-width:52ch}
+.score{display:flex;gap:14px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.score b{color:var(--ink);font-size:1.15rem}
+.controls{display:flex;flex-direction:column;gap:10px}
+.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.95rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--pen);border-color:var(--pen);color:var(--pen-ink)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.levelnote{font-size:.88rem;color:var(--muted);margin:4px 0 0}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:22px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px}
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qtag{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pen)}
+.rule{font-size:.9rem;color:var(--muted)}
+.prompt{font-size:1.05rem;display:flex;flex-direction:column;gap:8px}
+.prompt p{margin:0}
+.prompt .hl{font-weight:700;background:linear-gradient(transparent 58%,var(--hl) 58%);padding-inline:1px}
+.big{font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}
+.figwrap{display:flex;flex-direction:column;gap:4px}
+#fig{display:block;width:100%;height:auto;border:1.5px solid var(--line);border-radius:8px;background:var(--card);touch-action:manipulation}
+#fig.click{cursor:crosshair}
+#fig:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.fignote{font-size:.85rem;color:var(--muted);margin:0}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:1.3rem;font-weight:700}
+.answer .fld{display:inline-flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.answer input{font:inherit;font-weight:700;width:5.2em;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);text-align:center}
+.answer input:focus{outline:none;border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.answer input.ok{border-color:var(--good)} .answer input.no{border-color:var(--bad)}
+.answer .pt{font-variant-numeric:tabular-nums;color:var(--pen)}
+.answer input.wide{width:min(11em,100%);text-align:left}
+.keys{display:inline-flex;gap:6px}
+.key{font:inherit;font-weight:700;font-size:1.05rem;min-width:2.3em;padding:5px 10px;border:1.5px solid var(--pen);border-radius:8px;background:var(--pen-soft);color:var(--pen);cursor:pointer}
+.key:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.preview{flex-basis:100%;margin:0;font-size:.95rem;font-weight:400;color:var(--muted)}
+.preview b{color:var(--pen)}
+.choices{display:flex;flex-direction:column;gap:8px;width:100%;font-size:1.15rem}
+.opt{font:inherit;font-weight:700;text-align:left;padding:9px 14px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
+.opt .key{font-size:.8rem;color:var(--muted);min-width:1.2em}
+.opt:hover{border-color:var(--pen)}
+.opt[aria-checked="true"]{border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.opt.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.no{border-color:var(--bad);color:var(--bad);text-decoration:line-through;opacity:.7;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:.98rem;padding:9px 16px;border-radius:8px;border:1.5px solid var(--pen);background:var(--card);color:var(--pen);cursor:pointer}
+.btn.primary{background:var(--pen);color:var(--pen-ink)}
+.btn.quiet{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px;padding-inline:6px}
+.btn:focus-visible,.seg button:focus-visible,.opt:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.feedback{border-radius:8px;padding:12px 14px;font-size:1rem}
+.feedback.good{background:var(--good-soft);color:var(--good)}
+.feedback.bad{background:var(--bad-soft);color:var(--bad)}
+.feedback.hint{background:var(--hl);color:var(--hl-ink)}
+.feedback strong{display:block;margin-bottom:2px}
+.steps{border-top:1.5px dashed var(--line);padding-top:14px}
+.steps h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.steps ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.steps li::marker{color:var(--muted);font-size:.9rem}
+.why{display:block;font-size:.9rem;color:var(--muted)}
+.work{display:block;font-family:var(--f-pen);color:var(--pen);font-size:1.3rem;line-height:1.35;overflow-x:auto}
+.work.final{display:inline;background:linear-gradient(transparent 55%,var(--hl) 55%);padding-inline:2px}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.8em;line-height:1.05;text-align:center;margin:0 .1em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+table.tbl,table.box{border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums}
+table.tbl th{font-family:var(--f-body);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:left;padding:0 18px 2px 0}
+table.tbl td{padding:0 18px 0 0}
+table.box td{padding:4px 14px;text-align:center}
+table.box tr:first-child td{border-bottom:2px solid var(--pen)}
+table.box td:first-child{border-right:2px solid var(--pen)}
+.yellow{color:var(--pen);font-weight:700;margin-right:2px}
+footer{font-size:.85rem;color:var(--muted)}
+@media (max-width:480px){h1{font-size:1.55rem}.big{font-size:1.25rem}.answer{font-size:1.15rem}.answer input{width:4.4em}.choices{font-size:1.05rem}}
+@media (prefers-reduced-motion:no-preference){.feedback,.steps{animation:rise .18s ease-out}@keyframes rise{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+[hidden]{display:none!important}
+.xyw{overflow-x:auto;max-width:100%}
+table.xy{border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums;font-size:1.05rem}
+table.xy th,table.xy td{border:1.5px solid var(--line);padding:5px 12px;text-align:center;min-width:2.4em}
+table.xy th{background:var(--pen-soft);color:var(--pen);font-weight:700}
+.answer .fld.grow{flex:1 1 280px}
+.answer input.wide{width:min(15em,100%);flex:1 1 auto}
+.answer .ptsfld{flex-wrap:wrap;font-size:1.05rem}
+.answer .pt{font-weight:700}
+#clearPts{font-size:.9rem}
+.big sup{font-size:.65em}
+.steps table.tbl td{white-space:nowrap}
+.steps .work .tbl{font-size:1.05rem}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Unit 3 <span class="pen">Quadratic Functions</span></h1>
+      <p class="lede">Pick a skill and a level. Answer the question and press Check. If you get it wrong, try the hint, then the full steps.</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <span><b id="sFirst">0</b> first try</span>
+      <span><b id="sDone">0</b> done</span>
+      <span><b id="sStreak">0</b> streak</span>
+    </div>
+  </header>
+
+  <section class="controls" aria-label="Choose practice">
+    <div>
+      <div class="label" id="skillLbl">Skill</div>
+      <div class="seg" id="skills" role="group" aria-labelledby="skillLbl">
+        <button data-skill="types">Types of functions <small>L1</small></button>
+        <button data-skill="features">Key features <small>L2</small></button>
+        <button data-skill="avalue">The a-value <small>L3</small></button>
+        <button data-skill="vertex">Vertex form <small>L4–5</small></button>
+        <button data-skill="factored">Factored form <small>L6–7</small></button>
+        <button data-skill="apps">Word problems <small>L8</small></button>
+        <button data-skill="mixed">Mixed review <small>L9</small></button>
+      </div>
+    </div>
+    <div>
+      <div class="label" id="levelLbl">Level</div>
+      <div class="seg" id="levels" role="group" aria-labelledby="levelLbl">
+        <button data-level="0">Support</button>
+        <button data-level="1">On track</button>
+        <button data-level="2">Challenge</button>
+      </div>
+      <p class="levelnote" id="levelNote"></p>
+    </div>
+  </section>
+
+  <main class="card" id="card">
+    <div class="qtop"><span class="qtag" id="qtag"></span><span class="rule" id="rule"></span></div>
+    <div class="prompt" id="prompt"></div>
+    <div class="figwrap" id="figwrap" hidden><canvas id="fig"></canvas><p class="fignote" id="fignote" hidden>Click grid points to plot them (click again to remove). Or use the arrow keys and press Enter.</p></div>
+    <form class="answer" id="answer" autocomplete="off"></form>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn" type="button">Check</button>
+      <button class="btn" id="hintBtn" type="button">Hint</button>
+      <button class="btn quiet" id="stepsBtn" type="button">Show steps</button>
+      <button class="btn" id="nextBtn" type="button">New question</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="steps" id="steps" hidden></div>
+  </main>
+
+  <footer>Type whole numbers, negatives (−3 or -3), fractions (2/3 or -2/3) or decimals. Type equations the way you would on paper, like y = −2(x + 3)² + 8 or y = 1/2(x − 1)(x + 5). Use the ² button or ^2 for squares. Every question is new, so you can keep practising.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* =================== math helpers =================== */
+const M="−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const isInt=v=>Math.abs(v-Math.round(v))<1e-9;
+function fmt(v){if(isInt(v))v=Math.round(v);else v=Math.round(v*100)/100;return v<0?M+Math.abs(v):String(v)}
+const sn=n=>fmt(n);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fv=x=>typeof x==="number"?x:x.n/x.d;
+const fmul=(x,k)=>typeof x==="number"?x*k:F(x.n*k,x.d);
+const fa=x=>typeof x==="number"?String(x):(x.d===1?String(x.n):x.n+"/"+x.d);
+function fh(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}<span class="fr"><span>${Math.abs(x.n)}</span><span>${x.d}</span></span>`}
+function fs(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}${Math.abs(x.n)}/${x.d}`}
+const P=(x,y)=>`(${sn(x)}, ${sn(y)})`;
+const par=v=>v<0?`(${sn(v)})`:sn(v);
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+function XY(xs,ys,xl="x",yl="y"){return `<div class="xyw"><table class="xy"><tr><th>${xl}</th>${xs.map(v=>`<td>${typeof v==="string"?v:sn(v)}</td>`).join("")}</tr><tr><th>${yl}</th>${ys.map(v=>`<td>${typeof v==="string"?v:sn(v)}</td>`).join("")}</tr></table></div>`}
+const diffs=v=>v.slice(1).map((y,i)=>Math.round((y-v[i])*1e6)/1e6);
+const allSame=v=>v.every(x=>Math.abs(x-v[0])<1e-9);
+/* quadratic forms */
+function coefH(a){const v=fv(a);return v===1?"":v===-1?M:fh(a)}
+function coefS(a){const v=fv(a);return v===1?"":v===-1?M:fs(a)}
+const brV=h=>h===0?"x":`(x ${h>0?M:"+"} ${fmt(Math.abs(h))})`;
+const kS=k=>Math.abs(k)<1e-9?"":(k>0?` + ${fmt(k)}`:` ${M} ${fmt(-k)}`);
+const vfH=(a,h,k,v="y",x="x")=>`${v} = ${coefH(a)}${h===0?x+"²":brV(h).replace(/x/,x)+"²"}${kS(k)}`;
+const vfS=(a,h,k)=>`y = ${coefS(a)}${h===0?"x²":brV(h)+"²"}${kS(k)}`;
+function zord(s,t){return t===0?[t,s]:[s,t]}
+const ffH=(a,s,t,v="y")=>{const [p,q]=zord(s,t);return `${v} = ${coefH(a)}${brV(p)}${brV(q)}`};
+const ffS=(a,s,t)=>{const [p,q]=zord(s,t);return `y = ${coefS(a)}${brV(p)}${brV(q)}`};
+const vco=(a,h,k)=>{const v=fv(a);return[v*h*h+k,-2*v*h,v]};
+const fco=(a,s,t)=>{const v=fv(a);return[v*s*t,-v*(s+t),v]};
+const qv=(a,h,k,x)=>fv(a)*(x-h)*(x-h)+k;
+function stdH(c){/* c ascending [c0,c1,c2] -> y = ax² + bx + c */const t=[[c[2],"x²"],[c[1],"x"],[c[0],""]];let s="";for(const [v,p] of t){if(Math.abs(v)<1e-9)continue;const a=Math.abs(v);const body=p===""?fmt(a):(a===1?"":fmt(a))+p;s+=s===""?(v<0?M:"")+body:(v<0?` ${M} `:" + ")+body}return "y = "+(s||"0")}
+const SP=a=>[fmul(a,1),fmul(a,3),fmul(a,5)];
+const spH=a=>SP(a).map(fh).join(", ");
+const AL={0:[F(1),F(-1)],1:[F(1),F(-1),F(2),F(-2)],2:[F(2),F(-2),F(1,2),F(-1,2),F(3),F(-3)]};
+function rangeFor(pts,ex=1,max=20){
+  const xs=pts.map(p=>p[0]).concat([0]),ys=pts.map(p=>p[1]).concat([0]);
+  const x=[Math.floor(Math.min(...xs))-ex,Math.ceil(Math.max(...xs))+ex],y=[Math.floor(Math.min(...ys))-ex,Math.ceil(Math.max(...ys))+ex];
+  if(x[1]-x[0]>max||y[1]-y[0]>max)return null;
+  for(const r of [x,y]){let f=0;while(r[1]-r[0]<10){if(f++%2)r[1]++;else r[0]--}}
+  return{x,y};
+}
+const dir=a=>fv(a)>0?"up":"down";
+
+/* =================== question generators =================== */
+/* Each returns {skill, text, fig?, ans:{type,...}, steps:[[why,work],...], hint, mistakes?, fieldMsg?, missFn?, ptsWhy?} */
+
+/* ---- L1 types of functions ---- */
+const KINDS=["Linear","Quadratic","Other"];
+function typeWhy(kind,d1,d2){
+  return KINDS.map(k=>{if(k===kind)return "";
+    if(k==="Linear")return "The first differences are not all the same, so it isn't linear.";
+    if(k==="Quadratic")return kind==="Linear"?"The first differences are already constant, so it's linear.":"The second differences are not constant, so it isn't quadratic.";
+    return kind==="Linear"?"The first differences are constant. That's the test for linear.":"Look at the second differences: they're all the same.";});
+}
+function diffSteps(xs,ys,kind,step){
+  const d1=diffs(ys),d2=diffs(d1);
+  const rows=xs.map((x,i)=>[sn(x),sn(ys[i]),i>0?`${par(ys[i])} ${M} ${par(ys[i-1])} = ${sn(d1[i-1])}`:"",i>1?sn(d2[i-2]):""]);
+  const out=[[`The x-values go up by ${step} each time, so finite differences will work`,TBL(rows,["x","y","1st diff.","2nd diff."])]];
+  if(kind==="Linear")out.push(["The first differences are all the same",`${d1.map(sn).join(", ")}: constant`]);
+  else{out.push(["The first differences change, so it isn't linear",d1.map(sn).join(", ")]);
+    out.push([kind==="Quadratic"?"The second differences are all the same":"The second differences change too",`${d2.map(sn).join(", ")}${kind==="Quadratic"?": constant":""}`]);}
+  out.push(["Conclusion",`∴ ${kind}`]);
+  return out;
+}
+function genTypes(L){
+  const type=pick(L===0?["table","table","eqn","value"]:L===1?["table","table","eqn","value","next"]:["table","table","eqn","value","next"]);
+  if(type==="table"){
+    for(let t=0;t<200;t++){
+      const kind=pick(KINDS);let step=L===2?pick([1,2,3]):1,f,x0;
+      if(kind==="Linear"){const m=nz(-5,5),b=ri(-9,9);f=x=>m*x+b;x0=ri(-3,1);}
+      else if(kind==="Quadratic"){const a=pick(L===0?[1,-1]:[1,-1,2,-2,3]),h=ri(-2,3),k=ri(-8,8);f=x=>a*(x-h)*(x-h)+k;x0=ri(-2,1);}
+      else{step=Math.min(step,2);const o=pick(["exp","cube","exp"]);const d=ri(-6,6);
+        if(o==="exp"){f=x=>2**x+d;x0=0}else{f=x=>x*x*x+d;x0=step===1?ri(-2,0):-4}}
+      const xs=[0,1,2,3,4].map(i=>x0+i*step),ys=xs.map(f);
+      if(ys.some(y=>Math.abs(y)>300))continue;
+      const d1=diffs(ys),d2=diffs(d1);
+      const real=allSame(d1)?"Linear":allSame(d2)?"Quadratic":"Other";if(real!==kind)continue;
+      return{skill:"types",text:`<p>Use finite differences to decide whether the table is <span class="hl">linear, quadratic or other</span>.</p>${XY(xs,ys)}`,
+        ans:{type:"choice",opts:KINDS,correct:KINDS.indexOf(kind),why:typeWhy(kind,d1,d2)},
+        steps:diffSteps(xs,ys,kind,step),
+        hint:"Subtract each y-value from the next one (next − previous). If those first differences aren't constant, find the differences of the differences."};
+    }
+  }
+  if(type==="eqn"){
+    const kind=pick(KINDS);let eq,why;
+    if(kind==="Linear"){const v=ri(0,2),m=nz(-6,6),b=nz(-9,9);
+      if(v===0){eq=`y = ${m===1?"":m===-1?M:sn(m)}x ${b<0?M:"+"} ${Math.abs(b)}`;why=`The highest exponent on x is 1.`}
+      else if(v===1){const A=ri(1,5),B=nz(-6,6),C=ri(1,12);eq=`${A===1?"":A}x ${B<0?M:"+"} ${Math.abs(B)===1?"":Math.abs(B)}y = ${C}`;why="x and y are both to the power of 1, so it's linear (a straight line)."}
+      else{const p=nz(-5,5);eq=`y = ${m===1?"":m===-1?M:sn(m)}${brV(p)}`;why=`Expanding gives ${m===1?"":m===-1?M:sn(m)}x ${m*-p<0?M:"+"} ${Math.abs(m*p)}. The highest exponent on x is 1.`}}
+    else if(kind==="Quadratic"){const v=ri(0,3);
+      if(v===0){const b=nz(-8,8),c=nz(-9,9);eq=stdH([c,b,pick([1,-1,2,3,-2])]);why="The highest exponent on x is 2."}
+      else if(v===1){const s=nz(-6,6),t=nz(-6,6);eq=ffH(F(pick([1,1,2,-1])),s,t);why="Multiplying the two brackets gives an x² term, so the highest exponent is 2."}
+      else if(v===2){eq=vfH(F(pick([1,-1,2,-3])),nz(-5,5),nz(-9,9));why="Squaring the bracket gives an x² term, so the highest exponent is 2."}
+      else{const c=ri(2,12);eq=`y = ${c} ${M} ${pick(["","2","3"])}x²`;why="The highest exponent on x is 2."}}
+    else{const v=ri(0,2);
+      if(v===0){const d=nz(-9,9);eq=`y = 2<sup>x</sup> ${d<0?M:"+"} ${Math.abs(d)}`;why="x is in the exponent, so it's not linear or quadratic."}
+      else if(v===1){const b=ri(1,6);eq=`y = x³ ${M} ${b}x`;why="The highest exponent on x is 3."}
+      else{eq=`y = ${ri(2,4)}(${pick(["1.5","2","3"])})<sup>x</sup>`;why="x is in the exponent, so it's not linear or quadratic."}}
+    return{skill:"types",text:`<p>Is this function <span class="hl">linear, quadratic or other</span>?</p><p class="big">${eq}</p>`,
+      ans:{type:"choice",opts:KINDS,correct:KINDS.indexOf(kind),why:KINDS.map(k=>k===kind?"":"Look for the highest exponent on x. "+(kind==="Other"?"Is x in an exponent, or cubed?":"Expand any brackets first."))},
+      steps:[["Find the highest exponent on x",why],["Conclusion",`∴ ${kind}`]],
+      hint:"Highest exponent 1: linear. Highest exponent 2: quadratic. Anything else (x³, or x in an exponent): other."};
+  }
+  if(type==="value"){
+    const a=pick(L===0?[1]:L===1?[1,-1,2,-2]:[2,-2,3,-3]),b=nz(-6,6),c=ri(-9,9),x=L===2?nz(-4,4):ri(-3,-1);
+    const y=a*x*x+b*x+c,alt=a*(-x*x)+b*x+c,alt2=a*x*x-b*x+c;
+    const mist=[];if(alt!==y)mist.push({f:0,val:alt,msg:`Square the whole number, sign and all: ${par(x)}² = ${x*x}, not ${M}${x*x}.`});
+    if(alt2!==y&&alt2!==alt)mist.push({f:0,val:alt2,msg:`Check the middle term: ${b}(${sn(x)}) = ${sn(b*x)}.`});
+    return{skill:"types",text:`<p>Find the y-value when x = ${sn(x)}. Show the substitution.</p><p class="big">${stdH([c,b,a])}</p>`,
+      ans:{type:"num",fields:[{pre:"y =",label:"y-value"}],vals:[y]},mistakes:mist,
+      steps:[[`Sub x = ${sn(x)} into every x`,`y = ${a===1?"":a===-1?M:a}(${sn(x)})² ${b<0?M:"+"} ${Math.abs(b)}(${sn(x)})${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""}`],["Square first, then multiply",`y = ${a===1?"":a===-1?M:a}(${x*x}) ${b*x<0?M:"+"} ${Math.abs(b*x)}${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""}`],["Add",`y = ${sn(a*x*x)} ${b*x<0?M:"+"} ${Math.abs(b*x)}${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""} = ${sn(y)}`],["Conclusion",`∴ The point is ${P(x,y)}`]],
+      hint:`Put brackets around ${sn(x)} everywhere you see x. Square before you multiply.`};
+  }
+  /* next value from differences */
+  const a=pick(L===1?[1,-1,2]:[2,-2,3,-3]),h=ri(-1,3),k=ri(-6,6),x0=ri(-1,1);
+  const xs=[0,1,2,3].map(i=>x0+i),ys=xs.map(x=>a*(x-h)*(x-h)+k),d1=diffs(ys),d2=diffs(d1);
+  const nx=x0+4,nd=d1[2]+d2[0],ny=ys[3]+nd;
+  return{skill:"types",text:`<p>This table is quadratic. Use finite differences to find the missing y-value.</p>${XY(xs.concat([nx]),ys.map(sn).concat(["?"]))}`,
+    ans:{type:"num",fields:[{pre:"y =",label:"missing y-value"}],vals:[ny]},
+    mistakes:[{f:0,val:ys[3]+d1[2],msg:"The first differences change. Use the second difference to find the next first difference."}],
+    steps:[["First differences",d1.map(sn).join(", ")],["Second differences (constant)",d2.map(sn).join(", ")],["The next first difference",`${sn(d1[2])} + ${par(d2[0])} = ${sn(nd)}`],["Add it to the last y-value",`${sn(ys[3])} + ${par(nd)} = ${sn(ny)}`],["Conclusion",`∴ y = ${sn(ny)}`]],
+    hint:"Find the second difference first. It stays the same, so it tells you the next first difference."};
+}
+
+/* ---- L2 key features ---- */
+function niceParab(L,maxY=10){
+  for(let t=0;t<500;t++){
+    const d=ri(1,L===0?2:3),a=pick(AL[Math.min(L,1)].concat(L===2?[F(1,2),F(-1,2)]:[]));
+    const av=fv(a),k=-av*d*d;if(!isInt(k)||Math.abs(k)>9)continue;
+    const h=ri(-4,4),s=h-d,u=h+d,yint=av*s*u;if(!isInt(yint)||Math.abs(yint)>maxY)continue;
+    if(s===0||u===0)continue;
+    return{a,h,k,s,t:u,yint};
+  }
+}
+function parabFig(p,mark){
+  const pts=mark.map(m=>m);const all=pts.concat([[p.h-3,qv(p.a,p.h,p.k,p.h-3)],[p.h+3,qv(p.a,p.h,p.k,p.h+3)]]).filter(q=>Math.abs(q[1])<=11);
+  const r=rangeFor(pts.concat(all.filter(q=>Math.abs(q[1]-p.k)<=8)),1,18);if(!r)return null;
+  return{type:"grid",x:r.x,y:r.y,curves:[{a:fv(p.a),h:p.h,k:p.k}],pts:pts.map(q=>({x:q[0],y:q[1]}))};
+}
+function genFeatures(L,force){
+  const type=force||pick(L===0?["gVertex","gZeros","gYint","eVertex"]:L===1?["gVertex","gZeros","gYint","maxmin","eVertex","eZeros","table"]:["gYint","maxmin","eVertex","eZeros","eYint","table","table"]);
+  if(type[0]==="g"||type==="maxmin"){
+    for(let t=0;t<100;t++){
+      const p=niceParab(L);if(type==="maxmin"&&p.h===p.k)continue;
+      const fig=parabFig(p,[[p.h,p.k],[p.s,0],[p.t,0],[0,p.yint]]);if(!fig)continue;
+      const base={skill:"features",fig};
+      const vs=[["Read the vertex, the turning point",`(${sn(p.h)}, ${sn(p.k)})`],["Axis of symmetry: the vertical line through the vertex",`x = ${sn(p.h)}`],["Optimal value: the y-value of the vertex",`y = ${sn(p.k)} (a ${fv(p.a)<0?"maximum":"minimum"})`],["x-intercepts: where the graph crosses the x-axis",`${P(p.s,0)} and ${P(p.t,0)}`],["y-intercept: where the graph crosses the y-axis",P(0,p.yint)]];
+      if(type==="gVertex")return Object.assign(base,{text:`<p>State the <span class="hl">vertex</span> and the <span class="hl">axis of symmetry</span> of the parabola.</p>`,
+        ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate of the vertex"},{pre:",",post:")",label:"y-coordinate of the vertex"},{pre:"Axis of symmetry: x =",label:"axis of symmetry"}],vals:[p.h,p.k,p.h]},
+        fieldMsg:["Your y-value is right. Check the x-coordinate of the turning point.","Check the y-coordinate of the turning point.","The axis is the vertical line through the vertex, so it uses the vertex's x-value."],
+        mistakes:[{f:2,val:p.k,msg:"The axis of symmetry is a vertical line, x = the vertex's x-value."}],
+        steps:vs.slice(0,2).concat([["Conclusion",`∴ Vertex (${sn(p.h)}, ${sn(p.k)}), axis x = ${sn(p.h)}`]]),
+        hint:"The vertex is the turning point at the top or bottom. The axis of symmetry is the vertical line through it, written x = …"});
+      if(type==="gZeros")return Object.assign(base,{text:`<p>State the <span class="hl">x-intercepts</span> (zeros) of the parabola.</p>`,
+        ans:{type:"num",fields:[{pre:"x =",label:"first x-intercept"},{pre:"and x =",label:"second x-intercept"}],vals:[p.s,p.t],orderFree:true},
+        missFn:v=>v.includes(p.yint)?"The y-intercept is where it crosses the y-axis. x-intercepts are on the x-axis, where y = 0.":null,
+        steps:[vs[3],["Check: they are the same distance from the axis",`x = ${sn(p.h)} is halfway between ${sn(p.s)} and ${sn(p.t)} ✓`],["Conclusion",`∴ x = ${sn(p.s)} and x = ${sn(p.t)}`]],
+        hint:"x-intercepts are where the graph crosses the x-axis (y = 0). There are two of them here."});
+      if(type==="gYint")return Object.assign(base,{text:`<p>State the <span class="hl">y-intercept</span> and the <span class="hl">optimal value</span> of the parabola.</p>`,
+        ans:{type:"num",fields:[{pre:"y-intercept: (0,",post:")",label:"y-intercept"},{pre:"Optimal value: y =",label:"optimal value"}],vals:[p.yint,p.k]},
+        fieldMsg:["Your optimal value is right. The y-intercept is where the graph crosses the y-axis.","Your y-intercept is right. The optimal value is the y-value of the vertex."],
+        steps:[vs[4],vs[2],["Conclusion",`∴ y-intercept (0, ${sn(p.yint)}), optimal value y = ${sn(p.k)}`]],
+        hint:"y-intercept: where the graph crosses the y-axis (x = 0). Optimal value: the y-value at the vertex."});
+      const opts=[`Maximum value of y = ${sn(p.k)}`,`Minimum value of y = ${sn(p.k)}`,`Maximum value of y = ${sn(p.h)}`,`Minimum value of y = ${sn(p.h)}`];
+      const ci=fv(p.a)<0?0:1;
+      return Object.assign(base,{text:`<p>Does this parabola have a maximum or a minimum? What is the <span class="hl">optimal value</span>?</p>`,
+        ans:{type:"choice",opts,correct:ci,why:opts.map((o,i)=>i===ci?"":i>=2?"The optimal value is a y-value: the y-coordinate of the vertex.":`It opens ${dir(p.a)}, so the vertex is the ${ci===0?"highest":"lowest"} point.`)},
+        steps:[["Opening direction",`It opens ${dir(p.a)}, so the vertex is a ${ci===0?"maximum":"minimum"}`],["Optimal value = the y-value of the vertex",`Vertex (${sn(p.h)}, ${sn(p.k)}) → y = ${sn(p.k)}`],["Conclusion",`∴ ${opts[ci]}`]],
+        hint:"Opens down: the vertex is the highest point (maximum). Opens up: lowest point (minimum). The optimal value is its y-value."});
+    }
+  }
+  if(type==="eVertex"){
+    const a=pick(AL[L]),h=nz(-6,6),k=ri(-9,9);
+    return{skill:"features",text:`<p>State the <span class="hl">vertex</span> of the parabola.</p><p class="big">${vfH(a,h,k)}</p>`,
+      ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate of the vertex"},{pre:",",post:")",label:"y-coordinate of the vertex"}],vals:[h,k]},
+      mistakes:[{f:0,val:-h,msg:`Watch the sign of h. ${brV(h)} is (x ${M} (${sn(h)})), so h = ${sn(h)}.`},...(k?[{f:1,val:-k,msg:`k keeps its sign: k = ${sn(k)}.`}]:[])],
+      steps:[["Match it to y = a(x − h)² + k",`h = ${sn(h)}, k = ${sn(k)}`],h<0?["(x + something) means h is negative",`${brV(h)} = (x ${M} (${sn(h)}))`]:["The bracket is (x − h)",`${brV(h)} → h = ${sn(h)}`],["Conclusion",`∴ Vertex (${sn(h)}, ${sn(k)})`]],
+      hint:"In y = a(x − h)² + k the vertex is (h, k). The bracket shows x minus h, so flip the sign you see in the bracket. k keeps its sign."};
+  }
+  if(type==="eZeros"){
+    let s,u;do{s=nz(-7,7);u=nz(-7,7)}while(s===u);const a=pick(AL[L]);
+    return{skill:"features",text:`<p>State the <span class="hl">x-intercepts</span> (zeros) of the parabola.</p><p class="big">${ffH(a,s,u)}</p>`,
+      ans:{type:"num",fields:[{pre:"x =",label:"first x-intercept"},{pre:"and x =",label:"second x-intercept"}],vals:[s,u],orderFree:true},
+      missFn:v=>{const w=[...v].sort((x,y)=>x-y),r=[-s,-u].sort((x,y)=>x-y);return w[0]===r[0]&&w[1]===r[1]?`Set each bracket equal to 0. ${brV(s)} = 0 gives x = ${sn(s)}.`:null},
+      steps:[["Set y = 0",`0 = ${coefH(a)}${brV(s)}${brV(u)}`],["One of the brackets must be 0",`${brV(s).replace(/[()]/g,"")} = 0 or ${brV(u).replace(/[()]/g,"")} = 0`],["Solve each one",`x = ${sn(s)} or x = ${sn(u)}`],["Conclusion",`∴ The zeros are ${P(s,0)} and ${P(u,0)}`]],
+      hint:"In y = a(x − s)(x − t), the zeros are x = s and x = t. Set each bracket to 0 and solve."};
+  }
+  if(type==="eYint"){
+    const fac=Math.random()<.5;
+    if(fac){let s,u;do{s=nz(-6,6);u=nz(-6,6)}while(s===u);const a=pick([2,-2,3,-1,F(1,2)].map(v=>typeof v==="number"?F(v):v));const y=fv(a)*s*u;if(!isInt(y))return genFeatures(L);
+      return{skill:"features",text:`<p>Find the <span class="hl">y-intercept</span>.</p><p class="big">${ffH(a,s,u)}</p>`,ans:{type:"num",fields:[{pre:"y-intercept: (0,",post:")",label:"y-intercept"}],vals:[y]},
+        mistakes:[{f:0,val:Math.abs(y),msg:"Watch the signs: multiply carefully, one bracket at a time."},{f:0,val:-y,msg:"Check the signs when you sub x = 0."}],
+        steps:[["The y-intercept is where x = 0",`y = ${coefH(a)}(0 ${s>0?M:"+"} ${Math.abs(s)})(0 ${u>0?M:"+"} ${Math.abs(u)})`],["Multiply",`y = ${fh(a)}(${sn(-s)})(${sn(-u)}) = ${sn(y)}`],["Conclusion",`∴ (0, ${sn(y)})`]],hint:"Sub x = 0 into both brackets, then multiply."};}
+    const a=pick([1,-1,2,-3]),b=nz(-9,9),c=nz(-12,12);
+    return{skill:"features",text:`<p>Find the <span class="hl">y-intercept</span>.</p><p class="big">${stdH([c,b,a])}</p>`,ans:{type:"num",fields:[{pre:"y-intercept: (0,",post:")",label:"y-intercept"}],vals:[c]},
+      steps:[["In standard form y = ax² + bx + c, the y-intercept is c",`Sub x = 0: every x term is 0, so y = ${sn(c)}`],["Conclusion",`∴ (0, ${sn(c)})`]],hint:"Sub x = 0. In standard form, that leaves just c."};
+  }
+  /* table: find vertex by symmetry */
+  for(let t=0;t<200;t++){
+    const a=pick(L===1?[1,-1,2,-2]:[2,-2,3,-3,1]),h=ri(-3,4),k=ri(-9,9),r=ri(2,4);
+    const xs=Array.from({length:7},(_,i)=>h-r+i),ys=xs.map(x=>a*(x-h)*(x-h)+k);if(ys.some(y=>Math.abs(y)>40))continue;
+    const d2=diffs(diffs(ys))[0];
+    return{skill:"features",text:`<p>Use the table to find the <span class="hl">vertex</span> of the parabola.</p>${XY(xs,ys)}`,
+      ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate of the vertex"},{pre:",",post:")",label:"y-coordinate of the vertex"}],vals:[h,k]},
+      steps:[["Find two x-values with the same y-value",`y = ${sn(ys[xs.indexOf(h-1)])} at x = ${sn(h-1)} and x = ${sn(h+1)}`],["The axis is halfway between them",`x = (${sn(h-1)} + ${par(h+1)}) ÷ 2 = ${sn(h)}`],["Read the y-value there",`at x = ${sn(h)}, y = ${sn(k)}`],["Second differences",`${sn(d2)}: ${d2>0?"positive, so it opens up (a minimum)":"negative, so it opens down (a maximum)"}`],["Conclusion",`∴ Vertex (${sn(h)}, ${sn(k)})`]],
+      hint:"Find two points with the same y-value. The vertex is halfway between them."};
+  }
+}
+
+/* ---- L3 a-value ---- */
+function genAvalue(L,force){
+  const type=force||pick(L===0?["fromSP","toSP","graph"]:L===1?["fromSP","toSP","graph","alg","alg"]:["alg","alg","graph","toSP","fromSP"]);
+  if(type==="fromSP"){const a=pick(L===2?[F(1,2),F(-1,2),F(3,2),F(-3),F(4)]:L===1?[F(2),F(-2),F(3),F(-1),F(1,2)]:[F(1),F(-1),F(2),F(-2)]);
+    return{skill:"avalue",text:`<p>From the vertex, a parabola's step pattern is</p><p class="big">${spH(a)}</p><p>What is the <span class="hl">a-value</span>?</p>`,
+      ans:{type:"num",fields:[{pre:"a =",label:"a-value"}],vals:[a]},
+      mistakes:[{f:0,val:fmul(a,3),msg:"That's the second step. a is the first step: the change in y one unit from the vertex."},{f:0,val:fmul(a,-1),msg:"Check the sign. Negative steps mean the parabola opens down."}],
+      steps:[["The step pattern is a, 3a, 5a",`a, 3a, 5a = ${spH(a)}`],["So a is the first step",`a = ${fh(a)}`],["Check: 3a and 5a",`3(${fh(a)}) = ${fh(fmul(a,3))}, 5(${fh(a)}) = ${fh(fmul(a,5))} ✓`],["Conclusion",`∴ a = ${fh(a)}`]],
+      hint:"The base step pattern 1, 3, 5 gets multiplied by a. Divide each step by 1, 3 and 5."};}
+  if(type==="toSP"){const a=pick(AL[L]),h=nz(-6,6),k=ri(-9,9),A=SP(a);
+    return{skill:"avalue",text:`<p>Write the <span class="hl">step pattern</span> for</p><p class="big">${vfH(a,h,k)}</p>`,
+      ans:{type:"num",fields:[{pre:"",post:",",label:"first step"},{pre:"",post:",",label:"second step"},{pre:"",label:"third step"}],vals:A},
+      missFn:v=>{if(fv(a)!==1&&v[0]===1&&v[1]===3&&v[2]===5)return `Multiply the base step pattern 1, 3, 5 by a = ${fs(a)}.`;
+        if(Math.abs(v[1]-v[0]-2)<1e-9&&Math.abs(v[2]-v[1]-2)<1e-9&&Math.abs(v[0]-fv(a))<1e-9&&fv(a)!==1)return "Multiply, don't add: the steps are a, 3a, 5a.";
+        if(v.every((x,i)=>Math.abs(x+fv(A[i]))<1e-9))return `a = ${fs(a)} is ${fv(a)<0?"negative, so every step goes down":"positive, so every step goes up"}.`;return null},
+      steps:[["Read a from y = a(x − h)² + k",`a = ${fh(a)}`],["Multiply 1, 3, 5 by a",`${fh(a)} × 1, ${fh(a)} × 3, ${fh(a)} × 5`],["Conclusion",`∴ ${spH(a)}`]],
+      hint:"Only a changes the step pattern. Multiply 1, 3, 5 by a. The vertex doesn't matter here."};}
+  if(type==="graph"){
+    for(let t=0;t<200;t++){const a=L===0?pick([1,-1,2,-2]):nz(-3,3)||1,h=ri(-4,4),k=a>0?ri(-8,2):ri(-2,8);
+      const pts=[[h,k],[h+1,k+a]];const all=[[h-2,k+4*a],[h+2,k+4*a]];const r=rangeFor(pts.concat(all),1,18);if(!r)continue;
+      return{skill:"avalue",text:`<p>The vertex and the point one unit to its right are marked. Find the <span class="hl">a-value</span>.</p>`,
+        fig:{type:"grid",x:r.x,y:r.y,curves:[{a,h,k}],pts:pts.map(p=>({x:p[0],y:p[1]}))},
+        ans:{type:"num",fields:[{pre:"a =",label:"a-value"}],vals:[a]},mistakes:[{f:0,val:-a,msg:`From the vertex the graph goes ${a>0?"up":"down"}, so a is ${a>0?"positive":"negative"}.`}],
+        steps:[["Vertex",`(${sn(h)}, ${sn(k)})`],["One unit right of the vertex",`(${sn(h+1)}, ${sn(k+a)})`],["The change in y is a",`${sn(k+a)} ${M} ${par(k)} = ${sn(a)}`],["Conclusion",`∴ a = ${sn(a)}, step pattern ${spH(F(a))}`]],
+        hint:"Start at the vertex and move right 1. How far up or down do you go? That's a."};}
+  }
+  /* algebra */
+  for(let t=0;t<300;t++){
+    const h=ri(-5,5),k=ri(-9,9),dx=pick([2,3,4])*pick([1,-1]);let a;
+    if(L===2&&Math.random()<.7){const m=nz(-12,12);a=F(m,dx*dx);if(a.d===1)continue}else a=F(nz(-3,3));
+    const x1=h+dx,y1=k+fv(a)*dx*dx;if(!isInt(y1)||Math.abs(y1)>60)continue;
+    return{skill:"avalue",text:`<p>A parabola has its vertex at <span class="hl">(${sn(h)}, ${sn(k)})</span> and passes through <span class="hl">(${sn(x1)}, ${sn(y1)})</span>. Use algebra to find the a-value.</p>`,
+      ans:{type:"num",fields:[{pre:"a =",label:"a-value"}],vals:[a]},
+      mistakes:[{f:0,val:y1-k,msg:`The step pattern shortcut only works one unit from the vertex. This point is ${Math.abs(dx)} units away, so sub it in.`},{f:0,val:(y1-k)/dx,msg:`(x − h) is squared: (${sn(dx)})² = ${dx*dx}.`}],
+      steps:[["Sub the vertex into y = a(x − h)² + k",`y = a${brV(h)}² ${kS(k)}`.replace("y = a","y = a")],[`Sub the point (${sn(x1)}, ${sn(y1)})`,`${sn(y1)} = a(${sn(x1)} ${h<0?"+":M} ${Math.abs(h)})²${kS(k)}`],["Simplify the bracket and square it",`${sn(y1)} = ${dx*dx}a${kS(k)}`],[k>=0?`Subtract ${sn(k)}`:`Add ${-k}`,`${sn(y1-k)} = ${dx*dx}a`],[`Divide by ${dx*dx}`,`a = ${fh(a)}`],["Conclusion",`∴ a = ${fh(a)}, so y = ${coefH(a)}${brV(h)}²${kS(k)}`]],
+      hint:"Write y = a(x − h)² + k with the vertex filled in. Then sub the point for x and y and solve for a."};
+  }
+}
+
+/* ---- L4–L5 vertex form ---- */
+function plotPts(a,h,k){const o=Math.abs(fv(a))<1?[2,4]:[1,2];const out=[[h,k]];for(const d of o){const y=qv(a,h,k,h+d);out.push([h+d,y],[h-d,y])}return out}
+function vertexPtsWhy(a,h,k,sel,wrong){
+  const av=fv(a),has=(x,y)=>wrong.some(p=>p[0]===x&&p[1]===y);
+  if(h!==0&&has(-h,k))return `Check the vertex. ${brV(h)} means h = ${sn(h)}, so the vertex is (${sn(h)}, ${sn(k)}).`;
+  if(k!==0&&has(h,-k))return `Check the vertex: k keeps its sign, so the vertex is (${sn(h)}, ${sn(k)}).`;
+  const on=(aa,hh)=>wrong.every(p=>Math.abs(aa*(p[0]-hh)*(p[0]-hh)+k-p[1])<1e-9);
+  if(on(-av,h))return `a = ${fs(a)} is ${av<0?"negative, so the steps go down":"positive, so the steps go up"} from the vertex.`;
+  if(Math.abs(av)!==1&&(on(1,h)||on(-1,h)))return `Multiply the base step pattern 1, 3, 5 by a = ${fs(a)}: the steps are ${SP(a).map(fs).join(", ")}.`;
+  if(h!==0&&on(av,-h))return `Your points are around the wrong vertex. ${brV(h)} means h = ${sn(h)}.`;
+  return `Start at the vertex (${sn(h)}, ${sn(k)}). Then use the step pattern ${SP(a).map(fs).join(", ")} on both sides.`;
+}
+function genVertex(L){
+  const type=pick(L===0?["plot","plot","read","write"]:L===1?["plot","write","read","alg"]:["plot","write","alg","alg"]);
+  if(type==="plot"){
+    for(let t=0;t<300;t++){
+      const a=pick(L===0?[F(1),F(-1)]:L===1?[F(1),F(-1),F(2),F(-2)]:[F(2),F(-2),F(1,2),F(-1,2)]),h=ri(-5,5),av=fv(a);
+      const k=av>0?ri(-8,1):ri(-1,8);const pts=plotPts(a,h,k);const r=rangeFor(pts,1,16);if(!r)continue;
+      const far=Math.abs(av)<1;
+      return{skill:"vertex",text:`<p>Graph <span class="hl">${vfH(a,h,k)}</span>. Plot the vertex, then the points ${far?"2 and 4 units":"1 and 2 units"} to each side of it from the step pattern (5 points).</p>`,
+        fig:{type:"grid",x:r.x,y:r.y,click:true,sol:{a:av,h,k}},
+        ans:{type:"pts",pts},ptsWhy:(w,s)=>vertexPtsWhy(a,h,k,s,w),
+        steps:[["Vertex (h, k)",`(${sn(h)}, ${sn(k)})`],["Step pattern: a, 3a, 5a",far?`a = ${fs(a)}: moving 2 across changes y by a × 4 = ${sn(av*4)}, and 4 across by a × 16 = ${sn(av*16)}`:`a = ${fs(a)}: ${spH(a)}`],["Points on both sides",TBL(pts.slice(1).filter((_,i)=>i%2===0).map((p,i)=>[`${far?(i?4:2):(i?2:1)} across`,P(p[0],p[1]),P(2*h-p[0],p[1])]),["Step","Right","Left"])],["Conclusion","∴ Join the 5 points with a smooth U-shape"]],
+        hint:far?`The vertex is (h, k). When a = ${fs(a)}, going 2 across from the vertex changes y by a × 2² = ${sn(av*4)}.`:`Start at the vertex (h, k). From there go 1 across and ${av>0?"up":"down"} ${Math.abs(av)}, then 1 more across and ${av>0?"up":"down"} ${Math.abs(av*3)}. Do both sides.`};
+    }
+  }
+  if(type==="read"){
+    const q=Math.random()<.5?genFeatures(L,"eVertex"):genAvalue(L,"toSP");q.skill="vertex";return q;
+  }
+  if(type==="write"){
+    for(let t=0;t<300;t++){
+      const a=pick(L===0?[F(1),F(-1)]:L===1?[F(1),F(-1),F(2),F(-2),F(3)]:[F(2),F(-2),F(3),F(-3),F(1,2),F(-1,2)]),h=ri(-5,5),av=fv(a),k=av>0?ri(-8,2):ri(-2,8);
+      const pts=plotPts(a,h,k);const r=rangeFor(pts,1,16);if(!r)continue;
+      return{skill:"vertex",text:`<p>Write the equation of the parabola in <span class="hl">vertex form</span>, y = a(x − h)² + k.</p>`,
+        fig:{type:"grid",x:r.x,y:r.y,curves:[{a:av,h,k}],pts:pts.map(p=>({x:p[0],y:p[1]}))},
+        ans:{type:"expr",mode:"vertex",target:vco(a,h,k),ans:vfS(a,h,k),pre:"",label:"equation in vertex form"},
+        steps:[["Read the vertex",`(${sn(h)}, ${sn(k)}), so h = ${sn(h)} and k = ${sn(k)}`],Math.abs(av)<1?["Find a: 2 across from the vertex, y changes by a × 4",`${sn(av*4)} = 4a, so a = ${fh(a)}`]:["Find a: 1 across from the vertex, the change in y",`${sn(av)}, so a = ${sn(av)}`],["Fill in y = a(x − h)² + k",`y = ${fh(a)}(x ${M} ${par(h)})²${kS(k)}`],["Conclusion",`∴ ${vfH(a,h,k)}`]],
+        hint:"Read the vertex (h, k) from the turning point. Then move 1 across from the vertex: the change in y is a."};
+    }
+  }
+  /* algebra: vertex + point -> equation */
+  for(let t=0;t<300;t++){
+    const h=ri(-5,5),k=ri(-9,9),dx=pick([2,3,4,5])*pick([1,-1]);let a;
+    if(L===2&&Math.random()<.6){const m=nz(-12,12);a=F(m,dx*dx);if(a.d===1)continue}else a=F(nz(-3,3));
+    const x1=h+dx,y1=k+fv(a)*dx*dx;if(!isInt(y1)||Math.abs(y1)>80)continue;
+    return{skill:"vertex",text:`<p>A parabola has its vertex at <span class="hl">(${sn(h)}, ${sn(k)})</span> and passes through <span class="hl">(${sn(x1)}, ${sn(y1)})</span>. Write its equation in vertex form.</p>`,
+      ans:{type:"expr",mode:"vertex",target:vco(a,h,k),ans:vfS(a,h,k),pre:"",label:"equation in vertex form"},
+      steps:[["Sub the vertex",`y = a${brV(h)}²${kS(k)}`],[`Sub (${sn(x1)}, ${sn(y1)}) to get a`,`${sn(y1)} = a(${sn(x1)} ${h<0?"+":M} ${Math.abs(h)})²${kS(k)}`],["Simplify",`${sn(y1)} = ${dx*dx}a${kS(k)}`],["Solve for a",`${sn(y1-k)} = ${dx*dx}a, so a = ${fh(a)}`],["Conclusion",`∴ ${vfH(a,h,k)}`]],
+      hint:"Fill in the vertex first: y = a(x − h)² + k. Sub the point to find a. Leave a as a fraction if it doesn't divide evenly."};
+  }
+}
+
+/* ---- L6–L7 factored form ---- */
+function niceZeros(L,needIntVertex=true){
+  for(let t=0;t<500;t++){
+    const a=pick(L===0?[F(1),F(-1)]:L===1?[F(1),F(-1),F(2),F(-2)]:[F(2),F(-2),F(3),F(-1),F(1,2),F(-1,2)]);
+    let s=ri(-7,6),u=s+2*ri(1,4);if(s===0||u===0)continue;
+    if(Math.random()<.5){const w=-s;s=-u;u=w}
+    const h=(s+u)/2,k=qv(a,h,0,0)*0+fv(a)*(h-s)*(h-u);if(needIntVertex&&(!isInt(k)||Math.abs(k)>12))continue;
+    return{a,s,t:u,h,k,yint:fv(a)*s*u};
+  }
+}
+function genFactored(L){
+  const type=pick(L===0?["zeros","vertex","vertex","yint"]:L===1?["zeros","vertex","plot","write","writePt"]:["vertex","plot","write","writePt","writePt"]);
+  if(type==="zeros"){const q=genFeatures(L,"eZeros");q.skill="factored";return q}
+  const p=niceZeros(L);const {a,s,t,h,k}=p,av=fv(a);
+  const eq=ffH(a,s,t);
+  const zSteps=[["Set y = 0: one bracket must be 0",`${brV(s).replace(/[()]/g,"")} = 0 or ${brV(t).replace(/[()]/g,"")} = 0`],["Zeros",`x = ${sn(s)} and x = ${sn(t)}`],["Axis of symmetry: halfway between the zeros",`x = (${sn(s)} + ${par(t)}) ÷ 2 = ${sn(h)}`],[`Sub x = ${sn(h)} to get the y-value`,`y = ${coefH(a)}(${sn(h)} ${s<0?"+":M} ${Math.abs(s)})(${sn(h)} ${t<0?"+":M} ${Math.abs(t)}) = ${fh(a)}(${sn(h-s)})(${sn(h-t)}) = ${sn(k)}`]];
+  if(type==="vertex")return{skill:"factored",text:`<p>Find the <span class="hl">vertex</span> of</p><p class="big">${eq}</p>`,
+    ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate of the vertex"},{pre:",",post:")",label:"y-coordinate of the vertex"}],vals:[h,k]},
+    mistakes:[{f:0,val:-h,msg:`Set each bracket to 0 to get the zeros: ${brV(s)} gives x = ${sn(s)}. Then average them.`}],
+    fieldMsg:["Check the axis: average the two zeros.","Your x is right. Sub it back into the equation to get y."],
+    steps:zSteps.concat([["Conclusion",`∴ Vertex (${sn(h)}, ${sn(k)})`]]),
+    hint:"Find the zeros, average them to get the axis of symmetry, then sub that x-value back into the equation."};
+  if(type==="yint"){const y=av*s*t;return{skill:"factored",text:`<p>Find the <span class="hl">y-intercept</span> of</p><p class="big">${eq}</p>`,
+    ans:{type:"num",fields:[{pre:"y-intercept: (0,",post:")",label:"y-intercept"}],vals:[y]},
+    mistakes:[{f:0,val:-y,msg:"Watch the signs when you sub x = 0."}],
+    steps:[["Sub x = 0",`y = ${coefH(a)}(0 ${s<0?"+":M} ${Math.abs(s)})(0 ${t<0?"+":M} ${Math.abs(t)})`],["Multiply",`y = ${fh(a)}(${sn(-s)})(${sn(-t)}) = ${sn(y)}`],["Conclusion",`∴ (0, ${sn(y)})`]],hint:"The y-intercept is where x = 0. Sub 0 into both brackets and multiply."};}
+  if(type==="plot"){
+    const pts=[[s,0],[t,0],[h,k]];const r=rangeFor(pts,1,18);if(!r)return genFactored(L);
+    return{skill:"factored",text:`<p>Graph <span class="hl">${eq}</span>. Plot the two zeros and the vertex (3 points).</p>`,
+      fig:{type:"grid",x:r.x,y:r.y,click:true,sol:{a:av,h,k}},ans:{type:"pts",pts},
+      ptsWhy:(w)=>{const has=(x,y)=>w.some(q=>q[0]===x&&q[1]===y);if(has(-s,0)||has(-t,0))return `Set each bracket to 0: ${brV(s)} = 0 gives x = ${sn(s)}.`;if(w.some(q=>q[0]===h))return `The vertex is on the axis x = ${sn(h)}, but check its y-value: sub x = ${sn(h)} into the equation.`;return "Find the zeros first, then average them for the axis and sub in for the vertex."},
+      steps:zSteps.concat([["Conclusion",`∴ Plot ${P(s,0)}, ${P(t,0)} and the vertex ${P(h,k)}. The step pattern is ${spH(a)}.`]]),
+      hint:"Zeros: set each bracket to 0. The vertex sits halfway between the zeros. Sub that x-value in to get its y-value."};
+  }
+  if(type==="write"){
+    const mark=[[s,0],[t,0],[h,k]];const r=rangeFor(mark,1,18);if(!r)return genFactored(L);
+    return{skill:"factored",text:`<p>Write the equation of the parabola in <span class="hl">factored form</span>, y = a(x − s)(x − t).</p>`,
+      fig:{type:"grid",x:r.x,y:r.y,curves:[{a:av,h,k}],pts:mark.map(q=>({x:q[0],y:q[1]}))},
+      ans:{type:"expr",mode:"zeros",target:fco(a,s,t),ans:ffS(a,s,t),label:"equation in factored form"},
+      steps:[["Read the zeros",`x = ${sn(s)} and x = ${sn(t)}`],["Put them in the brackets",`y = a${brV(s)}${brV(t)}`],[`Sub the vertex (${sn(h)}, ${sn(k)}) to get a`,`${sn(k)} = a(${sn(h-s)})(${sn(h-t)}) = ${sn((h-s)*(h-t))}a, so a = ${fh(a)}`],["Conclusion",`∴ ${eq}`]],
+      hint:"Read the two x-intercepts for s and t. Then sub the vertex (or any other point) to find a."};
+  }
+  /* writePt: zeros + point */
+  for(let q=0;q<300;q++){
+    let ss=nz(-7,7),tt=nz(-7,7);if(ss===tt)continue;if(ss>tt)[ss,tt]=[tt,ss];
+    let x0=ri(-8,8);if(x0===ss||x0===tt)continue;const pr=(x0-ss)*(x0-tt);let aa;
+    if(L===2&&Math.random()<.6){aa=F(nz(-12,12),pr);if(aa.d===1&&Math.random()<.7)continue}else aa=F(nz(-3,3));
+    const y0=fv(aa)*pr;if(!isInt(y0)||Math.abs(y0)>80)continue;
+    return{skill:"factored",text:`<p>A parabola has x-intercepts at <span class="hl">x = ${sn(ss)}</span> and <span class="hl">x = ${sn(tt)}</span>, and passes through <span class="hl">${P(x0,y0)}</span>. Write its equation in factored form.</p>`,
+      ans:{type:"expr",mode:"zeros",target:fco(aa,ss,tt),ans:ffS(aa,ss,tt),label:"equation in factored form"},
+      steps:[["Put the zeros in the brackets",`y = a${brV(ss)}${brV(tt)}`],[`Sub ${P(x0,y0)}`,`${sn(y0)} = a(${sn(x0)} ${ss<0?"+":M} ${Math.abs(ss)})(${sn(x0)} ${tt<0?"+":M} ${Math.abs(tt)})`],["Simplify",`${sn(y0)} = a(${sn(x0-ss)})(${sn(x0-tt)}) = ${sn(pr)}a`],[`Divide by ${sn(pr)}`,`a = ${fh(aa)}`],["Conclusion",`∴ ${ffH(aa,ss,tt)}`]],
+      hint:"A zero at x = 3 goes in as (x − 3), and a zero at x = −2 as (x + 2). Then sub the point to find a."};
+  }
+}
+
+/* ---- L8 applications ---- */
+function genApps(L){
+  const type=pick(L===0?["max","when","start","at"]:L===1?["start","at","lands","write","twice"]:["lands","write","twice","dive","profit"]);
+  if(["max","when","start","at","lands","twice"].includes(type)){
+    for(let q=0;q<300;q++){
+      const h=ri(2,5),d=ri(h,h+3),k=5*d*d,eq=vfH(F(-5),h,k,"h","t"),launch=k-5*h*h;
+      const intro=`<p>A model rocket's height is <span class="hl">${eq}</span>, where h is the height in metres and t is the time in seconds.</p>`;
+      const sub0=[["Sub t = 0",`h = ${M}5(0 ${M} ${h})² + ${k} = ${M}5(${h*h}) + ${k} = ${sn(launch)}`]];
+      if(type==="max")return{skill:"apps",text:intro+`<p>What is the rocket's <span class="hl">maximum height</span>?</p>`,ans:{type:"num",fields:[{pre:"",post:"m",label:"maximum height in metres"}],vals:[k]},
+        mistakes:[{f:0,val:h,msg:"That's when it happens. The maximum height is the k-value, the y of the vertex."}],
+        steps:[["The vertex is (h, k)",`(${h}, ${k})`],["The maximum height is k",`${k} m`],["Conclusion",`∴ The maximum height is ${k} m, after ${h} s`]],hint:"The vertex is the highest point. Its second number is the height."};
+      if(type==="when")return{skill:"apps",text:intro+`<p>How many seconds after launch does the rocket reach its <span class="hl">maximum height</span>?</p>`,ans:{type:"num",fields:[{pre:"t =",post:"s",label:"time in seconds"}],vals:[h]},
+        mistakes:[{f:0,val:-h,msg:`(t − ${h}) means h = ${h}, a positive time.`},{f:0,val:k,msg:"That's the height. When it happens is the first number of the vertex."}],
+        steps:[["The vertex is (h, k)",`(${h}, ${k})`],["The time is h",`${h} s`],["Conclusion",`∴ It reaches its maximum after ${h} s`]],hint:"The vertex is (h, k). Which one is the time?"};
+      if(type==="start"){if(launch===0&&Math.random()<.7)continue;return{skill:"apps",text:intro+`<p>From what height was the rocket <span class="hl">launched</span>?</p>`,ans:{type:"num",fields:[{pre:"",post:"m",label:"launch height in metres"}],vals:[launch]},
+        mistakes:[{f:0,val:k,msg:"That's the maximum height. Launch is at t = 0, so sub 0 for t."},{f:0,val:k+5*h*h,msg:`(0 − ${h})² is positive ${h*h}, and then it's multiplied by −5.`}],
+        steps:sub0.concat([["Conclusion",`∴ It was launched from ${sn(launch)} m`]]),hint:"Launch is when t = 0. Sub 0 for t."};}
+      if(type==="at"){const t0=pick([1,2,3,h+1,h+2].filter(v=>v!==h&&v<h+d));const y=k-5*(t0-h)**2;
+        return{skill:"apps",text:intro+`<p>How high is the rocket after <span class="hl">${t0} s</span>?</p>`,ans:{type:"num",fields:[{pre:"h =",post:"m",label:"height in metres"}],vals:[y]},
+          mistakes:[{f:0,val:k-5*(t0-h),msg:"Square the bracket before you multiply by −5."},{f:0,val:k+5*(t0-h)**2,msg:"The squared bracket is positive, then multiply by −5: subtract it from k."}],
+          steps:[[`Sub t = ${t0}`,`h = ${M}5(${t0} ${M} ${h})² + ${k}`],["Bracket, then square",`h = ${M}5(${sn(t0-h)})² + ${k} = ${M}5(${(t0-h)**2}) + ${k}`],["Multiply and add",`h = ${sn(-5*(t0-h)**2)} + ${k} = ${sn(y)}`],["Conclusion",`∴ After ${t0} s it is ${sn(y)} m high`]],hint:`Replace t with ${t0}. Do the bracket, square it, multiply by −5, then add ${k}.`};}
+      if(type==="lands")return{skill:"apps",text:intro+`<p>When does the rocket <span class="hl">hit the ground</span>?</p>`,ans:{type:"num",fields:[{pre:"t =",post:"s",label:"landing time in seconds"}],vals:[h+d]},
+        mistakes:[{f:0,val:h-d,msg:"That's the other root, which is a time before (or at) launch. Use the + root."},{f:0,val:d,msg:`That's √(…). You still need to add ${h}: t − ${h} = ±${d}.`},{f:0,val:2*h,msg:"Symmetry only gives the landing time if it was launched from the ground. Set h = 0 and solve."}],
+        steps:[["Set h = 0",`0 = ${M}5(t ${M} ${h})² + ${k}`],[`Subtract ${k}`,`${M}${k} = ${M}5(t ${M} ${h})²`],["Divide by −5",`${d*d} = (t ${M} ${h})²`],["Square root both sides (±)",`±${d} = t ${M} ${h}`],[`Add ${h}`,`t = ${h + d} or t = ${sn(h-d)}`],["Reject the time that doesn't make sense",h-d<0?`${sn(h-d)} s is negative: inadmissible`:h-d===0?"t = 0 is the launch":`${h-d} s is on the way up`],["Conclusion",`∴ It lands after ${h+d} s`]],
+        hint:"Hitting the ground means h = 0. Isolate the squared bracket, square root both sides (±), and keep the answer that makes sense."};
+      if(type==="twice"){if(d<2)continue;const e=ri(1,Math.min(d,h)-1>0?Math.min(d,h)-1:1);if(e>=h)continue;const H=k-5*e*e;
+        return{skill:"apps",text:intro+`<p>At what two times is the rocket <span class="hl">${H} m</span> high?</p>`,ans:{type:"num",fields:[{pre:"t =",post:"s",label:"first time"},{pre:"and t =",post:"s",label:"second time"}],vals:[h-e,h+e],orderFree:true},
+          missFn:v=>v.includes(e)||v.includes(-e)?`Add ${h} after you square root: t − ${h} = ±${e}.`:null,
+          steps:[[`Set h = ${H}`,`${H} = ${M}5(t ${M} ${h})² + ${k}`],[`Subtract ${k}`,`${sn(H-k)} = ${M}5(t ${M} ${h})²`],["Divide by −5",`${e*e} = (t ${M} ${h})²`],["Square root (±)",`±${e} = t ${M} ${h}`],["Solve",`t = ${h-e} or t = ${h+e}`],["Conclusion",`∴ ${h-e} s on the way up and ${h+e} s on the way down`]],
+          hint:`Set h = ${H}, isolate (t − ${h})², then square root both sides. There are two answers.`};}
+    }
+  }
+  if(type==="write"){
+    for(let q=0;q<300;q++){const h=pick([10,12,15,20,25,30]),k=pick([5,6,8,9,10,12,15,16,18,20]);const a=F(-k,h*h);
+      return{skill:"apps",text:`<p>A ball is kicked from the ground. It reaches a maximum height of <span class="hl">${k} m</span> at a horizontal distance of <span class="hl">${h} m</span>, and lands <span class="hl">${2*h} m</span> away. Write the equation of its path in vertex form, using x for the distance and y for the height.</p>`,
+        ans:{type:"expr",mode:"vertex",target:vco(a,h,k),ans:vfS(a,h,k),label:"equation in vertex form"},
+        steps:[["Vertex (the maximum) and the landing point",`(${h}, ${k}) and (${2*h}, 0)`],["Sub the vertex",`y = a(x ${M} ${h})² + ${k}`],[`Sub (${2*h}, 0)`,`0 = a(${2*h} ${M} ${h})² + ${k} = ${h*h}a + ${k}`],["Solve",`${M}${k} = ${h*h}a, so a = ${fh(a)}`],["Conclusion",`∴ ${vfH(a,h,k)}`]],
+        hint:"The maximum is the vertex. Sub the landing point (where y = 0) to find a. Leave a as a fraction."};}
+  }
+  if(type==="dive"){
+    const [P0,tp]=pick([[10,0.5],[5,0.5],[3,1],[7.5,0.5],[10,1],[3,0.5]]);const K=P0+5*tp*tp,ans=tp+Math.sqrt(K/5);
+    const ex=isInt(Math.sqrt(K/5)*2)?"":` (exactly ${tp} + √${fmt(K/5)})`;
+    return{skill:"apps",text:`<p>A diver's height above the water is <span class="hl">${vfH(F(-5),tp,K,"h","t")}</span>, in metres, t seconds after she jumps. When does she reach the water? Round to 2 decimal places if needed.</p>`,
+      ans:{type:"num",fields:[{pre:"t =",post:"s",label:"time in seconds",tol:0.011}],vals:[ans]},note:`t = ${fmt(ans)} s${ex}`,
+      mistakes:[{f:0,val:Math.sqrt(K/5),msg:`Add ${tp} after you square root: t − ${tp} = ±√${fmt(K/5)}.`},{f:0,val:tp-Math.sqrt(K/5),msg:"That's a negative time, so it's inadmissible. Use the + root."}],
+      steps:[["Set h = 0",`0 = ${M}5(t ${M} ${tp})² + ${fmt(K)}`],[`Subtract ${fmt(K)} and divide by −5`,`${fmt(K/5)} = (t ${M} ${tp})²`],["Square root both sides (±)",`±√${fmt(K/5)} = t ${M} ${tp}`],[`Add ${tp}`,`t = ${tp} + √${fmt(K/5)} ≈ ${fmt(ans)} or t = ${tp} ${M} √${fmt(K/5)} ≈ ${fmt(tp-Math.sqrt(K/5))}`],["The negative time is inadmissible",""],["Conclusion",`∴ She reaches the water after ${fmt(ans)} s`]],
+      hint:"Reaching the water means h = 0. Isolate the squared bracket, square root (±), then keep the positive time."};
+  }
+  /* profit break-even */
+  const h=ri(6,15),d=ri(2,Math.min(5,h-1)),aa=pick([2,3,5,10]),k=aa*d*d;
+  return{skill:"apps",text:`<p>A club's profit, P dollars, for selling an item at x dollars is <span class="hl">${vfH(F(-aa),h,k,"P")}</span>. Find the two <span class="hl">break-even</span> prices, where the profit is $0.</p>`,
+    ans:{type:"num",fields:[{pre:"$",label:"first break-even price"},{pre:"and $",label:"second break-even price"}],vals:[h-d,h+d],orderFree:true},
+    missFn:v=>v.includes(d)||v.includes(-d)?`Add ${h} after the square root: x − ${h} = ±${d}.`:null,
+    steps:[["Set P = 0",`0 = ${M}${aa}(x ${M} ${h})² + ${k}`],[`Subtract ${k}, divide by −${aa}`,`${d*d} = (x ${M} ${h})²`],["Square root (±)",`±${d} = x ${M} ${h}`],["Solve",`x = ${h+d} or x = ${h-d}`],["Conclusion",`∴ The break-even prices are $${h-d} and $${h+d}`]],
+    hint:"Break-even means P = 0. Isolate the squared bracket and square root both sides."};
+}
+
+const GEN={types:genTypes,features:genFeatures,avalue:genAvalue,vertex:genVertex,factored:genFactored,apps:genApps};
+
+/* =================== typed expressions =================== */
+const SUPD={"²":2,"³":3,"⁴":4};
+function tokenize(s){
+  s=String(s).replace(/[−–—]/g,"-").replace(/[×·∙]/g,"*").replace(/÷/g,"/").replace(/X/g,"x").replace(/\s+/g,"");
+  s=s.replace(/^(y|f\(x\)|h|p|h\(t\))=/i,"");
+  const out=[];let i=0;
+  while(i<s.length){const ch=s[i];
+    if(/\d/.test(ch)||(ch==="."&&/\d/.test(s[i+1]||""))){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;const t=s.slice(i,j);if((t.match(/\./g)||[]).length>1)return{err:"bad"};out.push({t:"n",v:parseFloat(t)});i=j;continue}
+    if(ch==="x"){if(/\d/.test(s[i+1]||""))return{err:"xdigit"};out.push({t:"x"});i++;continue}
+    if(SUPD[ch]){out.push({t:"^"});out.push({t:"n",v:SUPD[ch]});i++;continue}
+    if("+-*^()/".includes(ch)){out.push({t:ch});i++;continue}
+    if(ch==="["||ch==="{"){out.push({t:"("});i++;continue}
+    if(ch==="]"||ch==="}"){out.push({t:")"});i++;continue}
+    if(ch==="="){return{err:"eq"}}
+    return{err:"char",ch};
+  }
+  return{tk:out};
+}
+function parseExpr(str){
+  const T0=tokenize(str);if(T0.err)return T0;const tk=T0.tk;if(!tk.length)return{err:"empty"};
+  let i=0;const peek=()=>tk[i],eat=t=>{if(tk[i]&&tk[i].t===t){i++;return true}return false};
+  const sign=()=>{let s=1;while(peek()&&(peek().t==="+"||peek().t==="-")){if(peek().t==="-")s=-s;i++}return s};
+  function expr(){const terms=[{s:sign(),n:term()}];while(peek()&&(peek().t==="+"||peek().t==="-"))terms.push({s:sign(),n:term()});
+    return terms.length===1&&terms[0].s===1?terms[0].n:{k:"add",terms}}
+  function term(){const fs=[factor()];for(;;){const p=peek();if(!p)break;if(p.t==="*"){i++;fs.push(factor());continue}
+      if(p.t==="/"){i++;const f=factor();const v=pev(f);if(v.length!==1||Math.abs(v[0])<1e-12)throw 0;fs.push({k:"div",v:v[0],src:f});continue}
+      if(p.t==="n"||p.t==="x"||p.t==="("){fs.push(factor());continue}break}return fs.length===1?fs[0]:{k:"mul",fs}}
+  function factor(){let b=primary();while(eat("^")){const e=peek();if(!e||e.t!=="n"||!Number.isInteger(e.v)||e.v>6)throw 0;i++;b={k:"pow",b,e:e.v}}return b}
+  function primary(){const p=peek();if(!p)throw 0;if(p.t==="n"){i++;return{k:"num",v:p.v}}if(p.t==="x"){i++;return{k:"x"}}if(p.t==="("){i++;const e=expr();if(!eat(")"))throw 0;return{k:"par",e}}throw 0}
+  try{const e=expr();if(i<tk.length)return{err:"bad"};return{ast:e}}catch(_){return{err:"bad"}}
+}
+const padd=(a,b)=>{const r=[];for(let k=0;k<Math.max(a.length,b.length);k++)r[k]=(a[k]||0)+(b[k]||0);return r};
+const pmul=(a,b)=>{const r=Array(a.length+b.length-1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y));return r};
+const ptrim=a=>{a=a.map(c=>Math.abs(c-Math.round(c))<1e-9?Math.round(c):c);while(a.length>1&&Math.abs(a[a.length-1])<1e-9)a.pop();return a};
+function pev(n){switch(n.k){case"num":return[n.v];case"x":return[0,1];case"par":return pev(n.e);case"div":return[1/n.v];
+  case"pow":{let r=[1];const b=pev(n.b);for(let k=0;k<n.e;k++)r=pmul(r,b);return r}
+  case"mul":return n.fs.reduce((r,f)=>pmul(r,pev(f)),[1]);
+  case"add":return n.terms.reduce((r,t)=>padd(r,pev(t.n).map(c=>c*t.s)),[0])}}
+const peq=(a,b)=>{a=ptrim(a);b=ptrim(b);return a.length===b.length&&a.every((c,i)=>Math.abs(c-b[i])<1e-9)};
+const SUPS=["⁰","¹","²","³","⁴","⁵","⁶"];
+function pshow(n){switch(n.k){case"num":return String(n.v);case"x":return"x";case"par":return"("+pshow(n.e)+")";case"div":return"/"+pshow(n.src);
+  case"pow":return pshow(n.b)+SUPS[n.e];
+  case"mul":return n.fs.map((f,k)=>(k>0&&(f.k==="num"||(f.k==="pow"&&f.b.k==="num"))?"·":"")+pshow(f)).join("");
+  case"add":return n.terms.map((t,k)=>{const b=pshow(t.n);return k===0?(t.s<0?M+b:b):(t.s<0?" "+M+" ":" + ")+b}).join("")}}
+const deg=n=>ptrim(pev(n)).length-1;
+function flatFactors(n){const out=[];const walk=f=>{if(f.k==="mul")f.fs.forEach(walk);else if(f.k==="par"&&f.e.k==="mul")walk(f.e);else if(f.k==="par"&&f.e.k==="add"&&f.e.terms.length===1)walk(f.e.terms[0].n);else out.push(f)};walk(n);return out}
+/* y = a(x − h)² + k : exactly one x² term made of numbers × (x − h)², other terms constant */
+function isVertexShape(ast){
+  const terms=ast.k==="add"?ast.terms.map(t=>t.n):[ast];
+  let sq=0;
+  for(const t of terms){const d=deg(t);if(d===0)continue;if(d!==2)return false;
+    const fs=flatFactors(t);let ok=false;
+    for(const f of fs){if(deg(f)===0)continue;if(f.k==="pow"&&f.e===2){const b=ptrim(pev(f.b));if(b.length===2&&Math.abs(b[1]-1)<1e-9&&!ok){ok=true;continue}}return false}
+    if(!ok)return false;sq++}
+  return sq===1;
+}
+/* y = a(x − s)(x − t): a product of numbers and linear factors with leading coefficient 1 */
+function isZerosShape(ast){
+  let node=ast;if(node.k==="add"){if(node.terms.length>1)return"sum";node=node.terms[0].n}
+  const fs=flatFactors(node);let lin=0;
+  for(const f of fs){const p=ptrim(pev(f));if(p.length===1)continue;
+    const base=f.k==="pow"?ptrim(pev(f.b)):p,e=f.k==="pow"?f.e:1;
+    if(base.length!==2)return"bad";if(Math.abs(base[1]-1)>1e-9)return"lead";lin+=e}
+  return lin===2?"ok":"bad";
+}
+function vparts(c){c=ptrim(c);if(c.length!==3)return null;const a=c[2],h=-c[1]/(2*a),k=c[0]-a*h*h;return{a,h,k}}
+const nm=v=>fmt(v);
+function quadMiss(mode,pv,T){
+  const S=vparts(pv),R=vparts(T);
+  if(!S)return ptrim(pv).length<3?"Your equation has no x² in it. A parabola needs a squared bracket (or two brackets with x).":"Check your exponents: a parabola's highest power of x is 2.";
+  const eq=(x,y)=>Math.abs(x-y)<1e-7,dir=R.a>0?"up":"down";
+  if(mode==="zeros"){
+    const r=pv.map(c=>c/S.a),rt=T.map(c=>c/R.a);
+    if(r.every((c,i)=>eq(c,rt[i]))){if(eq(S.a,-R.a))return `Your zeros are right. Check the sign of a: this parabola opens ${dir}.`;
+      if(Math.abs(S.a-R.a)/Math.abs(R.a)<0.1)return "Very close. Keep a as an exact fraction, not a rounded decimal.";
+      return "Your zeros are right. Find a by subbing the other point into y = a(x − s)(x − t).";}
+    const flip=[T[0],-T[1],T[2]].map(c=>c/R.a);if(r.every((c,i)=>eq(c,flip[i])))return "Check the signs in your brackets. A zero at x = 3 goes in as (x − 3), and a zero at x = −2 as (x + 2).";
+    return `Your equation's zeros don't match the x-intercepts. Put each zero in its own bracket as (x − s).`;
+  }
+  if(eq(S.a,R.a)){
+    if(eq(S.h,-R.h)&&eq(S.k,R.k))return `Check the sign of h. The vertex is at x = ${nm(R.h)}, so the bracket is ${brV(R.h)}.`;
+    if(eq(S.h,R.h)){if(eq(S.k,-R.k))return "Check the sign of k: it keeps its sign from the vertex (h, k).";return "Your a and h are right. Check k, the y-value of the vertex."}
+    return "Your a-value is right. Check h, the x-value of the vertex.";
+  }
+  if(eq(S.h,R.h)&&eq(S.k,R.k)){if(eq(S.a,-R.a))return `Your vertex is right. Check the sign of a: this parabola opens ${dir}.`;
+    if(Math.abs(S.a-R.a)/Math.abs(R.a)<0.1)return "Very close. Keep a as an exact fraction (like −4/75), not a rounded decimal.";
+    return "Your vertex is right. Check a: sub a point and solve for a.";}
+  return `Your equation has its vertex at (${nm(S.h)}, ${nm(S.k)}) and a = ${nm(S.a)}. Check each part.`;
+}
+const BADEXPR="I can't read that. Type it like y = −2(x + 3)² + 8 or y = 1/2(x − 1)(x + 5), and check your brackets.";
+function checkExpr(q,input){
+  const A=q.ans,r=parseExpr(input);
+  if(r.err==="empty")return{s:"empty",msg:"Type your answer first."};
+  if(r.err==="xdigit")return{s:"empty",msg:"For x squared, type x^2 or use the ² button."};
+  if(r.err==="eq")return{s:"empty",msg:"Start with y = and type only one equals sign."};
+  if(r.err==="char")return{s:"empty",msg:/[a-z]/i.test(r.ch)?"Use x as the variable.":BADEXPR};
+  if(r.err)return{s:"empty",msg:BADEXPR};
+  const pv=pev(r.ast),T=A.target;
+  if(!peq(pv,T))return{s:"miss",msg:quadMiss(A.mode,pv,T)};
+  if(A.mode==="vertex"){if(!isVertexShape(r.ast))return{s:"miss",msg:`That's the right parabola, but write it in vertex form, y = a(x − h)² + k, like ${A.ans}.`};return{s:"ok"}}
+  if(A.mode==="zeros"){const z=isZerosShape(r.ast);
+    if(z==="sum")return{s:"miss",msg:"That's the right parabola, but write it in factored form, y = a(x − s)(x − t)."};
+    if(z==="lead")return{s:"miss",msg:"That's equal, but take any number out of the brackets so each one looks like (x − s)."};
+    if(z!=="ok")return{s:"miss",msg:"That's the right parabola, but write it in factored form, y = a(x − s)(x − t)."};
+    return{s:"ok"}}
+  return{s:"ok"};
+}
+
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/i,"").replace(/^\+/,"").replace(/^\$/,"").replace(/(m|s|cm)$/i,"");
+  if(s==="")return null;
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s)};
+  const m=s.match(/^(-?\d+)\/(-?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2]};
+  return{bad:true};
+}
+const near=(a,b,tol)=>Math.abs(a-b)<(tol||0.006);
+const key=p=>p[0]+","+p[1];
+function check(q,input){
+  const A=q.ans;
+  if(A.type==="expr")return checkExpr(q,input);
+  if(A.type==="choice"){if(input===A.correct)return{s:"ok"};return{s:"miss",msg:A.why[input]||"Check your work and try again."}}
+  if(A.type==="pts"){
+    if(!input||!input.length)return{s:"empty",msg:"Click the grid to plot your points first."};
+    const T=new Set(A.pts.map(key)),wrong=input.filter(p=>!T.has(key(p))),S=new Set(input.map(key)),missing=A.pts.filter(p=>!S.has(key(p)));
+    if(!wrong.length&&!missing.length)return{s:"ok"};
+    if(!wrong.length)return{s:"partial",msg:`So far so good. You need ${A.pts.length} points and you have ${input.length}.`};
+    const right=input.length-wrong.length;
+    return{s:"miss",wrong,msg:`${right?`${right} of your points ${right===1?"is":"are"} right. `:""}${wrong.length===1?"The point marked ✗ isn't":"The points marked ✗ aren't"} on the parabola. ${q.ptsWhy?q.ptsWhy(wrong,input):""}`};
+  }
+  const ps=input.map(parseNum);
+  if(ps.some(p=>!p))return{s:"empty",msg:A.fields.length>1?"Fill in every box first.":"Type an answer first."};
+  if(ps.some(p=>p.bad))return{s:"empty",msg:"Use a whole number, a fraction like 2/3, or a decimal like 2.5."};
+  let v=ps.map(p=>p.v),t=A.vals.map(fv);const tol=A.fields.map(f=>f.tol);
+  if(A.orderFree){v=[...v].sort((a,b)=>a-b);t=[...t].sort((a,b)=>a-b)}
+  const ok=v.map((x,i)=>near(x,t[i],tol[i]));
+  if(ok.every(Boolean))return{s:"ok"};
+  if(q.missFn){const m=q.missFn(ps.map(p=>p.v));if(m)return{s:"miss",msg:m}}
+  for(const mk of q.mistakes||[]){if(!ok[mk.f]&&near(v[mk.f],fv(mk.val),tol[mk.f]))return{s:"miss",msg:mk.msg}}
+  if(q.fieldMsg){const wrong=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(wrong.length===1&&q.fieldMsg[wrong[0]])return{s:"miss",msg:q.fieldMsg[wrong[0]]}}
+  return{s:"miss",msg:"Check each step of your work."};
+}
+function correctInput(q){const A=q.ans;if(A.type==="expr")return A.ans;if(A.type==="choice")return A.correct;if(A.type==="pts")return A.pts.map(p=>p.slice());return A.vals.map(v=>typeof v==="number"&&!isInt(v)?String(Math.round(v*1000)/1000):fa(v))}
+window.__u3={GEN,check,correctInput,parseExpr,pev};
+
+/* =================== figures (theme-aware) =================== */
+const PAL={
+  light:{paper:"#15233b",dim:"#8391a8",cyan:"#1f4fb0",green:"#22803f",red:"#b0302a",grid:"#dbe2ed",axis:"#56637a",bg:"#ffffff",curve:"#c25a12",gdot:"#15233b",label:"#56637a",sel:"#1f4fb0",solc:"#22803f"},
+  dark:{paper:"#e5ebf4",dim:"#8b97ab",cyan:"#8db0ff",green:"#6fd39a",red:"#ff8f86",grid:"#283344",axis:"#9ba8bc",bg:"#161e2a",curve:"#ffb24a",gdot:"#ffe066",label:"#9ba8bc",sel:"#8db0ff",solc:"#6fd39a"}
+};
+function isDark(){const t=document.documentElement.getAttribute("data-theme");if(t==="dark")return true;if(t==="light")return false;return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
+let FC=PAL.light;
+const FONT='"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+const PAD=30;
+function gscale(fig){const xs=fig.x[1]-fig.x[0],ys=fig.y[1]-fig.y[0];return Math.min(30,400/xs,460/ys)}
+function figSize(fig){const s=gscale(fig);return[Math.round((fig.x[1]-fig.x[0])*s+2*PAD),Math.round((fig.y[1]-fig.y[0])*s+2*PAD)]}
+function gridMap(fig,W,H){const s=gscale(fig),x0=fig.x[0],y0=fig.y[0];return{s,X:x=>PAD+(x-x0)*s,Y:y=>H-PAD-(y-y0)*s,toX:px=>(px-PAD)/s+x0,toY:py=>(H-PAD-py)/s+y0}}
+function drawFig(cv,fig,st){
+  FC=isDark()?PAL.dark:PAL.light;
+  const [W,H]=figSize(fig),dpr=Math.min(3,window.devicePixelRatio||1);
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  cv.style.maxWidth=W+"px";
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle=FC.bg;c.fillRect(0,0,W,H);
+  c.lineCap="round";c.lineJoin="round";
+  const {X,Y}=gridMap(fig,W,H),[xa,xb]=fig.x,[ya,yb]=fig.y;
+  c.strokeStyle=FC.grid;c.lineWidth=1;c.beginPath();
+  for(let i=xa;i<=xb;i++){c.moveTo(X(i),Y(ya));c.lineTo(X(i),Y(yb))}
+  for(let j=ya;j<=yb;j++){c.moveTo(X(xa),Y(j));c.lineTo(X(xb),Y(j))}
+  c.stroke();
+  c.strokeStyle=FC.axis;c.lineWidth=2;c.beginPath();
+  if(xa<=0&&xb>=0){c.moveTo(X(0),Y(ya));c.lineTo(X(0),Y(yb))}
+  if(ya<=0&&yb>=0){c.moveTo(X(xa),Y(0));c.lineTo(X(xb),Y(0))}
+  c.stroke();
+  c.font=`13px ${FONT}`;c.fillStyle=FC.label;
+  const rowY=ya<=0&&yb>=0?0:ya,colX=xa<=0&&xb>=0?0:xa;
+  const sx=xb-xa>12?2:1,sy=yb-ya>12?2:1;
+  c.textAlign="center";c.textBaseline="top";for(let i=xa;i<=xb;i++){if(i===0||i%sx)continue;c.fillText(sn(i),X(i),Y(rowY)+7)}
+  c.textAlign="right";c.textBaseline="middle";for(let j=ya;j<=yb;j++){if(j===0||j%sy)continue;c.fillText(sn(j),X(colX)-5,Y(j))}
+  if(rowY===0&&colX===0){c.textAlign="right";c.textBaseline="top";c.fillText("0",X(0)-4,Y(0)+3)}
+  c.save();c.beginPath();c.rect(X(xa),Y(yb),X(xb)-X(xa),Y(ya)-Y(yb));c.clip();
+  const curve=(p,col,w)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();let first=true;for(let x=xa-1;x<=xb+1;x+=0.05){const y=p.a*(x-p.h)*(x-p.h)+p.k;if(y<ya-3||y>yb+3){first=true;continue}if(first){c.moveTo(X(x),Y(y));first=false}else c.lineTo(X(x),Y(y))}c.stroke()};
+  for(const p of fig.curves||[])curve(p,FC.curve,2.75);
+  if(st&&st.ok&&fig.sol)curve(fig.sol,FC.solc,2.75);
+  c.restore();
+  for(const p of fig.pts||[]){c.fillStyle=FC.gdot;c.beginPath();c.arc(X(p.x),Y(p.y),5,0,7);c.fill()}
+  if(st&&st.cur){c.strokeStyle=FC.paper;c.lineWidth=1.5;c.setLineDash([3,3]);c.strokeRect(X(st.cur[0])-9,Y(st.cur[1])-9,18,18);c.setLineDash([])}
+  for(const w of (st&&st.wrong)||[]){c.strokeStyle=FC.red;c.lineWidth=2.5;c.beginPath();c.moveTo(X(w[0])-6,Y(w[1])-6);c.lineTo(X(w[0])+6,Y(w[1])+6);c.moveTo(X(w[0])+6,Y(w[1])-6);c.lineTo(X(w[0])-6,Y(w[1])+6);c.stroke()}
+  for(const s of (st&&st.sel)||[]){const col=st.ok?FC.green:FC.sel;c.fillStyle=col;c.beginPath();c.arc(X(s[0]),Y(s[1]),5.5,0,7);c.fill();c.strokeStyle=col;c.lineWidth=2.5;c.beginPath();c.arc(X(s[0]),Y(s[1]),10,0,7);c.stroke()}
+}
+
+/* =================== page =================== */
+const TAG={types:"Types of functions",features:"Key features",avalue:"The a-value",vertex:"Vertex form",factored:"Factored form",apps:"Word problems"};
+const RULE={types:"Constant 1st differences: linear · constant 2nd differences: quadratic",features:"Vertex · axis of symmetry · optimal value · intercepts",avalue:"Step pattern: a, 3a, 5a",vertex:"y = a(x − h)² + k has its vertex at (h, k)",factored:"y = a(x − s)(x − t) has zeros at s and t",apps:"Max: the vertex · start: x = 0 · lands: y = 0"};
+const SKILLS=Object.keys(TAG);
+const LEVELNOTES=["Support: a = 1 or −1, small numbers, and points that sit on the grid.","On track: like the questions on your worksheets.","Challenge: fraction a-values, algebra to find a, and harder word problems."];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let skill=store.get("u3.skill","types"),level=store.get("u3.level",1);
+if(!SKILLS.includes(skill)&&skill!=="mixed")skill="types";if(![0,1,2].includes(level))level=1;
+const stats={first:0,done:0,streak:0};
+let q=null,attempts=0,revealed=false,finished=false,choice=null;
+const fst={sel:[],cur:null,wrong:[],ok:false};
+const figEl=$("fig");
+const redraw=()=>{if(q&&q.fig)drawFig(figEl,q.fig,fst)};
+
+function setPressed(){
+  document.querySelectorAll("#skills button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.skill===skill)));
+  document.querySelectorAll("#levels button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.level===level)));
+  $("levelNote").textContent=LEVELNOTES[level];
+}
+function ptsText(){return fst.sel.length?fst.sel.map(p=>P(p[0],p[1])).join("  "):"click the grid"}
+function newQ(){
+  const k=skill==="mixed"?pick(SKILLS):skill;
+  q=GEN[k](level);window.__q=q;attempts=0;revealed=false;finished=false;choice=null;
+  Object.assign(fst,{sel:[],cur:null,wrong:[],ok:false});
+  $("qtag").textContent=TAG[q.skill]+(skill==="mixed"?" · mixed":"");
+  $("rule").textContent=RULE[q.skill];
+  $("prompt").innerHTML=q.text;
+  const A=q.ans,f=$("answer");
+  if(A.type==="num")f.innerHTML=A.fields.map((fd,i)=>`<span class="fld">${fd.pre?`<span>${fd.pre}</span>`:""}<input id="a${i}" aria-label="${esc(fd.label)}" inputmode="text" spellcheck="false" autocomplete="off">${fd.post?`<span>${fd.post}</span>`:""}</span>`).join("");
+  else if(A.type==="expr"){const keys=[["²","squared"],["(","open bracket"],[")","close bracket"]];
+    f.innerHTML=`<span class="fld grow"><span>y =</span><input id="a0" class="wide" aria-label="${esc(A.label)}" inputmode="text" spellcheck="false" autocomplete="off" autocapitalize="off"></span><span class="keys">${keys.map(([k,l])=>`<button type="button" class="key" data-ins="${k}" aria-label="Type ${l}">${k}</button>`).join("")}</span><p class="preview" id="pv">Type it like ${A.mode==="zeros"?"2(x − 1)(x + 5)":"−2(x + 3)² + 8"}. Use / for fractions, like 3/7(x − 2)² + 1.</p>`;}
+  else if(A.type==="choice")f.innerHTML=`<div class="choices" role="radiogroup" aria-label="Answer choices">${A.opts.map((o,i)=>`<button type="button" class="opt" role="radio" aria-checked="false" data-i="${i}"><span class="key">${"ABCDEF"[i]}</span><span>${o}</span></button>`).join("")}</div>`;
+  else f.innerHTML=`<span class="fld ptsfld"><span>Points:</span><span class="pt" id="ptTxt">click the grid</span></span><button type="button" class="btn quiet" id="clearPts">Clear points</button>`;
+  if(q.fig){
+    $("figwrap").hidden=false;figEl.className=q.fig.click?"click":"";
+    if(q.fig.click){figEl.tabIndex=0;figEl.setAttribute("role","application");figEl.setAttribute("aria-label","Coordinate grid. Use the arrow keys to move, then press Enter to plot or remove a point.");figEl.removeAttribute("aria-hidden")}
+    else{figEl.removeAttribute("tabindex");figEl.removeAttribute("role");figEl.removeAttribute("aria-label");figEl.setAttribute("aria-hidden","true")}
+    $("fignote").hidden=!q.fig.click;redraw();
+  }else $("figwrap").hidden=true;
+  $("fb").innerHTML="";$("steps").hidden=true;$("steps").innerHTML="";
+  $("checkBtn").disabled=false;$("stepsBtn").textContent="Show steps";
+}
+function fb(type,title,msg){$("fb").innerHTML=`<div class="feedback ${type}"><strong>${title}</strong>${msg||""}</div>`}
+function mark(id,ok){const el=$(id);if(el){el.classList.toggle("ok",ok);el.classList.toggle("no",!ok)}}
+function showSteps(){
+  revealed=true;
+  const items=q.steps.map((s,i)=>`<li><span class="why">${s[0]}</span>${s[1]?`<span class="work${i===q.steps.length-1?" final":""}">${s[1]}</span>`:""}</li>`).join("");
+  $("steps").innerHTML=`<h2>Worked steps</h2><ol>${items}</ol>`;$("steps").hidden=false;$("stepsBtn").textContent="Steps shown";
+}
+function updateScore(){$("sFirst").textContent=stats.first;$("sDone").textContent=stats.done;$("sStreak").textContent=stats.streak}
+function win(extra){
+  if(!finished){finished=true;stats.done++;if(attempts===0&&!revealed){stats.first++;stats.streak++}else stats.streak=0;updateScore();}
+  const praise=attempts===0&&!revealed?pick(["Correct!","Nailed it.","That's right.","Correct, first try."]):"Correct!";
+  fb("good",praise,extra||"");$("checkBtn").disabled=true;
+  $("answer").querySelectorAll("input,.opt,.key,#clearPts").forEach(el=>el.disabled=true);
+  $("nextBtn").focus({preventScroll:true});
+}
+function miss(msg){attempts++;fb("bad","Not quite.",msg+(attempts>=2&&!revealed?" You can also press Show steps.":""))}
+function answerText(){const A=q.ans;return A.fields.map((fd,i)=>`${fd.pre?fd.pre.replace(/\($/,"(").trim()+" ":""}${fh(A.vals[i])}${fd.post?" "+fd.post.trim():""}`).join(" ").replace(/\( /g,"(").replace(/ ,/g,",").replace(/ \)/g,")")}
+
+function doCheck(){
+  if(finished)return;
+  const A=q.ans;
+  if(A.type==="choice"){
+    if(choice===null)return fb("hint","Pick an answer first.","Click one of the choices, then press Check.");
+    const r=check(q,choice),b=$("answer").querySelector(`.opt[data-i="${choice}"]`);
+    if(r.s==="ok"){b.classList.add("ok");return win("")}
+    b.classList.add("no");b.disabled=true;b.setAttribute("aria-checked","false");choice=null;
+    return miss(r.msg);
+  }
+  if(A.type==="expr"){
+    const r=check(q,$("a0").value);
+    if(r.s==="empty")return fb("hint",r.msg.startsWith("Type your")?"Type your answer first.":"I can't read that.",r.msg.startsWith("Type your")?"":r.msg);
+    if(r.s==="ok"){mark("a0",true);return win(r.note||"")}
+    mark("a0",false);return miss(r.msg);
+  }
+  if(A.type==="pts"){
+    const r=check(q,fst.sel);
+    if(r.s==="empty")return fb("hint","Plot your points first.","Click the grid to plot each point, then press Check.");
+    if(r.s==="partial")return fb("hint","Keep going.",r.msg);
+    if(r.s==="ok"){fst.ok=true;fst.wrong=[];redraw();return win(A.pts.length>1?"Your points are on the parabola, shown in green.":"")}
+    const W=new Set(r.wrong.map(key));fst.wrong.push(...r.wrong);fst.sel=fst.sel.filter(p=>!W.has(key(p)));redraw();$("ptTxt").textContent=ptsText();
+    return miss(r.msg);
+  }
+  const ins=A.fields.map((_,i)=>$("a"+i));
+  const r=check(q,ins.map(i=>i.value));
+  if(r.s==="empty"){const blank=ins.some(i=>!i.value.trim());return fb("hint",blank?(ins.length>1?"Fill in every box.":"Type your answer first."):"I can't read that number.",blank?(ins.length>1?"Each box needs a number.":"Write your answer in the box."):"Use a whole number, a fraction like 2/3, or a decimal like 2.5.")}
+  const t=A.vals.map(fv);
+  if(r.s==="ok"){ins.forEach(i=>mark(i.id,true));return win(q.note?q.note:A.vals.some(v=>typeof v!=="number"&&v.d!==1)?answerText():"")}
+  if(A.orderFree){ins.forEach(i=>mark(i.id,false))}
+  else ins.forEach((i,k)=>{const p=parseNum(i.value);mark(i.id,!!(p&&!p.bad&&near(p.v,t[k],A.fields[k].tol)))});
+  return miss(r.msg);
+}
+
+function preview(){const inp=$("a0"),pv=$("pv");if(!inp||!pv||!q||q.ans.type!=="expr")return;const v=inp.value.trim();if(!v)return;
+  const r=parseExpr(v);pv.innerHTML=r.ast?`You typed: <b>y = ${esc(pshow(r.ast))}</b>`:`You typed: ${esc(v)}`}
+$("answer").addEventListener("input",preview);
+/* events */
+$("skills").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;skill=b.dataset.skill;store.set("u3.skill",skill);setPressed();newQ();});
+$("levels").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;level=+b.dataset.level;store.set("u3.level",level);setPressed();newQ();});
+$("checkBtn").addEventListener("click",doCheck);
+$("answer").addEventListener("submit",e=>{e.preventDefault();doCheck();});
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();doCheck();}});
+$("answer").addEventListener("click",e=>{
+  if(e.target.closest("#clearPts")){if(finished)return;fst.sel=[];redraw();$("ptTxt").textContent=ptsText();return}
+  const kb=e.target.closest(".key");if(kb&&kb.dataset.ins){const inp=$("a0");if(!inp||finished)return;const v=kb.dataset.ins,a0=inp.selectionStart??inp.value.length,b0=inp.selectionEnd??a0;
+    inp.value=inp.value.slice(0,a0)+v+inp.value.slice(b0);inp.focus();inp.setSelectionRange(a0+v.length,a0+v.length);preview();return}
+  const b=e.target.closest(".opt");if(!b||b.disabled||finished)return;choice=+b.dataset.i;
+  $("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));});
+document.addEventListener("keydown",e=>{
+  if(!q||q.ans.type!=="choice"||finished)return;if(e.target.closest&&e.target.closest("input"))return;
+  const i="abcdef".indexOf(e.key.toLowerCase());
+  if(i>=0&&i<q.ans.opts.length){const b=$("answer").querySelector(`.opt[data-i="${i}"]`);if(b&&!b.disabled){choice=i;$("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));}}
+  else if(e.key==="Enter"&&choice!==null&&!(e.target.closest&&e.target.closest("button"))){e.preventDefault();doCheck();}
+});
+function togglePt(p){
+  const k=key(p),i=fst.sel.findIndex(s=>key(s)===k);
+  if(i>=0)fst.sel.splice(i,1);else{if(q.ans.pts.length===1)fst.sel=[p];else if(fst.sel.length<q.ans.pts.length+4)fst.sel.push(p)}
+  fst.wrong=fst.wrong.filter(w=>key(w)!==k);redraw();$("ptTxt").textContent=ptsText();
+}
+figEl.addEventListener("click",e=>{if(!q||!q.fig||!q.fig.click||finished)return;
+  const r=figEl.getBoundingClientRect(),[W,H]=figSize(q.fig),gm=gridMap(q.fig,W,H);
+  const lx=(e.clientX-r.left)/r.width*W,ly=(e.clientY-r.top)/r.height*H;
+  const x=Math.round(gm.toX(lx)),y=Math.round(gm.toY(ly));
+  if(x<q.fig.x[0]||x>q.fig.x[1]||y<q.fig.y[0]||y>q.fig.y[1])return;fst.cur=null;togglePt([x,y]);});
+figEl.addEventListener("keydown",e=>{if(!q||!q.fig||!q.fig.click||finished)return;
+  const d={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];
+  const [xa,xb]=q.fig.x,[ya,yb]=q.fig.y;
+  if(d){e.preventDefault();const c=fst.cur||[Math.max(xa,Math.min(xb,0)),Math.max(ya,Math.min(yb,0))];
+    fst.cur=[Math.max(xa,Math.min(xb,c[0]+d[0])),Math.max(ya,Math.min(yb,c[1]+d[1]))];redraw();return}
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();if(fst.cur)togglePt(fst.cur.slice());}
+});
+$("hintBtn").addEventListener("click",()=>fb("hint","Hint",q.hint));
+$("stepsBtn").addEventListener("click",()=>{showSteps();if(!finished){stats.streak=0;updateScore();}});
+$("nextBtn").addEventListener("click",()=>{if(!finished&&(revealed||attempts>0)){stats.done++;stats.streak=0;updateScore();}newQ();const a=$("a0");if(a)a.focus({preventScroll:true});});
+if(window.matchMedia){const mq=matchMedia("(prefers-color-scheme: dark)");(mq.addEventListener?mq.addEventListener("change",redraw):mq.addListener(redraw))}
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
+setPressed();newQ();updateScore();
+})();
+</script>
+</body>
+</html>

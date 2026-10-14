@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A retro puzzle-workshop review game for Grade 10 Unit 3 math: aim launchers with quadratic equations through Ottawa history.">
+<meta name="robots" content="noindex">
+<title>Launch Lab</title>
+<style>
+:root{color-scheme:dark}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Press Start 2P";src:url("../fonts/press-start-2p.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<style>
+/* Layout: one centred game column — the canvas (960×540 side-view rooms), a touch pad under it, and DOM panels laid over the canvas for machines, history cards and menus.
+   Deliberately single-theme: a VGA-era workshop console, so every colour is set explicitly. */
+:root{
+  --bg:#141a2e; --bg2:#1d2541; --panel:#f3efe2; --panel2:#e6dfc8; --ink:#1b1f33; --muted:#5b5f73;
+  --accent:#2b6fd6; --accent-ink:#ffffff; --gold:#e8a920; --good:#1e8a4c; --good-soft:#dcf1e3; --bad:#c23b2e; --bad-soft:#f8e1dd; --hl:#ffe27a;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif; --f-pix:"Press Start 2P","Courier New",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:#e9ecf6;font-family:var(--f-body)}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:16px 32px;display:flex;flex-direction:column;gap:12px}
+.stage{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;border:4px solid #0b0f1d;border-radius:6px;overflow:hidden;background:#000;box-shadow:0 0 0 2px #39436b}
+#game{display:block;width:100%;height:100%;image-rendering:pixelated}
+[hidden]{display:none!important}
+.overlay{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(8,10,20,.62)}
+.card{color-scheme:light;background:var(--panel);color:var(--ink);border:4px solid #1b1f33;border-radius:6px;box-shadow:6px 6px 0 #0b0f1d;width:min(100%,760px);max-height:100%;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px;font-size:16px;line-height:1.45}
+.card.wide{width:min(100%,1100px)}
+.cols{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.cols>div{display:flex;flex-direction:column;gap:10px;min-width:0}
+@media (min-width:860px){.cols{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}}
+.card h2{font-family:var(--f-pix);font-size:15px;line-height:1.5;margin:0;color:var(--ink);letter-spacing:.02em}
+.card h3{margin:0;font-size:17px}
+.card p{margin:0}
+.card .ctx{color:#3b3f52}
+.tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-weight:700;font-size:15px;padding:8px 14px;border:3px solid #1b1f33;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 #1b1f33}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #1b1f33}
+.btn.go{background:var(--accent);color:var(--accent-ink)}
+.btn.fire{background:#d6402c;color:#fff}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn:focus-visible,.opt:focus-visible,.choice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.title{font-family:var(--f-pix);font-size:clamp(20px,4.6vw,40px);color:var(--gold);text-shadow:4px 4px 0 #8a3b12;margin:0;text-align:center;letter-spacing:.04em}
+.sub{font-family:var(--f-pix);font-size:10px;color:#9fb0ff;text-align:center;line-height:1.8}
+.titlecard{color-scheme:dark;background:transparent;color:#e9ecf6;border:none;box-shadow:none;align-items:center;text-align:center;gap:14px}
+.titlecard p{max-width:60ch;color:#d9def0}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{font:inherit;text-align:left;flex:1 1 200px;padding:10px 12px;border:3px solid #1b1f33;border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
+.choice b{display:block}
+.choice small{color:var(--muted)}
+.choice[aria-pressed="true"]{background:#dce8ff;border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
+input[type=text]{font:inherit;font-size:18px;font-weight:700;padding:6px 10px;border:3px solid #1b1f33;border-radius:4px;background:#fff;color:var(--ink);min-width:0}
+input[type=text]:focus{outline:3px solid var(--gold);outline-offset:1px}
+input.ok{border-color:var(--good)} input.no{border-color:var(--bad)}
+.eqrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:20px;font-weight:700}
+.eqrow input{flex:1 1 220px;font-size:20px}
+.key{font:inherit;font-weight:700;color:var(--ink);min-width:2.2em;padding:5px 8px;border:3px solid #1b1f33;border-radius:4px;background:#e9eefc;cursor:pointer}
+.num{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:18px;font-weight:700}
+.num .fld{display:inline-flex;gap:6px;align-items:center}
+.num input{width:5.5em;text-align:center}
+.opt{font:inherit;font-weight:700;color:var(--ink);text-align:left;padding:8px 12px;border:3px solid #1b1f33;border-radius:4px;background:#fff;cursor:pointer;flex:1 1 160px}
+.opt[aria-checked="true"]{background:#dce8ff;border-color:var(--accent)}
+.opt.no{opacity:.5;text-decoration:line-through}
+.opt.ok{background:var(--good-soft);border-color:var(--good)}
+.preview{font-size:14px;color:var(--muted)}
+.fb{border-radius:4px;padding:8px 12px;font-size:15px}
+.fb.good{background:var(--good-soft);color:#14512e;border:2px solid var(--good)}
+.fb.bad{background:var(--bad-soft);color:#7a1f16;border:2px solid var(--bad)}
+.fb.hint{background:#fff6cf;color:#5a4400;border:2px solid var(--gold)}
+.fb strong{display:block}
+.shots{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.pip{display:inline-block;width:12px;height:12px;border:2px solid #1b1f33;border-radius:50%;background:var(--gold)}
+.pip.used{background:transparent}
+.scene{display:block;width:100%;height:auto;border:3px solid #1b1f33;border-radius:4px;background:#000}
+.big{font-size:20px;font-weight:700}
+.hl{font-weight:700;background:linear-gradient(transparent 60%,var(--hl) 60%)}
+.steps{border-top:2px dashed #9a937a;padding-top:8px}
+.steps ol{margin:4px 0 0;padding-left:1.4em;display:flex;flex-direction:column;gap:6px}
+.steps .why{display:block;font-size:14px;color:var(--muted)}
+.steps .work{display:block;font-weight:700;color:#1d3f8f;font-size:17px}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.8em;line-height:1.05;text-align:center;margin:0 .1em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+table.tbl,table.xy{border-collapse:collapse;font-variant-numeric:tabular-nums}
+table.tbl th{font-size:12px;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 2px 0}
+table.tbl td{padding:0 14px 0 0;white-space:nowrap}
+.xyw{overflow-x:auto;max-width:100%}
+table.xy th,table.xy td{border:2px solid #1b1f33;padding:4px 10px;text-align:center;min-width:2.2em;font-weight:700}
+table.xy th{background:#dce8ff}
+.hist{background:#f6e7c1;border-color:#6b4a12}
+.hist h2{color:#6b3a10}
+.hist .yr{font-family:var(--f-pix);font-size:10px;color:#8a5a1c}
+.report td,.report th{padding:4px 10px;border-bottom:1px solid #cfc7ac;text-align:left}
+.report{border-collapse:collapse;width:100%;color:var(--ink);font-size:15px}
+.pad{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+.pad .grp{display:flex;gap:8px}
+.pad button{font:inherit;font-weight:700;font-size:18px;width:56px;height:48px;border:3px solid #0b0f1d;border-radius:6px;background:#2c3763;color:#fff;touch-action:none;user-select:none;-webkit-user-select:none}
+.pad button.a{background:#d6402c;width:84px}
+.pad .help{font-size:13px;color:#aab3d6;flex:1 1 260px}
+.toast{position:absolute;z-index:5;left:50%;top:64px;transform:translateX(-50%);background:#fff6cf;color:#3d2f00;border:3px solid #1b1f33;border-radius:4px;padding:6px 12px;font-weight:700;font-size:15px;box-shadow:3px 3px 0 #1b1f33;pointer-events:none;max-width:90%;text-align:center}
+@media (max-width:600px){.card{padding:12px;font-size:15px}.big{font-size:17px}.eqrow,.eqrow input{font-size:17px}}
+@media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
+</style>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <canvas id="game" width="960" height="540" aria-label="Launch Lab game. Use the arrow keys or WASD to move and climb ladders, and Space to use a machine."></canvas>
+    <div class="overlay" id="ov"></div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+  <div class="pad" id="pad">
+    <div class="grp"><button data-k="left" aria-label="Move left">◀</button><button data-k="right" aria-label="Move right">▶</button></div>
+    <p class="help">Arrow keys or WASD to walk and climb ladders. Space or Enter to use a machine. Esc closes a panel.</p>
+    <div class="grp"><button data-k="up" aria-label="Climb up">▲</button><button data-k="down" aria-label="Climb down">▼</button><button class="a" data-k="act" aria-label="Use">USE</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* =================== math helpers =================== */
+const M="−";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const isInt=v=>Math.abs(v-Math.round(v))<1e-9;
+function fmt(v){if(isInt(v))v=Math.round(v);else v=Math.round(v*100)/100;return v<0?M+Math.abs(v):String(v)}
+const sn=n=>fmt(n);
+function F(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const fv=x=>typeof x==="number"?x:x.n/x.d;
+const fmul=(x,k)=>typeof x==="number"?x*k:F(x.n*k,x.d);
+const fa=x=>typeof x==="number"?String(x):(x.d===1?String(x.n):x.n+"/"+x.d);
+function fh(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}<span class="fr"><span>${Math.abs(x.n)}</span><span>${x.d}</span></span>`}
+function fs(x){if(typeof x==="number")return sn(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}${Math.abs(x.n)}/${x.d}`}
+const P=(x,y)=>`(${sn(x)}, ${sn(y)})`;
+const par=v=>v<0?`(${sn(v)})`:sn(v);
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+function XY(xs,ys,xl="x",yl="y"){return `<div class="xyw"><table class="xy"><tr><th>${xl}</th>${xs.map(v=>`<td>${typeof v==="string"?v:sn(v)}</td>`).join("")}</tr><tr><th>${yl}</th>${ys.map(v=>`<td>${typeof v==="string"?v:sn(v)}</td>`).join("")}</tr></table></div>`}
+const diffs=v=>v.slice(1).map((y,i)=>Math.round((y-v[i])*1e6)/1e6);
+const allSame=v=>v.every(x=>Math.abs(x-v[0])<1e-9);
+/* quadratic forms */
+function coefH(a){const v=fv(a);return v===1?"":v===-1?M:fh(a)}
+function coefS(a){const v=fv(a);return v===1?"":v===-1?M:fs(a)}
+const brV=h=>h===0?"x":`(x ${h>0?M:"+"} ${fmt(Math.abs(h))})`;
+const kS=k=>Math.abs(k)<1e-9?"":(k>0?` + ${fmt(k)}`:` ${M} ${fmt(-k)}`);
+const vfH=(a,h,k,v="y",x="x")=>`${v} = ${coefH(a)}${h===0?x+"²":brV(h).replace(/x/,x)+"²"}${kS(k)}`;
+const vfS=(a,h,k)=>`y = ${coefS(a)}${h===0?"x²":brV(h)+"²"}${kS(k)}`;
+function zord(s,t){return t===0?[t,s]:[s,t]}
+const ffH=(a,s,t,v="y")=>{const [p,q]=zord(s,t);return `${v} = ${coefH(a)}${brV(p)}${brV(q)}`};
+const ffS=(a,s,t)=>{const [p,q]=zord(s,t);return `y = ${coefS(a)}${brV(p)}${brV(q)}`};
+const vco=(a,h,k)=>{const v=fv(a);return[v*h*h+k,-2*v*h,v]};
+const fco=(a,s,t)=>{const v=fv(a);return[v*s*t,-v*(s+t),v]};
+const qv=(a,h,k,x)=>fv(a)*(x-h)*(x-h)+k;
+function stdH(c){/* c ascending [c0,c1,c2] -> y = ax² + bx + c */const t=[[c[2],"x²"],[c[1],"x"],[c[0],""]];let s="";for(const [v,p] of t){if(Math.abs(v)<1e-9)continue;const a=Math.abs(v);const body=p===""?fmt(a):(a===1?"":fmt(a))+p;s+=s===""?(v<0?M:"")+body:(v<0?` ${M} `:" + ")+body}return "y = "+(s||"0")}
+const SP=a=>[fmul(a,1),fmul(a,3),fmul(a,5)];
+const spH=a=>SP(a).map(fh).join(", ");
+const AL={0:[F(1),F(-1)],1:[F(1),F(-1),F(2),F(-2)],2:[F(2),F(-2),F(1,2),F(-1,2),F(3),F(-3)]};
+function rangeFor(pts,ex=1,max=20){
+  const xs=pts.map(p=>p[0]).concat([0]),ys=pts.map(p=>p[1]).concat([0]);
+  const x=[Math.floor(Math.min(...xs))-ex,Math.ceil(Math.max(...xs))+ex],y=[Math.floor(Math.min(...ys))-ex,Math.ceil(Math.max(...ys))+ex];
+  if(x[1]-x[0]>max||y[1]-y[0]>max)return null;
+  for(const r of [x,y]){let f=0;while(r[1]-r[0]<10){if(f++%2)r[1]++;else r[0]--}}
+  return{x,y};
+}
+const dir=a=>fv(a)>0?"up":"down";
+
+/* =================== question generators =================== */
+/* Each returns {skill, text, fig?, ans:{type,...}, steps:[[why,work],...], hint, mistakes?, fieldMsg?, missFn?, ptsWhy?} */
+
+/* ---- L1 types of functions ---- */
+const KINDS=["Linear","Quadratic","Other"];
+function typeWhy(kind,d1,d2){
+  return KINDS.map(k=>{if(k===kind)return "";
+    if(k==="Linear")return "The first differences are not all the same, so it isn't linear.";
+    if(k==="Quadratic")return kind==="Linear"?"The first differences are already constant, so it's linear.":"The second differences are not constant, so it isn't quadratic.";
+    return kind==="Linear"?"The first differences are constant. That's the test for linear.":"Look at the second differences: they're all the same.";});
+}
+function diffSteps(xs,ys,kind,step){
+  const d1=diffs(ys),d2=diffs(d1);
+  const rows=xs.map((x,i)=>[sn(x),sn(ys[i]),i>0?`${par(ys[i])} ${M} ${par(ys[i-1])} = ${sn(d1[i-1])}`:"",i>1?sn(d2[i-2]):""]);
+  const out=[[`The x-values go up by ${step} each time, so finite differences will work`,TBL(rows,["x","y","1st diff.","2nd diff."])]];
+  if(kind==="Linear")out.push(["The first differences are all the same",`${d1.map(sn).join(", ")}: constant`]);
+  else{out.push(["The first differences change, so it isn't linear",d1.map(sn).join(", ")]);
+    out.push([kind==="Quadratic"?"The second differences are all the same":"The second differences change too",`${d2.map(sn).join(", ")}${kind==="Quadratic"?": constant":""}`]);}
+  out.push(["Conclusion",`∴ ${kind}`]);
+  return out;
+}
+function genTypes(L,force){
+  const type=force||pick(L===0?["table","table","eqn","value"]:L===1?["table","table","eqn","value","next"]:["table","table","eqn","value","next"]);
+  if(type==="table"){
+    for(let t=0;t<200;t++){
+      const kind=pick(KINDS);let step=L===2?pick([1,2,3]):1,f,x0;
+      if(kind==="Linear"){const m=nz(-5,5),b=ri(-9,9);f=x=>m*x+b;x0=ri(-3,1);}
+      else if(kind==="Quadratic"){const a=pick(L===0?[1,-1]:[1,-1,2,-2,3]),h=ri(-2,3),k=ri(-8,8);f=x=>a*(x-h)*(x-h)+k;x0=ri(-2,1);}
+      else{step=Math.min(step,2);const o=pick(["exp","cube","exp"]);const d=ri(-6,6);
+        if(o==="exp"){f=x=>2**x+d;x0=0}else{f=x=>x*x*x+d;x0=step===1?ri(-2,0):-4}}
+      const xs=[0,1,2,3,4].map(i=>x0+i*step),ys=xs.map(f);
+      if(ys.some(y=>Math.abs(y)>300))continue;
+      const d1=diffs(ys),d2=diffs(d1);
+      const real=allSame(d1)?"Linear":allSame(d2)?"Quadratic":"Other";if(real!==kind)continue;
+      return{skill:"types",text:`<p>Use finite differences to decide whether the table is <span class="hl">linear, quadratic or other</span>.</p>${XY(xs,ys)}`,
+        ans:{type:"choice",opts:KINDS,correct:KINDS.indexOf(kind),why:typeWhy(kind,d1,d2)},
+        steps:diffSteps(xs,ys,kind,step),
+        hint:"Subtract each y-value from the next one (next − previous). If those first differences aren't constant, find the differences of the differences."};
+    }
+  }
+  if(type==="eqn"){
+    const kind=pick(KINDS);let eq,why;
+    if(kind==="Linear"){const v=ri(0,2),m=nz(-6,6),b=nz(-9,9);
+      if(v===0){eq=`y = ${m===1?"":m===-1?M:sn(m)}x ${b<0?M:"+"} ${Math.abs(b)}`;why=`The highest exponent on x is 1.`}
+      else if(v===1){const A=ri(1,5),B=nz(-6,6),C=ri(1,12);eq=`${A===1?"":A}x ${B<0?M:"+"} ${Math.abs(B)===1?"":Math.abs(B)}y = ${C}`;why="x and y are both to the power of 1, so it's linear (a straight line)."}
+      else{const p=nz(-5,5);eq=`y = ${m===1?"":m===-1?M:sn(m)}${brV(p)}`;why=`Expanding gives ${m===1?"":m===-1?M:sn(m)}x ${m*-p<0?M:"+"} ${Math.abs(m*p)}. The highest exponent on x is 1.`}}
+    else if(kind==="Quadratic"){const v=ri(0,3);
+      if(v===0){const b=nz(-8,8),c=nz(-9,9);eq=stdH([c,b,pick([1,-1,2,3,-2])]);why="The highest exponent on x is 2."}
+      else if(v===1){const s=nz(-6,6),t=nz(-6,6);eq=ffH(F(pick([1,1,2,-1])),s,t);why="Multiplying the two brackets gives an x² term, so the highest exponent is 2."}
+      else if(v===2){eq=vfH(F(pick([1,-1,2,-3])),nz(-5,5),nz(-9,9));why="Squaring the bracket gives an x² term, so the highest exponent is 2."}
+      else{const c=ri(2,12);eq=`y = ${c} ${M} ${pick(["","2","3"])}x²`;why="The highest exponent on x is 2."}}
+    else{const v=ri(0,2);
+      if(v===0){const d=nz(-9,9);eq=`y = 2<sup>x</sup> ${d<0?M:"+"} ${Math.abs(d)}`;why="x is in the exponent, so it's not linear or quadratic."}
+      else if(v===1){const b=ri(1,6);eq=`y = x³ ${M} ${b}x`;why="The highest exponent on x is 3."}
+      else{eq=`y = ${ri(2,4)}(${pick(["1.5","2","3"])})<sup>x</sup>`;why="x is in the exponent, so it's not linear or quadratic."}}
+    return{skill:"types",text:`<p>Is this function <span class="hl">linear, quadratic or other</span>?</p><p class="big">${eq}</p>`,
+      ans:{type:"choice",opts:KINDS,correct:KINDS.indexOf(kind),why:KINDS.map(k=>k===kind?"":"Look for the highest exponent on x. "+(kind==="Other"?"Is x in an exponent, or cubed?":"Expand any brackets first."))},
+      steps:[["Find the highest exponent on x",why],["Conclusion",`∴ ${kind}`]],
+      hint:"Highest exponent 1: linear. Highest exponent 2: quadratic. Anything else (x³, or x in an exponent): other."};
+  }
+  if(type==="value"){
+    const a=pick(L===0?[1]:L===1?[1,-1,2,-2]:[2,-2,3,-3]),b=nz(-6,6),c=ri(-9,9),x=L===2?nz(-4,4):ri(-3,-1);
+    const y=a*x*x+b*x+c,alt=a*(-x*x)+b*x+c,alt2=a*x*x-b*x+c;
+    const mist=[];if(alt!==y)mist.push({f:0,val:alt,msg:`Square the whole number, sign and all: ${par(x)}² = ${x*x}, not ${M}${x*x}.`});
+    if(alt2!==y&&alt2!==alt)mist.push({f:0,val:alt2,msg:`Check the middle term: ${b}(${sn(x)}) = ${sn(b*x)}.`});
+    return{skill:"types",text:`<p>Find the y-value when x = ${sn(x)}. Show the substitution.</p><p class="big">${stdH([c,b,a])}</p>`,
+      ans:{type:"num",fields:[{pre:"y =",label:"y-value"}],vals:[y]},mistakes:mist,
+      steps:[[`Sub x = ${sn(x)} into every x`,`y = ${a===1?"":a===-1?M:a}(${sn(x)})² ${b<0?M:"+"} ${Math.abs(b)}(${sn(x)})${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""}`],["Square first, then multiply",`y = ${a===1?"":a===-1?M:a}(${x*x}) ${b*x<0?M:"+"} ${Math.abs(b*x)}${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""}`],["Add",`y = ${sn(a*x*x)} ${b*x<0?M:"+"} ${Math.abs(b*x)}${c?` ${c<0?M:"+"} ${Math.abs(c)}`:""} = ${sn(y)}`],["Conclusion",`∴ The point is ${P(x,y)}`]],
+      hint:`Put brackets around ${sn(x)} everywhere you see x. Square before you multiply.`};
+  }
+  /* next value from differences */
+  const a=pick(L===1?[1,-1,2]:[2,-2,3,-3]),h=ri(-1,3),k=ri(-6,6),x0=ri(-1,1);
+  const xs=[0,1,2,3].map(i=>x0+i),ys=xs.map(x=>a*(x-h)*(x-h)+k),d1=diffs(ys),d2=diffs(d1);
+  const nx=x0+4,nd=d1[2]+d2[0],ny=ys[3]+nd;
+  return{skill:"types",text:`<p>This table is quadratic. Use finite differences to find the missing y-value.</p>${XY(xs.concat([nx]),ys.map(sn).concat(["?"]))}`,
+    ans:{type:"num",fields:[{pre:"y =",label:"missing y-value"}],vals:[ny]},
+    mistakes:[{f:0,val:ys[3]+d1[2],msg:"The first differences change. Use the second difference to find the next first difference."}],
+    steps:[["First differences",d1.map(sn).join(", ")],["Second differences (constant)",d2.map(sn).join(", ")],["The next first difference",`${sn(d1[2])} + ${par(d2[0])} = ${sn(nd)}`],["Add it to the last y-value",`${sn(ys[3])} + ${par(nd)} = ${sn(ny)}`],["Conclusion",`∴ y = ${sn(ny)}`]],
+    hint:"Find the second difference first. It stays the same, so it tells you the next first difference."};
+}
+
+
+/* =================== typed expressions =================== */
+const SUPD={"²":2,"³":3,"⁴":4};
+function tokenize(s){
+  s=String(s).replace(/[−–—]/g,"-").replace(/[×·∙]/g,"*").replace(/÷/g,"/").replace(/X/g,"x").replace(/\s+/g,"");
+  s=s.replace(/^(y|f\(x\)|h|p|h\(t\))=/i,"");
+  const out=[];let i=0;
+  while(i<s.length){const ch=s[i];
+    if(/\d/.test(ch)||(ch==="."&&/\d/.test(s[i+1]||""))){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;const t=s.slice(i,j);if((t.match(/\./g)||[]).length>1)return{err:"bad"};out.push({t:"n",v:parseFloat(t)});i=j;continue}
+    if(ch==="x"){if(/\d/.test(s[i+1]||""))return{err:"xdigit"};out.push({t:"x"});i++;continue}
+    if(SUPD[ch]){out.push({t:"^"});out.push({t:"n",v:SUPD[ch]});i++;continue}
+    if("+-*^()/".includes(ch)){out.push({t:ch});i++;continue}
+    if(ch==="["||ch==="{"){out.push({t:"("});i++;continue}
+    if(ch==="]"||ch==="}"){out.push({t:")"});i++;continue}
+    if(ch==="="){return{err:"eq"}}
+    return{err:"char",ch};
+  }
+  return{tk:out};
+}
+function parseExpr(str){
+  const T0=tokenize(str);if(T0.err)return T0;const tk=T0.tk;if(!tk.length)return{err:"empty"};
+  let i=0;const peek=()=>tk[i],eat=t=>{if(tk[i]&&tk[i].t===t){i++;return true}return false};
+  const sign=()=>{let s=1;while(peek()&&(peek().t==="+"||peek().t==="-")){if(peek().t==="-")s=-s;i++}return s};
+  function expr(){const terms=[{s:sign(),n:term()}];while(peek()&&(peek().t==="+"||peek().t==="-"))terms.push({s:sign(),n:term()});
+    return terms.length===1&&terms[0].s===1?terms[0].n:{k:"add",terms}}
+  function term(){const fs=[factor()];for(;;){const p=peek();if(!p)break;if(p.t==="*"){i++;fs.push(factor());continue}
+      if(p.t==="/"){i++;const f=factor();const v=pev(f);if(v.length!==1||Math.abs(v[0])<1e-12)throw 0;fs.push({k:"div",v:v[0],src:f});continue}
+      if(p.t==="n"||p.t==="x"||p.t==="("){fs.push(factor());continue}break}return fs.length===1?fs[0]:{k:"mul",fs}}
+  function factor(){let b=primary();while(eat("^")){const e=peek();if(!e||e.t!=="n"||!Number.isInteger(e.v)||e.v>6)throw 0;i++;b={k:"pow",b,e:e.v}}return b}
+  function primary(){const p=peek();if(!p)throw 0;if(p.t==="n"){i++;return{k:"num",v:p.v}}if(p.t==="x"){i++;return{k:"x"}}if(p.t==="("){i++;const e=expr();if(!eat(")"))throw 0;return{k:"par",e}}throw 0}
+  try{const e=expr();if(i<tk.length)return{err:"bad"};return{ast:e}}catch(_){return{err:"bad"}}
+}
+const padd=(a,b)=>{const r=[];for(let k=0;k<Math.max(a.length,b.length);k++)r[k]=(a[k]||0)+(b[k]||0);return r};
+const pmul=(a,b)=>{const r=Array(a.length+b.length-1).fill(0);a.forEach((x,i)=>b.forEach((y,j)=>r[i+j]+=x*y));return r};
+const ptrim=a=>{a=a.map(c=>Math.abs(c-Math.round(c))<1e-9?Math.round(c):c);while(a.length>1&&Math.abs(a[a.length-1])<1e-9)a.pop();return a};
+function pev(n){switch(n.k){case"num":return[n.v];case"x":return[0,1];case"par":return pev(n.e);case"div":return[1/n.v];
+  case"pow":{let r=[1];const b=pev(n.b);for(let k=0;k<n.e;k++)r=pmul(r,b);return r}
+  case"mul":return n.fs.reduce((r,f)=>pmul(r,pev(f)),[1]);
+  case"add":return n.terms.reduce((r,t)=>padd(r,pev(t.n).map(c=>c*t.s)),[0])}}
+const peq=(a,b)=>{a=ptrim(a);b=ptrim(b);return a.length===b.length&&a.every((c,i)=>Math.abs(c-b[i])<1e-9)};
+const SUPS=["⁰","¹","²","³","⁴","⁵","⁶"];
+function pshow(n){switch(n.k){case"num":return String(n.v);case"x":return"x";case"par":return"("+pshow(n.e)+")";case"div":return"/"+pshow(n.src);
+  case"pow":return pshow(n.b)+SUPS[n.e];
+  case"mul":return n.fs.map((f,k)=>(k>0&&(f.k==="num"||(f.k==="pow"&&f.b.k==="num"))?"·":"")+pshow(f)).join("");
+  case"add":return n.terms.map((t,k)=>{const b=pshow(t.n);return k===0?(t.s<0?M+b:b):(t.s<0?" "+M+" ":" + ")+b}).join("")}}
+const deg=n=>ptrim(pev(n)).length-1;
+function flatFactors(n){const out=[];const walk=f=>{if(f.k==="mul")f.fs.forEach(walk);else if(f.k==="par"&&f.e.k==="mul")walk(f.e);else if(f.k==="par"&&f.e.k==="add"&&f.e.terms.length===1)walk(f.e.terms[0].n);else out.push(f)};walk(n);return out}
+/* y = a(x − h)² + k : exactly one x² term made of numbers × (x − h)², other terms constant */
+function isVertexShape(ast){
+  const terms=ast.k==="add"?ast.terms.map(t=>t.n):[ast];
+  let sq=0;
+  for(const t of terms){const d=deg(t);if(d===0)continue;if(d!==2)return false;
+    const fs=flatFactors(t);let ok=false;
+    for(const f of fs){if(deg(f)===0)continue;if(f.k==="pow"&&f.e===2){const b=ptrim(pev(f.b));if(b.length===2&&Math.abs(b[1]-1)<1e-9&&!ok){ok=true;continue}}return false}
+    if(!ok)return false;sq++}
+  return sq===1;
+}
+/* y = a(x − s)(x − t): a product of numbers and linear factors with leading coefficient 1 */
+function isZerosShape(ast){
+  let node=ast;if(node.k==="add"){if(node.terms.length>1)return"sum";node=node.terms[0].n}
+  const fs=flatFactors(node);let lin=0;
+  for(const f of fs){const p=ptrim(pev(f));if(p.length===1)continue;
+    const base=f.k==="pow"?ptrim(pev(f.b)):p,e=f.k==="pow"?f.e:1;
+    if(base.length!==2)return"bad";if(Math.abs(base[1]-1)>1e-9)return"lead";lin+=e}
+  return lin===2?"ok":"bad";
+}
+function vparts(c){c=ptrim(c);if(c.length!==3)return null;const a=c[2],h=-c[1]/(2*a),k=c[0]-a*h*h;return{a,h,k}}
+const nm=v=>fmt(v);
+function quadMiss(mode,pv,T){
+  const S=vparts(pv),R=vparts(T);
+  if(!S)return ptrim(pv).length<3?"Your equation has no x² in it. A parabola needs a squared bracket (or two brackets with x).":"Check your exponents: a parabola's highest power of x is 2.";
+  const eq=(x,y)=>Math.abs(x-y)<1e-7,dir=R.a>0?"up":"down";
+  if(mode==="zeros"){
+    const r=pv.map(c=>c/S.a),rt=T.map(c=>c/R.a);
+    if(r.every((c,i)=>eq(c,rt[i]))){if(eq(S.a,-R.a))return `Your zeros are right. Check the sign of a: this parabola opens ${dir}.`;
+      if(Math.abs(S.a-R.a)/Math.abs(R.a)<0.1)return "Very close. Keep a as an exact fraction, not a rounded decimal.";
+      return "Your zeros are right. Find a by subbing the other point into y = a(x − s)(x − t).";}
+    const flip=[T[0],-T[1],T[2]].map(c=>c/R.a);if(r.every((c,i)=>eq(c,flip[i])))return "Check the signs in your brackets. A zero at x = 3 goes in as (x − 3), and a zero at x = −2 as (x + 2).";
+    return `Your equation's zeros don't match the x-intercepts. Put each zero in its own bracket as (x − s).`;
+  }
+  if(eq(S.a,R.a)){
+    if(eq(S.h,-R.h)&&eq(S.k,R.k))return `Check the sign of h. The vertex is at x = ${nm(R.h)}, so the bracket is ${brV(R.h)}.`;
+    if(eq(S.h,R.h)){if(eq(S.k,-R.k))return "Check the sign of k: it keeps its sign from the vertex (h, k).";return "Your a and h are right. Check k, the y-value of the vertex."}
+    return "Your a-value is right. Check h, the x-value of the vertex.";
+  }
+  if(eq(S.h,R.h)&&eq(S.k,R.k)){if(eq(S.a,-R.a))return `Your vertex is right. Check the sign of a: this parabola opens ${dir}.`;
+    if(Math.abs(S.a-R.a)/Math.abs(R.a)<0.1)return "Very close. Keep a as an exact fraction (like −4/75), not a rounded decimal.";
+    return "Your vertex is right. Check a: sub a point and solve for a.";}
+  return `Your equation has its vertex at (${nm(S.h)}, ${nm(S.k)}) and a = ${nm(S.a)}. Check each part.`;
+}
+const BADEXPR="I can't read that. Type it like y = −2(x + 3)² + 8 or y = 1/2(x − 1)(x + 5), and check your brackets.";
+function checkExpr(q,input){
+  const A=q.ans,r=parseExpr(input);
+  if(r.err==="empty")return{s:"empty",msg:"Type your answer first."};
+  if(r.err==="xdigit")return{s:"empty",msg:"For x squared, type x^2 or use the ² button."};
+  if(r.err==="eq")return{s:"empty",msg:"Start with y = and type only one equals sign."};
+  if(r.err==="char")return{s:"empty",msg:/[a-z]/i.test(r.ch)?"Use x as the variable.":BADEXPR};
+  if(r.err)return{s:"empty",msg:BADEXPR};
+  const pv=pev(r.ast),T=A.target;
+  if(!peq(pv,T))return{s:"miss",msg:quadMiss(A.mode,pv,T)};
+  if(A.mode==="vertex"){if(!isVertexShape(r.ast))return{s:"miss",msg:`That's the right parabola, but write it in vertex form, y = a(x − h)² + k, like ${A.ans}.`};return{s:"ok"}}
+  if(A.mode==="zeros"){const z=isZerosShape(r.ast);
+    if(z==="sum")return{s:"miss",msg:"That's the right parabola, but write it in factored form, y = a(x − s)(x − t)."};
+    if(z==="lead")return{s:"miss",msg:"That's equal, but take any number out of the brackets so each one looks like (x − s)."};
+    if(z!=="ok")return{s:"miss",msg:"That's the right parabola, but write it in factored form, y = a(x − s)(x − t)."};
+    return{s:"ok"}}
+  return{s:"ok"};
+}
+
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]+=/i,"").replace(/^\+/,"").replace(/^\$/,"").replace(/(m|s|cm)$/i,"");
+  if(s==="")return null;
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s)};
+  const m=s.match(/^(-?\d+)\/(-?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2]};
+  return{bad:true};
+}
+
+
+
+/* =================== room challenges =================== */
+/* term: {kind:"term", lesson, title, text, scene?, ans:{type:"num"|"choice",...}, steps, hint, mistakes?, missFn?, fieldMsg?}
+   launch: {kind:"launch", lesson, title, text, scene, target:[c0,c1,c2], form:"vertex"|"factored", ans (plain string), steps, hint, effect} */
+const rnd=pick;
+function niceA(L){return L===0?pick([F(-1),F(-2)]):L===1?pick([F(-1),F(-2),F(-1,2)]):pick([F(-1,2),F(-3,2),F(-2),F(-3),F(-1,3)])}
+function arcPts(a,h,k,from,to){return{a:fv(a),h,k,from,to}}
+
+/* ---------- L0 workshop tutorial ---------- */
+function chTutorial(){
+  return{kind:"launch",lesson:"tut",title:"Calibration launcher",
+    text:`<p>Every launcher in the workshop fires along a parabola. This one should peak at <b>(3, 9)</b> and drop into the bucket at <b>(6, 0)</b>.</p><p>Type <b>y = −(x − 3)² + 9</b> and press <b>Fire</b>. Use the ² button or type ^2.</p>`,
+    scene:{theme:"lobby",xr:[0,10],yr:[0,11],start:[0,0],tgt:[6,0],objs:[{t:"launcher",x:0},{t:"bucket",x:6}],marks:[[3,9]]},
+    target:vco(F(-1),3,9),form:"vertex",ans:"y = −(x − 3)² + 9",effect:"bucket",
+    steps:[["The vertex is (3, 9), so h = 3 and k = 9","y = a(x − 3)² + 9"],["It opens down with step pattern −1, −3, −5, so a = −1","y = −(x − 3)² + 9"]],
+    hint:"Type it exactly as shown: y = −(x − 3)^2 + 9. The minus at the front makes it open down.",free:true};
+}
+
+/* ---------- L1 Experimental Farm ---------- */
+function farmWrap(q,intro){q.kind="term";q.lesson="L1";q.text=`<p class="ctx">${intro}</p>`+q.text;return q}
+function chFarm1(L){return farmWrap(Object.assign(genTypes(L,"table"),{title:"Test-plot ledger"}),"A page from the Farm's lab ledger. The readings were taken at equal steps.")}
+function chFarm2(L){return farmWrap(Object.assign(genTypes(Math.max(1,L),"next"),{title:"Irrigation log"}),"The water gauge on the irrigation tank follows a quadratic pattern, but the last reading was smudged.")}
+function chFarm3(L){return farmWrap(Object.assign(genTypes(L,Math.random()<.5?"eqn":"value"),{title:"Saunders' formula box"}),"Dr. Saunders kept a box of growth formulas. Sort this one out.")}
+
+/* ---------- L2 Dey's Arena (lifted shots) ---------- */
+function puckArc(L){
+  for(let t=0;t<200;t++){const s=ri(0,2),d=pick([2,3,4]),k=pick([1,2,3]),a=F(-k,d*d);return{s,d,u:s+2*d,h:s+d,k,a}}
+}
+function arenaScene(p){return{theme:"arena",xr:[0,p.u+2],yr:[0,p.k+2],objs:[{t:"skater",x:p.s},{t:"net",x:p.u+1.6}],arcs:[arcPts(p.a,p.h,p.k,p.s,p.u)],marks:[[p.h,p.k],[p.s,0],[p.u,0]]}}
+function chArena1(L){const p=puckArc(L);
+  return{kind:"term",lesson:"L2",title:"Lifted shot: the peak",scene:arenaScene(p),
+    text:`<p class="ctx">McGee lifts the puck over a sprawled goalie. The graph shows its path (metres).</p><p>Where is the puck <span class="hl">highest</span>, and how high is it there?</p>`,
+    ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate"},{pre:",",post:")",label:"height"}],vals:[p.h,p.k]},
+    fieldMsg:["Your height is right. Check the x-value of the highest point.","Check the height of the highest point."],
+    steps:[["The vertex is the turning point at the top",`(${p.h}, ${p.k})`],["Conclusion",`∴ The puck is highest, ${p.k} m up, at x = ${p.h} m`]],
+    hint:"The vertex is the highest point of the path. Read its x and y from the grid."}}
+function chArena2(L){const p=puckArc(L);
+  return{kind:"term",lesson:"L2",title:"Lifted shot: on the ice",scene:arenaScene(p),
+    text:`<p class="ctx">Another lifted shot. The puck leaves the ice, flies, and lands again.</p><p>State the <span class="hl">x-intercepts</span>: where it leaves the ice and where it lands.</p>`,
+    ans:{type:"num",fields:[{pre:"x =",label:"first x-intercept"},{pre:"and x =",label:"second x-intercept"}],vals:[p.s,p.u],orderFree:true},
+    missFn:v=>v.includes(p.k)?"The x-intercepts are on the ice, where the height is 0.":null,
+    steps:[["x-intercepts: where the height is 0",`x = ${p.s} and x = ${p.u}`],["Check: the vertex is halfway between them",`(${p.s} + ${p.u}) ÷ 2 = ${p.h} ✓`],["Conclusion",`∴ It leaves the ice at x = ${p.s} m and lands at x = ${p.u} m`]],
+    hint:"x-intercepts are where the graph touches the ice (y = 0)."}}
+function chArena3(L){const p=puckArc(L);
+  return{kind:"term",lesson:"L2",title:"Lifted shot: the axis",scene:arenaScene(p),
+    text:`<p class="ctx">The Silver Seven's coach wants the numbers for this shot.</p><p>State the <span class="hl">axis of symmetry</span> and the <span class="hl">optimal value</span>.</p>`,
+    ans:{type:"num",fields:[{pre:"Axis of symmetry: x =",label:"axis of symmetry"},{pre:"Optimal value: y =",label:"optimal value"}],vals:[p.h,p.k]},
+    mistakes:[{f:0,val:p.k,msg:"The axis of symmetry is a vertical line through the vertex: x = the vertex's x-value."}],
+    fieldMsg:["The axis is the vertical line through the vertex.","The optimal value is the height at the vertex."],
+    steps:[["Axis of symmetry: the vertical line through the vertex",`x = ${p.h}`],["Optimal value: the y-value of the vertex (a maximum, since it opens down)",`y = ${p.k}`],["Conclusion",`∴ Axis x = ${p.h}, maximum y = ${p.k}`]],
+    hint:"Find the vertex first. The axis uses its x-value; the optimal value is its y-value."}}
+
+/* ---------- L3 Rideau Hall toboggan ---------- */
+function slide(L){
+  for(let t=0;t<400;t++){
+    const h=ri(1,2),k=pick([6,8,9,10,12]);let a,dx;
+    if(L===0){a=pick([F(-1),F(-2)]);dx=ri(1,3)}else{dx=ri(2,5);const y1=ri(0,k-2);a=F(y1-k,dx*dx);if(a.n===0)continue;if(L===1&&a.d>4)continue}
+    const y1=k+fv(a)*dx*dx;if(!isInt(y1)||y1<0)continue;return{h,k,a,dx,x1:h+dx,y1};
+  }
+}
+function slideScene(p){return{theme:"rideau",xr:[0,p.x1+2],yr:[0,p.k+2],start:[p.h,p.k],tgt:[p.x1,p.y1],objs:[{t:"ramp",x:p.h,y:p.k},{t:"snowbank",x:p.x1,y:p.y1}],marks:[[p.h,p.k],[p.x1,p.y1]]}}
+function chRideau1(L){const a=pick(L===0?[F(-1),F(-2)]:[F(-1,2),F(-2),F(-3,2),F(-3)]);
+  return{kind:"term",lesson:"L3",title:"The drop pattern",
+    text:`<p class="ctx">Lady Dufferin's guests time the toboggan as it leaves the lip of the slide. Each metre forward, it drops:</p><p class="big">${SP(fmul(a,-1)).map(fs).join(" m, ")} m</p><p>What is the <span class="hl">a-value</span> of its path?</p>`,
+    ans:{type:"num",fields:[{pre:"a =",label:"a-value"}],vals:[a]},
+    mistakes:[{f:0,val:fmul(a,-1),msg:"The toboggan is dropping, so the steps are negative and a is negative."},{f:0,val:fmul(a,3),msg:"That's the second step. a is the first step."}],
+    steps:[["The step pattern is a, 3a, 5a",spH(a)],["a is the first step",`a = ${fh(a)}`],["Conclusion",`∴ a = ${fh(a)}`]],
+    hint:"The step pattern is a, 3a, 5a. A drop means negative steps."}}
+function chRideau2(L){const p=slide(Math.max(1,L));
+  return{kind:"term",lesson:"L3",title:"Where it lands",scene:Object.assign(slideScene(p),{arcs:[arcPts(p.a,p.h,p.k,p.h,p.x1)],ghost:true}),
+    text:`<p class="ctx">The toboggan shoots straight off the flat lip of the slide at <b>(${p.h}, ${p.k})</b> and drops onto the snowbank at <b>(${p.x1}, ${p.y1})</b>. Its flight (dashed) is half a parabola: the lip is the <b>highest point of the flight</b>, so it's the vertex.</p><p>Use algebra to find the <span class="hl">a-value</span> of its path.</p>`,
+    ans:{type:"num",fields:[{pre:"a =",label:"a-value"}],vals:[p.a]},
+    mistakes:[{f:0,val:p.y1-p.k,msg:`The step shortcut only works one unit from the vertex. This point is ${p.dx} units away, so sub it in.`}],
+    steps:[["Sub the vertex",`y = a(x ${M} ${p.h})² + ${p.k}`],[`Sub (${p.x1}, ${p.y1})`,`${p.y1} = a(${p.x1} ${M} ${p.h})² + ${p.k} = ${p.dx*p.dx}a + ${p.k}`],[`Subtract ${p.k} and divide by ${p.dx*p.dx}`,`a = ${sn(p.y1-p.k)} ÷ ${p.dx*p.dx} = ${fh(p.a)}`],["Conclusion",`∴ a = ${fh(p.a)}`]],
+    hint:"Write y = a(x − h)² + k with the lip as the vertex, then sub the landing point."}}
+function chRideau3(L){const p=slide(L);
+  return{kind:"launch",lesson:"L3",title:"Set the slide",scene:slideScene(p),
+    text:`<p class="ctx">Set the slide so the toboggan shoots off the flat lip at <b>(${p.h}, ${p.k})</b>, the highest point of its flight, and lands on the snowbank at <b>(${p.x1}, ${p.y1})</b>.</p><p>Type its path in <span class="hl">vertex form</span>.</p>`,
+    target:vco(p.a,p.h,p.k),form:"vertex",ans:vfS(p.a,p.h,p.k),effect:"snow",
+    steps:[["The lip is the vertex",`y = a(x ${M} ${p.h})² + ${p.k}`],[`Sub the landing point (${p.x1}, ${p.y1})`,`${p.y1} = ${p.dx*p.dx}a + ${p.k}, so a = ${fh(p.a)}`],["Conclusion",`∴ ${vfH(p.a,p.h,p.k)}`]],
+    hint:"The lip is the vertex (h, k). Sub the snowbank point to find a."}}
+
+/* ---------- L4–L5 Lansdowne ---------- */
+function kick(L){if(L===0){const [h,k]=pick([[10,10],[10,5],[20,10],[20,8]]);return{h,k,a:F(-k,h*h)}}const h=pick(L===1?[10,15,20]:[10,15,20,25]),k=pick(L===1?[9,10,12,15]:[8,9,10,12,15]);return{h,k,a:F(-k,h*h)}}
+function fieldScene(h,k,P,extra){return Object.assign({theme:"field",xr:[0,Math.max(2*h,P)+4],yr:[0,k+4],start:[0,0],objs:[{t:"kicker",x:0},{t:"posts",x:P}],marks:[[h,k]]},extra||{})}
+function chField1(L){const {h,k,a}=kick(L);let P=pick([h+5,h+8,h+10,Math.round(1.5*h)]);
+  return{kind:"launch",lesson:"L4",title:"Field goal",scene:fieldScene(h,k,P,{tgt:[2*h,0]}),
+    text:`<p class="ctx">A Rough Rider kicks from the ground at (0, 0). The ball peaks <b>${k} m</b> high, <b>${h} m</b> downfield.</p><p>Type the ball's path in <span class="hl">vertex form</span> (x and y in metres).</p>`,
+    target:vco(a,h,k),form:"vertex",ans:vfS(a,h,k),effect:"posts",
+    steps:[["The peak is the vertex",`y = a(x ${M} ${h})² + ${k}`],["Sub the kick point (0, 0)",`0 = a(0 ${M} ${h})² + ${k} = ${h*h}a + ${k}`],["Solve for a",`a = ${M}${k} ÷ ${h*h} = ${fh(a)}`],["Conclusion",`∴ ${vfH(a,h,k)}`]],
+    hint:"The peak is the vertex. The kick starts at (0, 0): sub it in to find a. Leave a as a fraction."}}
+function chField2(L){
+  for(;;){const a=L===0?pick([F(-1)]):pick([F(-1),F(-2)]),h=ri(3,6),k=fv(a)===-1?ri(5,9):ri(8,10);const av=fv(a);
+    const pts=[[h,k],[h-1,k+av],[h+1,k+av],[h-2,k+4*av],[h+2,k+4*av]];if(pts.some(q=>q[1]<0))continue;
+    return{kind:"launch",lesson:"L5",title:"Replay the kick",
+      scene:{theme:"field",xr:[0,h+5],yr:[0,k+2],start:[h-2,k+4*av],tgt:[h+2,k+4*av],objs:[],marks:pts,arcs:[arcPts(a,h,k,h-2.6,h+2.6)],ghost:true},
+      text:`<p class="ctx">The coach's replay shows part of a practice kick on the training grid (1 square = 1 m).</p><p>Type the path in <span class="hl">vertex form</span> so the replay machine can redraw it.</p>`,
+      target:vco(a,h,k),form:"vertex",ans:vfS(a,h,k),effect:"posts",
+      steps:[["Read the vertex",`(${h}, ${k})`],["One square across from the vertex, the change in y is a",`a = ${sn(av)}`],["Conclusion",`∴ ${vfH(a,h,k)}`]],
+      hint:"Find the vertex, then move 1 across: the change in height is a."}}}
+function chField3(L){
+  for(;;){const {h,k,a}=kick(L);const P=h+pick([5,8,10,12,15]);const y=qv(a,h,k,P);if(Math.abs(y*100-Math.round(y*100))>1e-6||y<0.5)continue;
+    const clear=y>3.05;
+    return{kind:"term",lesson:"L5",title:"Over the crossbar?",scene:fieldScene(h,k,P,{arcs:[arcPts(a,h,k,0,2*h)],marks:[[h,k]]}),
+      text:`<p class="ctx">This kick follows</p><p class="big">${vfH(a,h,k)}</p><p class="ctx">The goalposts are <b>${P} m</b> away and the crossbar is about <b>3 m</b> high.</p><p>How high is the ball when it reaches the posts?</p>`,
+      ans:{type:"num",fields:[{pre:"y =",post:"m",label:"height at the posts",tol:0.011}],vals:[y]},note:`${fmt(y)} m: ${clear?"it clears the crossbar. The kick is good!":"it's under the crossbar. No good!"}`,
+      mistakes:[{f:0,val:qv(fmul(a,-1),h,k,P),msg:"a is negative, so subtract: the squared bracket times a is a negative number."}],
+      steps:[[`Sub x = ${P}`,`y = ${fh(a)}(${P} ${M} ${h})² + ${k}`],["Bracket, square, multiply",`y = ${fh(a)}(${(P-h)**2}) + ${k} = ${fmt(fv(a)*(P-h)**2)} + ${k}`],["Conclusion",`∴ y = ${fmt(y)} m, so it ${clear?"clears":"does not clear"} the 3 m crossbar`]],
+      hint:`Sub x = ${P}. Work out the bracket, square it, multiply by a, then add ${k}.`}}}
+
+/* ---------- L6–L7 Great Fire 1900 ---------- */
+function hose(){for(let t=0;t<500;t++){const s=ri(0,2),d=pick([3,4,5,6]),a=pick([F(-1,2),F(-1,4),F(-1,3),F(-1)]);const k=-fv(a)*d*d;if(!isInt(k)||k>16||k<4)continue;return{s,u:s+2*d,h:s+d,k,a}}}
+function fireScene(p,extra){return Object.assign({theme:"fire",xr:[0,p.u+3],yr:[0,p.k+3],start:[p.s,0],objs:[{t:"pumper",x:p.s},{t:"blaze",x:p.u}]},extra||{})}
+function chFire1(L){const p=hose();
+  return{kind:"term",lesson:"L6",title:"How high does it reach?",scene:fireScene(p,{arcs:[arcPts(p.a,p.h,0,p.s,p.u)]}),
+    text:`<p class="ctx">The steam pumper's hose stream follows</p><p class="big">${ffH(p.a,p.s,p.u)}</p><p>Find the <span class="hl">vertex</span>: how high the water goes, and where.</p>`,
+    ans:{type:"num",fields:[{pre:"Vertex: (",label:"x-coordinate"},{pre:",",post:")",label:"height"}],vals:[p.h,p.k]},
+    fieldMsg:["Average the two zeros to get the axis.","Your x is right. Sub it back in to get the height."],
+    steps:[["Zeros: set each bracket to 0",`x = ${p.s} and x = ${p.u}`],["Axis: halfway between",`x = (${p.s} + ${p.u}) ÷ 2 = ${p.h}`],[`Sub x = ${p.h}`,`y = ${fh(p.a)}(${p.h-p.s})(${p.h-p.u}) = ${p.k}`],["Conclusion",`∴ The water peaks at (${p.h}, ${p.k}): ${p.k} m high`]],
+    hint:"Find the zeros, average them for the axis of symmetry, then sub that x-value in."}}
+function chFire2(L){const p=hose();
+  return{kind:"term",lesson:"L6",title:"Where does it land?",scene:fireScene(p),
+    text:`<p class="ctx">A second crew's hose follows</p><p class="big">${ffH(p.a,p.s,p.u)}</p><p>Where does the water <span class="hl">leave the nozzle</span> and where does it <span class="hl">land</span>?</p>`,
+    ans:{type:"num",fields:[{pre:"x =",label:"where it leaves"},{pre:"and x =",label:"where it lands"}],vals:[p.s,p.u],orderFree:true},
+    missFn:v=>{const w=[...v].sort((x,y)=>x-y);return(w[0]===-p.u&&w[1]===-p.s)?`Set each bracket equal to 0: ${brV(p.u)} = 0 gives x = ${p.u}.`:null},
+    steps:[["Set y = 0",`0 = ${coefH(p.a)}${brV(p.s)}${brV(p.u)}`],["One bracket must be 0",`x = ${p.s} or x = ${p.u}`],["Conclusion",`∴ It leaves at x = ${p.s} m and lands at x = ${p.u} m`]],
+    hint:"The zeros of y = a(x − s)(x − t) are x = s and x = t."}}
+function chFire3(L){
+  for(let t=0;t<500;t++){const s=ri(0,2),u=s+pick([8,10,12]),p=s+ri(2,4),a=pick(L===0?[F(-1,2),F(-1)]:[F(-1,2),F(-1,4),F(-1,3),F(-1),F(-2,3)]);
+    const q=fv(a)*(p-s)*(p-u);if(!isInt(q)||q<3||q>18)continue;const h=(s+u)/2;
+    const peak=fv(a)*(h-s)*(h-u);if(peak>22)continue;
+    return{kind:"launch",lesson:"L7",title:"Over the wall",
+      scene:{theme:"fire",xr:[0,u+3],yr:[0,Math.ceil(peak)+3],start:[s,0],tgt:[u,0],objs:[{t:"pumper",x:s},{t:"wall",x:p,y:q},{t:"blaze",x:u}],marks:[[s,0],[p,q],[u,0]]},
+      text:`<p class="ctx">Sparks have jumped the river to J. R. Booth's lumber piles. Aim the hose from the nozzle at <b>(${s}, 0)</b> so the water lands on the fire at <b>(${u}, 0)</b> and just clears the top of the wall at <b>(${p}, ${q})</b>.</p><p>Type the stream's path in <span class="hl">factored form</span>.</p>`,
+      target:fco(a,s,u),form:"factored",ans:ffS(a,s,u),effect:"douse",
+      steps:[["The zeros are the nozzle and the fire",`y = a${brV(s)}${brV(u)}`],[`Sub the top of the wall (${p}, ${q})`,`${q} = a(${p-s})(${p-u}) = ${(p-s)*(p-u)}a`],["Solve for a",`a = ${q} ÷ ${sn((p-s)*(p-u))} = ${fh(a)}`],["Conclusion",`∴ ${ffH(a,s,u)}`]],
+      hint:"Put the two zeros in the brackets, then sub the top of the wall to find a."}}}
+
+/* ---------- L8 Camp Fortune ski jump ---------- */
+function jump(){const h=ri(1,3),d=ri(Math.max(h,2),4),k=5*d*d;return{h,d,k,launch:k-5*h*h}}
+function jumpScene(p,arc){return{theme:"ski",xr:[0,p.h+p.d+1],yr:[0,p.k+Math.max(4,Math.round(p.k*.15))],start:[0,p.launch],objs:[{t:"jumptower",x:0,y:p.launch}],arcs:arc?[arcPts(F(-5),p.h,p.k,0,p.h+p.d)]:[],marks:arc?[[p.h,p.k]]:[],xl:"time (s)"}}
+function chSki1(L){const p=jump();
+  return{kind:"term",lesson:"L8",title:"Take-off height",scene:jumpScene(p,true),
+    text:`<p class="ctx">A jumper's height above the bottom of the hill is</p><p class="big">${vfH(F(-5),p.h,p.k,"h","t")}</p><p class="ctx">where h is in metres and t is the time in seconds.</p><p>How high was the jumper at <span class="hl">take-off</span> (t = 0)?</p>`,
+    ans:{type:"num",fields:[{pre:"h =",post:"m",label:"take-off height"}],vals:[p.launch]},
+    mistakes:[{f:0,val:p.k,msg:"That's the maximum height. Take-off is at t = 0, so sub 0 for t."},{f:0,val:p.k+5*p.h*p.h,msg:`(0 − ${p.h})² is positive ${p.h*p.h}, then multiply by −5.`}],
+    steps:[["Sub t = 0",`h = ${M}5(0 ${M} ${p.h})² + ${p.k} = ${M}5(${p.h*p.h}) + ${p.k}`],["Conclusion",`∴ The take-off is ${p.launch} m above the bottom of the hill`]],
+    hint:"Take-off is when t = 0. Sub 0 for t."}}
+function chSki2(L){const p=jump();
+  return{kind:"term",lesson:"L8",title:"Touchdown",scene:jumpScene(p,true),
+    text:`<p class="ctx">A jumper's height is</p><p class="big">${vfH(F(-5),p.h,p.k,"h","t")}</p><p>When does the jumper <span class="hl">touch down</span> (h = 0)?</p>`,
+    ans:{type:"num",fields:[{pre:"t =",post:"s",label:"touchdown time"}],vals:[p.h+p.d]},
+    mistakes:[{f:0,val:p.h-p.d,msg:"That's a negative time, so it's inadmissible. Use the + root."},{f:0,val:p.d,msg:`That's √(…). Add ${p.h}: t − ${p.h} = ±${p.d}.`}],
+    steps:[["Set h = 0",`0 = ${M}5(t ${M} ${p.h})² + ${p.k}`],[`Subtract ${p.k}, divide by −5`,`${p.d*p.d} = (t ${M} ${p.h})²`],["Square root (±)",`±${p.d} = t ${M} ${p.h}`],["Solve",`t = ${p.h+p.d} or t = ${p.h-p.d} (negative: inadmissible)`],["Conclusion",`∴ Touchdown after ${p.h+p.d} s`]],
+    hint:"Set h = 0, isolate the squared bracket, square root both sides (±) and keep the positive time."}}
+function chSki3(L){const p=jump();const a=F(-5);
+  return{kind:"launch",lesson:"L8",title:"Program the jump",scene:Object.assign(jumpScene(p,false),{tgt:[p.h+p.d,0],marks:[[0,p.launch],[p.h,p.k]]}),
+    text:`<p class="ctx">The ski club's timing machine needs the jump's equation. The jumper leaves the take-off at <b>(0, ${p.launch})</b> and is highest, <b>${p.k} m</b>, after <b>${p.h} s</b>.</p><p>Type the path in <span class="hl">vertex form</span>, using x for time and y for height.</p>`,
+    target:vco(a,p.h,p.k),form:"vertex",ans:vfS(a,p.h,p.k),effect:"land",
+    steps:[["The highest point is the vertex",`y = a(x ${M} ${p.h})² + ${p.k}`],[`Sub the take-off (0, ${p.launch})`,`${p.launch} = ${p.h*p.h}a + ${p.k}`],["Solve",`${p.launch-p.k} = ${p.h*p.h}a, so a = ${M}5`],["Conclusion",`∴ ${vfH(a,p.h,p.k)}`]],
+    hint:"The highest point is the vertex. Sub the take-off point to find a."}}
+
+/* ---------- L9 Parliament Hill finale ---------- */
+function shells(){
+  for(let t=0;t<800;t++){const a=pick([F(-1),F(-1,2)]),av=fv(a),h1=ri(3,7),h2=h1+pick([2,4,6]),k1=ri(10,18),k2=ri(10,18);
+    const x=(h1+h2)/2+(k2-k1)/(2*av*(h2-h1));if(!isInt(x)||x<=h1-3||x>=h2+3)continue;const y=qv(a,h1,k1,x);if(!isInt(y)||y<3)continue;
+    return{a,h1,h2,k1,k2,x,y}}
+}
+function chHill1(L){const p=shells();
+  return{kind:"term",lesson:"L9",title:"Where the shells cross",
+    scene:{theme:"hill",xr:[0,p.h2+6],yr:[0,Math.max(p.k1,p.k2)+3],objs:[{t:"tower",x:p.h2+4.5}],arcs:[arcPts(p.a,p.h1,p.k1,p.h1-4,p.h1+4),arcPts(p.a,p.h2,p.k2,p.h2-4,p.h2+4)],marks:[]},
+    text:`<p class="ctx">Two shells light up the Hill:</p><p class="big">${vfH(p.a,p.h1,p.k1)}<br>${vfH(p.a,p.h2,p.k2)}</p><p>Where do their paths <span class="hl">cross</span>? Check your point in both equations.</p>`,
+    ans:{type:"num",fields:[{pre:"(",label:"x-coordinate"},{pre:",",post:")",label:"y-coordinate"}],vals:[p.x,p.y]},
+    fieldMsg:["Your y is right. Check x.","Your x is right. Sub it into either equation to get y."],
+    steps:[["Set the two equations equal",`${coefH(p.a)}${brV(p.h1)}² + ${p.k1} = ${coefH(p.a)}${brV(p.h2)}² + ${p.k2}`],["Expand both: the x² terms cancel, leaving a linear equation",`x = ${p.x}`],[`Sub x = ${p.x} into the first`,`y = ${fh(p.a)}(${p.x-p.h1})² + ${p.k1} = ${p.y}`],["Check in the second",`${fh(p.a)}(${p.x-p.h2})² + ${p.k2} = ${qv(p.a,p.h2,p.k2,p.x)} ✓`],["Conclusion",`∴ They cross at (${p.x}, ${p.y})`]],
+    hint:"Graph both with the step pattern and look for the shared point, or set the equations equal and solve."}}
+function chHill2(L){
+  for(let t=0;t<800;t++){const s=ri(0,3),px=s+pick([3,4,5,6]),py=ri(10,18),dx=px-s;const a=F(-py,dx*dx);if(L<2&&a.d>9)continue;
+    return{kind:"launch",lesson:"L9",title:"Program a shell",
+      scene:{theme:"hill",xr:[0,px+dx+3],yr:[0,py+3],start:[s,0],tgt:[px,py],objs:[{t:"mortar",x:s},{t:"tower",x:px+dx+1.5}],marks:[[s,0],[px,py]]},
+      text:`<p class="ctx">Program the next shell. It launches from <b>(${s}, 0)</b> and must burst at the top of its path, exactly at <b>(${px}, ${py})</b>, where the last shell burst.</p><p>Type its path in <span class="hl">vertex form</span>.</p>`,
+      target:vco(a,px,py),form:"vertex",ans:vfS(a,px,py),effect:"burst",
+      steps:[["The burst point is the vertex",`y = a(x ${M} ${px})² + ${py}`],[`Sub the launch point (${s}, 0)`,`0 = a(${s} ${M} ${px})² + ${py} = ${dx*dx}a + ${py}`],["Solve",`a = ${M}${py} ÷ ${dx*dx} = ${fh(a)}`],["Conclusion",`∴ ${vfH(a,px,py)}`]],
+      hint:"The burst is at the top, so it's the vertex. Sub the launch point to find a."}}}
+function chHill3(L){
+  for(let t=0;t<800;t++){const s=ri(0,3),u=s+pick([8,10,12]),px=s+ri(2,5),py=ri(8,16);const a=F(py,(px-s)*(px-u));if(a.d>12)continue;
+    const h=(s+u)/2,peak=fv(a)*(h-s)*(h-u);if(peak>24)continue;
+    return{kind:"launch",lesson:"L9",title:"The finale shell",
+      scene:{theme:"hill",xr:[0,u+3],yr:[0,Math.ceil(peak)+3],start:[s,0],tgt:[px,py],objs:[{t:"mortar",x:s},{t:"tower",x:u+1.5}],marks:[[s,0],[u,0],[px,py]]},
+      text:`<p class="ctx">For the finale, a shell launches from <b>(${s}, 0)</b> and would come back down at <b>(${u}, 0)</b>. On the way up it must pass through the burst at <b>(${px}, ${py})</b> to set off a chain.</p><p>Type its path in <span class="hl">factored form</span>.</p>`,
+      target:fco(a,s,u),form:"factored",ans:ffS(a,s,u),effect:"burstpt",
+      steps:[["The zeros are the launch and landing spots",`y = a${brV(s)}${brV(u)}`],[`Sub (${px}, ${py})`,`${py} = a(${px-s})(${px-u}) = ${(px-s)*(px-u)}a`],["Solve",`a = ${fh(a)}`],["Conclusion",`∴ ${ffH(a,s,u)}`]],
+      hint:"Use the two zeros in the brackets, then sub the burst point to find a."}}}
+
+const ROOMCH={lobby:[chTutorial],farm:[chFarm1,chFarm2,chFarm3],arena:[chArena1,chArena2,chArena3],rideau:[chRideau1,chRideau2,chRideau3],field:[chField1,chField2,chField3],fire:[chFire1,chFire2,chFire3],ski:[chSki1,chSki2,chSki3],hill:[chHill1,chHill2,chHill3]};
+
+
+/* =================== rooms =================== */
+const LAY={
+  A:{plats:[[0,960,500],[150,810,360],[30,330,220],[630,930,220]],lads:[[180,360,500],[780,360,500],[300,220,360],[660,220,360]],st:[[470,500],[560,360],[790,220]],plaque:[120,220],parts:[[60,220],[900,220],[400,360]],haz:[250,700,500]},
+  C:{plats:[[0,960,500],[60,420,360],[540,900,360],[250,710,220]],lads:[[100,360,500],[860,360,500],[380,220,360],[580,220,360]],st:[[300,360],[700,360],[480,220]],plaque:[480,500],parts:[[280,220],[680,220],[620,500]],haz:[150,800,500]}
+};
+function mirror(L){const m=x=>960-x;return{plats:L.plats.map(p=>[m(p[1]),m(p[0]),p[2]]),lads:L.lads.map(l=>[m(l[0]),l[1],l[2]]),st:L.st.map(s=>[m(s[0]),s[1]]),plaque:[m(L.plaque[0]),L.plaque[1]],parts:L.parts.map(p=>[m(p[0]),p[1]]),haz:[m(L.haz[1]),m(L.haz[0]),L.haz[2]]}}
+LAY.B=mirror(LAY.A);
+LAY.lobby={plats:[[0,960,500],[560,860,360]],lads:[[600,360,500]],st:[[330,500],[730,360]],plaque:[180,500],parts:[],haz:null};
+const ROOMS=[
+  {id:"lobby",name:"The Workshop",place:"Ingenium, Ottawa",year:"Tonight",lay:"lobby",lesson:"Warm-up",
+   intro:"After hours at Ingenium, Canada's science and technology museum. Calibrate the launcher, then step through the exhibit door. Rex Ratchet, the museum's other inventor, is racing you to build the Canada Day finale.",
+   card:{title:"Ingenium's science museum",yr:"1967",text:"Canada's science and technology museum opened on November 16, 1967, in a former Morrison Lamothe bakery on the edge of Ottawa. Two exhibits from opening day are still there: the tilted Crazy Kitchen and the steam locomotives. The museum closed in 2014 when mould was found, and reopened on November 17, 2017, after an $80.5-million rebuild."}},
+  {id:"farm",name:"Central Experimental Farm",place:"Ottawa",year:"1887",lay:"A",lesson:"L1 · Types of functions",haz:"goat",part:"brass spring",
+   intro:"The Farm's lab ledgers are full of patterns. Use finite differences to sort them out. Watch out for the loose goat.",
+   card:{title:"The Experimental Farm",yr:"1886",text:"The Central Experimental Farm was created in 1886 to test crops and farming methods for all of Canada. Its first director was William Saunders. It started with 188 hectares on what was then the edge of Ottawa. Today it is a working farm of about 4 km² in the middle of the city, and a National Historic Site."}},
+  {id:"arena",name:"Dey's Arena",place:"Bay and Gladstone",year:"January 1905",lay:"C",lesson:"L2 · Key features",haz:"puck",part:"steel gear",
+   intro:"Ottawa's Silver Seven are about to face the Dawson City Nuggets. Read the lifted shots: vertex, axis, intercepts.",
+   card:{title:"The Klondikers' challenge",yr:"1905",text:"In December 1904 the Dawson City Nuggets set out from the Yukon to challenge Ottawa for the Stanley Cup. With no snow for dogsleds, they walked about 530 km to Whitehorse, then took ships and trains, reaching Ottawa on January 11, 1905. At Dey's Arena, Ottawa's Silver Seven won 9–2 and 23–2. Frank McGee scored 14 goals in the second game."}},
+  {id:"rideau",name:"Rideau Hall",place:"Governor General's grounds",year:"1870s",lay:"B",lesson:"L3 · The a-value",haz:"snowball",part:"copper valve",
+   intro:"Lady Dufferin's toboggan party needs a slide that lands safely. The a-value sets the drop.",
+   card:{title:"Winter at Rideau Hall",yr:"1872–1878",text:"Lord and Lady Dufferin, who lived at Rideau Hall from 1872 to 1878, built a toboggan run on the grounds and held famous skating and tobogganing parties. Lord Dufferin also laid out an indoor rink. A later Governor General, Lord Stanley, donated a hockey trophy in 1892: the Stanley Cup. Rideau Hall's outdoor rink is still used today."}},
+  {id:"field",name:"Lansdowne Park",place:"The Glebe",year:"1976",lay:"A",lesson:"L4–5 · Vertex form",haz:"football",part:"leather strap",
+   intro:"The Rough Riders need kicks that sail through the posts. Write each kick in vertex form.",
+   card:{title:"Football at Lansdowne",yr:"1876",text:"The Ottawa Football Club was founded in 1876. As the Rough Riders, it won nine Grey Cups between 1925 and 1976, playing at Lansdowne Park. The team folded in 1996. Football came back to Lansdowne in 2014 with the Redblacks, who won the Grey Cup in 2016."}},
+  {id:"fire",name:"The Great Fire",place:"Hull and Ottawa",year:"April 26, 1900",lay:"C",lesson:"L6–7 · Factored form",haz:"ember",part:"brass nozzle",
+   intro:"The fire has jumped the river. Aim the steam pumpers' hoses: launch spot and landing spot are the zeros.",
+   card:{title:"The fire of 1900",yr:"1900",text:"On April 26, 1900, a chimney fire in Hull spread in a strong wind. Around 1 p.m., sparks jumped the Ottawa River and lit J. R. Booth's lumber piles. Steam pumpers struggled against the wind, and a pump and fire crew arrived from Montréal around 4 p.m. About 15,000 people lost their homes and seven died. The fire burned out when the wind dropped that evening."}},
+  {id:"ski",name:"Camp Fortune",place:"Gatineau Hills",year:"1920s",lay:"B",lesson:"L8 · Word problems",haz:"snowball",part:"ski binding",
+   intro:"The Ottawa Ski Club's jumpers fly in parabolas. Take-off, top of the jump, touchdown: it's all vertex form.",
+   card:{title:"Camp Fortune",yr:"1910",text:"The Ottawa Ski Club was founded in 1910 for ski jumping, first in Rockliffe Park. In 1920 the club bought Garrett Fortune's shack in the Gatineau Hills, and Camp Fortune grew around it. Ottawa's Anne Heggtveit learned to ski there. In 1960 she won Olympic gold in the slalom, Canada's first Olympic skiing gold."}},
+  {id:"hill",name:"Parliament Hill",place:"Canada Day",year:"July 1",lay:"A",lesson:"L9 · Two parabolas",haz:"spark",part:"golden fuse",
+   intro:"The finale! Program the fireworks so their paths meet. Then launch the show before Rex does.",
+   card:{title:"Fire and the Peace Tower",yr:"1916–1927",text:"On February 3, 1916, fire destroyed Parliament's Centre Block. A library clerk ordered the iron doors shut, and the Library of Parliament was the only part saved. The new Peace Tower's carillon of 53 bells was first played on July 1, 1927, Confederation's 60th anniversary. It was heard across Canada in the country's first coast-to-coast radio broadcast."}}
+];
+const SKILL={L1:"L1 Types of functions",L2:"L2 Key features",L3:"L3 The a-value",L4:"L4–5 Vertex form",L5:"L4–5 Vertex form",L6:"L6–7 Factored form",L7:"L6–7 Factored form",L8:"L8 Word problems",L9:"L9 Two parabolas"};
+const ROLES=[{id:"app",name:"Apprentice",bat:14,mult:1,L:0,desc:"14 battery cells · friendlier numbers"},{id:"eng",name:"Engineer",bat:12,mult:1.5,L:1,desc:"12 cells · score × 1.5"},{id:"inv",name:"Inventor",bat:10,mult:2,L:2,desc:"10 cells · fraction a-values · score × 2"}];
+const REX=240; /* seconds Rex needs to cross a room */
+
+/* =================== state =================== */
+const cv=document.getElementById("game"),g=cv.getContext("2d"),W=960,H=540,HUD=52;
+const ov=document.getElementById("ov"),toastEl=document.getElementById("toast");
+const S={screen:"title",name:"",mode:"shift",role:ROLES[1],battery:12,score:0,parts:[],cards:new Set(),rexWins:0,ri:0,room:null,stats:{},log:[],ended:false};
+const me={x:90,y:500,vy:0,face:1,lad:false,walk:0,inv:0};
+let keys={},paused=true,toastT=0,rexT=0,rexDone=false,haz=null,tick=0,lastT=performance.now(),panelOpen=false;
+const FONT='"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif',PIX='"Press Start 2P","Courier New",monospace';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t,ms=2600){toastEl.textContent=t;toastEl.hidden=false;toastT=ms}
+function award(n){const v=Math.round(n*S.role.mult);S.score+=v;return v}
+function drain(n=1){if(S.mode!=="shift")return;S.battery=Math.max(0,S.battery-n);if(S.battery===0)setTimeout(()=>endRun(false),600)}
+function stat(lesson,first){const k=SKILL[lesson];if(!k)return;const s=S.stats[k]||(S.stats[k]={n:0,first:0,steps:0});s.n++;if(first===true)s.first++;if(first==="steps")s.steps++}
+
+/* =================== room setup =================== */
+function enterRoom(i){
+  S.ri=i;const R=ROOMS[i],L=LAY[R.lay];
+  const L0=S.role.L;
+  const gens=ROOMCH[R.id];
+  const st=L.st.map((p,k)=>{const gen=gens[k];return gen?{x:p[0],y:p[1],ch:gen(L0),done:false,star:false,misses:0,shots:0,steps:false}:{x:p[0],y:p[1],range:true,done:true}});
+  if(R.id==="lobby"){st[1]={x:L.st[1][0],y:L.st[1][1],range:true,done:true}}
+  const part=R.part&&L.parts.length?(()=>{const q=pick(L.parts);return{x:q[0],y:q[1],got:false}})():null;
+  S.room={R,L,st,part,plaque:{x:L.plaque[0],y:L.plaque[1]},exit:{x:905,y:500}};
+  haz=R.haz&&L.haz?{kind:R.haz,x:L.haz[0],x1:L.haz[0],x2:L.haz[1],y:L.haz[2],v:R.haz==="ember"?2.2:1.7,t:0}:null;
+  Object.assign(me,{x:70,y:500,vy:0,face:1,lad:false,inv:0});
+  rexT=0;rexDone=false;
+  showIntro();
+}
+function roomDone(){return S.room.st.every(s=>s.done)}
+
+/* =================== physics & input =================== */
+function platAt(x,y){return S.room.L.plats.find(p=>x>=p[0]-4&&x<=p[1]+4&&Math.abs(p[2]-y)<0.5)}
+function ladAt(x,y){return S.room.L.lads.find(l=>Math.abs(l[0]-x)<16&&y>=l[1]-1&&y<=l[2]+1)}
+function update(dt){
+  tick++;
+  if(toastT>0){toastT-=dt*1000;if(toastT<=0)toastEl.hidden=true}
+  if(paused||panelOpen||S.screen!=="room")return;
+  if(S.room.R.id!=="lobby"&&!rexDone){rexT+=dt;if(rexT>=REX){rexDone=true;toast("Rex reached the exit of this room first. Keep going!")}}
+  const sp=3.4,L=keys.left||keys.a,Rt=keys.right||keys.d,U=keys.up||keys.w,D=keys.down||keys.s;
+  const lad=ladAt(me.x,me.y);
+  if((U||D)&&lad){
+    const goingUp=U&&me.y>lad[1],goingDown=D&&me.y<lad[2];
+    if(goingUp||goingDown){me.lad=true;me.x=lad[0];me.y+=goingUp?-3:3;me.y=Math.max(lad[1],Math.min(lad[2],me.y));me.walk+=0.3}
+  }
+  if(me.lad){if(!lad){me.lad=false}else if((L||Rt)&&platAt(me.x,me.y)){me.lad=false}}
+  if(!me.lad){
+    if(L){me.x-=sp;me.face=-1;me.walk+=0.25}if(Rt){me.x+=sp;me.face=1;me.walk+=0.25}
+    me.x=Math.max(16,Math.min(W-16,me.x));
+    if(!platAt(me.x,me.y)){me.vy+=0.7;const ny=me.y+me.vy;const land=S.room.L.plats.filter(p=>me.x>=p[0]-4&&me.x<=p[1]+4&&p[2]>=me.y&&p[2]<=ny).sort((a,b)=>a[2]-b[2])[0];
+      if(land){me.y=land[2];me.vy=0}else me.y=ny;if(me.y>H)me.y=500}
+    else me.vy=0;
+  }
+  if(me.inv>0)me.inv-=dt;
+  /* hazard */
+  if(haz){haz.t+=dt;haz.x+=haz.v;if(haz.x>haz.x2||haz.x<haz.x1){haz.v=-haz.v;haz.x=Math.max(haz.x1,Math.min(haz.x2,haz.x))}
+    if(me.inv<=0&&Math.abs(haz.x-me.x)<24&&Math.abs(haz.y-me.y)<4&&!me.lad){me.inv=1.6;const dir=me.x<haz.x?-1:1;me.x=Math.max(16,Math.min(W-16,me.x+dir*70));
+      if(S.mode==="shift"){drain(1);toast(`Bumped by the ${hazName(haz.kind)}! −1 battery`)}else toast(`Bumped by the ${hazName(haz.kind)}! (No cost in practice.)`)}}
+  /* part */
+  const pt=S.room.part;if(pt&&!pt.got&&Math.abs(pt.x-me.x)<22&&Math.abs(pt.y-me.y)<4){pt.got=true;S.parts.push(S.room.R.part);award(50);if(S.mode==="shift")S.battery+=2;toast(`Found a part: ${S.room.R.part}! +${Math.round(50*S.role.mult)}${S.mode==="shift"?" · +2 battery":""}`)}
+}
+function hazName(k){return{goat:"goat",puck:"loose puck",snowball:"snowball",football:"football",ember:"ember",spark:"stray spark"}[k]||k}
+function nearObj(){const r=S.room;const c=[];r.st.forEach((s,i)=>c.push({type:"st",i,x:s.x,y:s.y}));c.push({type:"plaque",x:r.plaque.x,y:r.plaque.y});c.push({type:"exit",x:r.exit.x,y:r.exit.y});
+  return c.find(o=>Math.abs(o.x-me.x)<36&&Math.abs(o.y-me.y)<4)}
+function act(){
+  if(S.screen!=="room"||paused||panelOpen)return;const o=nearObj();if(!o)return;
+  if(o.type==="st"){const s=S.room.st[o.i];if(s.range)openRange();else openStation(s)}
+  else if(o.type==="plaque")openCard();
+  else if(o.type==="exit"){if(!roomDone())return toast(`The exit is locked: finish the machines first (${S.room.st.filter(s=>s.done).length} of ${S.room.st.length}).`);leaveRoom()}
+}
+function leaveRoom(){
+  const R=S.room.R;
+  if(R.id!=="lobby"&&!rexDone){S.rexWins++;const v=award(150);toast(`You beat Rex to the exit! +${v}`)}
+  if(S.ri===ROOMS.length-1)return finale();
+  enterRoom(S.ri+1);
+}
+
+/* =================== drawing: room =================== */
+const TH={
+  lobby:{sky:["#2a3358","#3b4777"],wall:"#4b5687",plat:"#9aa3c7",edge:"#5c6694",lad:"#d9b45a"},
+  farm:{sky:["#8fd3ff","#d8f1ff"],wall:null,plat:"#8b5a2b",edge:"#5b3716",lad:"#c8a060"},
+  arena:{sky:["#3b2a1e","#6b4a30"],wall:"#7a5636",plat:"#d6ecff",edge:"#7fa9cc",lad:"#c8a060"},
+  rideau:{sky:["#0f1c45","#36508f"],wall:null,plat:"#eef6ff",edge:"#9db6d6",lad:"#a87a4a"},
+  field:{sky:["#5aa9ff","#bfe3ff"],wall:null,plat:"#3f9a3f",edge:"#2a6b2a",lad:"#d9d9d9"},
+  fire:{sky:["#3a0d0d","#c2501e"],wall:null,plat:"#6b4a2a",edge:"#3d2814",lad:"#b8873f"},
+  ski:{sky:["#6fa8e6","#dcecff"],wall:null,plat:"#f4f8ff",edge:"#a9bdd6",lad:"#8a5a2b"},
+  hill:{sky:["#050a1f","#1d2a5c"],wall:null,plat:"#8c8f99",edge:"#5a5d66",lad:"#c9b27a"}
+};
+function sky(t){const gr=g.createLinearGradient(0,HUD,0,H);gr.addColorStop(0,t.sky[0]);gr.addColorStop(1,t.sky[1]);g.fillStyle=gr;g.fillRect(0,HUD,W,H-HUD)}
+function rect(c,x,y,w,h){g.fillStyle=c;g.fillRect(x,y,w,h)}
+function drawBg(id){
+  const t=TH[id];sky(t);
+  if(id==="lobby"){rect("#3e4874",0,HUD,W,440);for(let x=0;x<W;x+=120)rect("#465184",x,HUD,6,448);
+    /* locomotive exhibit */rect("#1b1f33",560,420,250,60);rect("#1b1f33",740,380,60,40);rect("#2d334d",580,400,150,24);rect("#c23b2e",620,440,40,8);[590,650,710,770].forEach(x=>{g.fillStyle="#0b0d16";g.beginPath();g.arc(x,484,16,0,7);g.fill()});
+    g.font=`10px ${PIX}`;g.fillStyle="#d9b45a";g.fillText("STEAM HALL",580,410-24);
+    /* crazy kitchen tilted */g.save();g.translate(90,330);g.rotate(-0.08);rect("#f3efe2",0,0,150,110);rect("#c23b2e",10,10,40,40);rect("#2b6fd6",80,60,50,40);g.restore();g.fillStyle="#f3efe2";g.fillText("CRAZY KITCHEN",70,320)}
+  if(id==="farm"){rect("#7cc56b",0,420,W,80);for(let i=0;i<8;i++)rect(i%2?"#94d27f":"#6db35c",0,430+i*9,W,5);
+    rect("#a33b2a",700,300,180,140);g.fillStyle="#7a2a1d";g.beginPath();g.moveTo(690,300);g.lineTo(790,240);g.lineTo(890,300);g.fill();rect("#f3efe2",765,360,50,80);
+    for(let x=20;x<W;x+=44){rect("#f3efe2",x,456,6,30)}rect("#f3efe2",0,462,W,5)}
+  if(id==="arena"){rect("#6b4a30",0,HUD,W,250);for(let x=0;x<W;x+=60){g.strokeStyle="#4a3220";g.lineWidth=4;g.beginPath();g.moveTo(x,HUD);g.lineTo(x+30,HUD+60);g.stroke()}
+    rect("#e9f3ff",0,430,W,70);rect("#c23b2e",0,468,W,4);rect("#2b6fd6",300,430,4,70);rect("#2b6fd6",660,430,4,70);rect("#f3efe2",0,400,W,30);rect("#1b1f33",0,398,W,4);
+    g.font=`10px ${PIX}`;g.fillStyle="#f3efe2";g.fillText("OTTAWA  vs  DAWSON CITY",330,90)}
+  if(id==="rideau"){for(let i=0;i<60;i++){g.fillStyle="#fff";g.fillRect((i*137)%W,HUD+((i*71)%260),2,2)}
+    rect("#8a7a64",560,250,340,190);for(let x=580;x<890;x+=50)rect("#f6e7a8",x,290,20,30);rect("#6b5e4b",560,240,340,14);
+    rect("#f4f8ff",0,440,W,60);g.strokeStyle="#a87a4a";g.lineWidth=6;g.beginPath();g.moveTo(30,260);g.lineTo(260,440);g.stroke()}
+  if(id==="field"){rect("#5d6a7d",0,HUD+40,W,120);for(let r=0;r<5;r++)for(let x=r*8;x<W;x+=16)rect(["#c23b2e","#e9ecf6","#1b1f33","#e8a920"][(x+r)%4],x,HUD+50+r*20,10,12);
+    rect("#3f9a3f",0,420,W,80);for(let x=40;x<W;x+=90)rect("#e9ecf6",x,420,4,80);rect("#e8a920",880,300,8,130);rect("#e8a920",840,360,90,8);rect("#e8a920",840,300,6,60);rect("#e8a920",924,300,6,60)}
+  if(id==="fire"){for(let i=0;i<7;i++){const x=40+i*130,h=120+(i*53)%90;rect("#2a1a12",x,440-h,100,h);for(let f=0;f<5;f++){g.fillStyle=["#ffb02e","#ff6a1f","#ffd76a"][(f+i+(tick>>3))%3];g.beginPath();g.moveTo(x+f*20,440-h);g.lineTo(x+f*20+10,440-h-30-((tick*3+f*17+i*11)%20));g.lineTo(x+f*20+20,440-h);g.fill()}}
+    rect("#2a4a6b",0,470,W,30);g.fillStyle="rgba(60,40,40,.35)";for(let i=0;i<5;i++){g.beginPath();g.arc((i*230+tick*0.4)%1100-60,HUD+60+i*12,70,0,7);g.fill()}}
+  if(id==="ski"){g.fillStyle="#e8f1ff";g.beginPath();g.moveTo(0,440);g.lineTo(260,200);g.lineTo(520,440);g.fill();g.beginPath();g.moveTo(380,440);g.lineTo(700,170);g.lineTo(960,440);g.fill();
+    for(let i=0;i<12;i++){const x=30+i*80,y=400+(i%3)*14;g.fillStyle="#1e5a3a";g.beginPath();g.moveTo(x,y);g.lineTo(x+18,y-50);g.lineTo(x+36,y);g.fill()}
+    rect("#8a5a2b",120,180,14,260);g.strokeStyle="#8a5a2b";g.lineWidth=8;g.beginPath();g.moveTo(127,180);g.lineTo(300,330);g.stroke();rect("#f4f8ff",0,440,W,60)}
+  if(id==="hill"){for(let i=0;i<80;i++){g.fillStyle=i%5?"#c9d4ff":"#fff";g.fillRect((i*173)%W,HUD+((i*97)%300),2,2)}
+    g.fillStyle="#141a2e";rect("#141a2e",160,280,640,200);rect("#141a2e",440,120,80,170);g.beginPath();g.moveTo(440,120);g.lineTo(480,60);g.lineTo(520,120);g.fill();
+    rect("#f6e7a8",466,170,28,22);for(let x=180;x<790;x+=36)rect("#f6e7a8",x,320,12,20);rect("#2f5a2f",0,470,W,30)}
+}
+function drawPlats(t){
+  for(const p of S.room.L.plats){rect(t.edge,p[0],p[2],p[1]-p[0],14);rect(t.plat,p[0],p[2],p[1]-p[0],9)}
+  for(const l of S.room.L.lads){rect(t.lad,l[0]-12,l[1]-2,4,l[2]-l[1]+2);rect(t.lad,l[0]+8,l[1]-2,4,l[2]-l[1]+2);for(let y=l[1]+10;y<l[2];y+=16)rect(t.lad,l[0]-12,y,24,3)}
+}
+function drawStation(s,i){
+  const x=s.x,y=s.y,bob=Math.sin(tick/12+i)*2;
+  if(s.range){rect("#2b3a6b",x-26,y-62,52,62);rect("#9fd3ff",x-20,y-56,40,26);g.strokeStyle="#ffcf4a";g.lineWidth=2;g.beginPath();g.moveTo(x-18,y-34);g.quadraticCurveTo(x,y-70,x+18,y-34);g.stroke();
+    g.font=`8px ${PIX}`;g.fillStyle="#fff";g.textAlign="center";g.fillText("TEST",x,y-20);g.fillText("RANGE",x,y-10);g.textAlign="left";return}
+  const launch=s.ch.kind==="launch";
+  if(launch){rect("#5c5f6b",x-24,y-20,48,20);g.save();g.translate(x-6,y-24);g.rotate(-0.7);rect("#2b2f3d",0,-8,40,16);rect("#d6402c",32,-9,8,18);g.restore();rect("#e8a920",x-20,y-8,40,4)}
+  else{rect("#3a4a7a",x-22,y-58,44,58);rect(s.done?"#7fe0a0":"#9fd3ff",x-17,y-52,34,24);rect("#1b1f33",x-12,y-20,24,4);rect("#1b1f33",x-12,y-12,24,4)}
+  g.font=`bold 15px ${FONT}`;g.textAlign="center";
+  if(s.done){g.fillStyle="#1e8a4c";g.beginPath();g.arc(x,y-78+bob,11,0,7);g.fill();g.fillStyle="#fff";g.fillText(s.star?"★":"✓",x,y-73+bob)}
+  else{g.fillStyle="#e8a920";g.beginPath();g.arc(x,y-78+bob,11,0,7);g.fill();g.fillStyle="#1b1f33";g.fillText("!",x,y-73+bob)}
+  g.textAlign="left";
+}
+function drawPlaque(){const p=S.room.plaque,got=S.cards.has(S.room.R.id);rect("#6b4a12",p.x-3,p.y-30,6,30);rect(got?"#b89a5a":"#e8c35a",p.x-18,p.y-56,36,28);g.fillStyle="#3d2a08";g.font=`bold 16px ${FONT}`;g.textAlign="center";g.fillText("i",p.x,p.y-36);g.textAlign="left"}
+function drawExit(){const e=S.room.exit,ok=roomDone();rect("#3d2a14",e.x-24,e.y-76,48,76);rect(ok?"#8a5a2b":"#5a4a3a",e.x-19,e.y-70,38,70);rect(ok?"#3ddc84":"#d6402c",e.x+8,e.y-40,6,6);
+  g.font=`8px ${PIX}`;g.fillStyle=ok?"#3ddc84":"#ffb4a8";g.textAlign="center";g.fillText(S.ri===ROOMS.length-1?"SHOW":"EXIT",e.x,e.y-82);g.textAlign="left"}
+function drawPart(){const p=S.room.part;if(!p||p.got)return;const y=p.y-18+Math.sin(tick/9)*3;g.save();g.translate(p.x,y);g.rotate(tick/30);g.fillStyle="#e8a920";for(let k=0;k<8;k++){g.rotate(Math.PI/4);g.fillRect(-3,-11,6,6)}g.beginPath();g.arc(0,0,7,0,7);g.fill();g.fillStyle="#1b1f33";g.beginPath();g.arc(0,0,3,0,7);g.fill();g.restore()}
+function drawHaz(){if(!haz)return;const x=haz.x,y=haz.y;
+  if(haz.kind==="goat"){rect("#f3efe2",x-18,y-22,30,14);rect("#f3efe2",x+(haz.v>0?8:-22),y-30,14,12);rect("#5b5f73",x-14,y-8,4,8);rect("#5b5f73",x+6,y-8,4,8);rect("#1b1f33",x+(haz.v>0?16:-18),y-26,3,3)}
+  else if(haz.kind==="puck"){g.fillStyle="#111";g.beginPath();g.ellipse(x,y-5,12,5,0,0,7);g.fill()}
+  else if(haz.kind==="snowball"){g.fillStyle="#fff";g.strokeStyle="#9db6d6";g.lineWidth=2;g.beginPath();g.arc(x,y-14,14,0,7);g.fill();g.stroke()}
+  else if(haz.kind==="football"){const b=Math.abs(Math.sin(haz.t*5))*30;g.fillStyle="#8a4a1e";g.beginPath();g.ellipse(x,y-12-b,13,8,haz.t*4,0,7);g.fill();rect("#fff",x-4,y-13-b,8,2)}
+  else{const fl=(tick>>2)%2;g.fillStyle=fl?"#ffb02e":"#ff6a1f";g.beginPath();g.arc(x,y-16+Math.sin(haz.t*6)*6,9,0,7);g.fill();g.fillStyle="#ffe9a0";g.beginPath();g.arc(x,y-16+Math.sin(haz.t*6)*6,4,0,7);g.fill()}}
+function drawPlayer(){
+  if(me.inv>0&&(tick>>2)%2)return;const x=Math.round(me.x),y=Math.round(me.y),f=me.face,step=Math.floor(me.walk)%2;
+  rect("#2b2f3d",x-8+(step?2:0),y-14,6,14);rect("#2b2f3d",x+2-(step?2:0),y-14,6,14);
+  rect("#f3efe2",x-11,y-34,22,22);rect("#2b6fd6",x-4,y-34,8,22);
+  rect("#f2c39a",x-9,y-48,18,15);rect("#5a3a1e",x-10,y-52,20,6);
+  rect("#e8a920",x-9,y-45,18,5);rect("#9fd3ff",x+(f>0?2:-8),y-45,6,5);
+  if(S.name){g.font=`8px ${PIX}`;g.fillStyle="#fff";g.textAlign="center";g.fillText(S.name.slice(0,12),x,y-58);g.textAlign="left"}
+}
+function drawPrompt(){const o=nearObj();if(!o||panelOpen||paused)return;let t="";
+  if(o.type==="st"){const s=S.room.st[o.i];t=s.range?"SPACE: test range":s.done?"SPACE: look again":"SPACE: use machine"}
+  else if(o.type==="plaque")t="SPACE: read plaque";else t=roomDone()?(S.ri===ROOMS.length-1?"SPACE: launch the show":"SPACE: next exhibit"):"Locked";
+  g.font=`bold 15px ${FONT}`;const w=g.measureText(t).width+16;const x=Math.max(8,Math.min(W-w-8,o.x-w/2)),y=o.y-118;
+  rect("#1b1f33",x-2,y-2,w+4,28);rect("#fff6cf",x,y,w,24);g.fillStyle="#1b1f33";g.fillText(t,x+8,y+17)}
+function drawHUD(){
+  rect("#0b0f1d",0,0,W,HUD);rect("#39436b",0,HUD-3,W,3);
+  const R=S.room.R;g.fillStyle="#ffcf4a";g.font=`bold 17px ${FONT}`;g.fillText(`${R.name}`,12,22);g.fillStyle="#aab3d6";g.font=`13px ${FONT}`;g.fillText(`${R.year} · ${R.lesson}`,12,41);
+  /* race */
+  if(R.id!=="lobby"){const x0=360,w=240;rect("#2c3763",x0,18,w,8);const me=S.room.st.filter(s=>s.done).length/S.room.st.length,rx=Math.min(1,rexT/REX);
+    g.font=`8px ${PIX}`;g.fillStyle="#aab3d6";g.fillText("RACE TO THE EXIT",x0,12);
+    rect("#ff6a5a",x0+rx*w-5,30,10,10);g.fillStyle="#ff9d93";g.fillText("REX",x0+Math.min(rx*w,w-24)-4,49);
+    rect("#7fd3ff",x0+me*w-5,14,10,10)}
+  /* right */
+  g.textAlign="right";g.font=`bold 15px ${FONT}`;g.fillStyle="#fff";
+  g.fillText(`Score ${S.score}`,W-12,21);
+  g.font=`13px ${FONT}`;g.fillStyle="#e8c35a";g.fillText(`Parts ${S.parts.length}/7 · Cards ${S.cards.size}/8`,W-12,41);
+  g.textAlign="left";
+  if(S.mode==="shift"){const n=S.battery,x0=640;g.font=`bold 13px ${FONT}`;g.fillStyle="#aab3d6";g.fillText("Battery",x0,21);for(let i=0;i<Math.min(n,16);i++)rect(n<=3?"#ff6a5a":"#3ddc84",x0+i*9,27,7,14);if(n>16){g.fillStyle="#3ddc84";g.fillText(`+${n-16}`,x0+148,40)}}
+  else{g.font=`bold 13px ${FONT}`;g.fillStyle="#aab3d6";g.fillText("Practice",640,21);g.fillStyle="#7fe0a0";g.fillText("no battery limit",640,40)}
+}
+function draw(){
+  if(S.screen==="room"&&S.room){const t=TH[S.room.R.id];drawBg(S.room.R.id);drawPlats(t);drawPlaque();S.room.st.forEach(drawStation);drawExit();drawPart();drawHaz();drawPlayer();drawPrompt();drawHUD()}
+  else{drawTitleBg()}
+}
+let fw=[];
+function drawTitleBg(){
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,"#050a1f");gr.addColorStop(1,"#1d2a5c");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  for(let i=0;i<90;i++){g.fillStyle=i%5?"#8d9ad6":"#fff";g.fillRect((i*173)%W,(i*97)%420,2,2)}
+  g.fillStyle="#0b0f1d";g.fillRect(200,330,560,210);g.fillRect(445,170,70,170);g.beginPath();g.moveTo(445,170);g.lineTo(480,110);g.lineTo(515,170);g.fill();
+  if(tick%40===0)fw.push({x:200+Math.random()*560,y:140+Math.random()*120,t:0,c:pick(["#ffcf4a","#ff6a5a","#7fd3ff","#7fe0a0","#f39ae0"])});
+  fw=fw.filter(f=>f.t<60);for(const f of fw){f.t++;for(let k=0;k<16;k++){const a=k/16*Math.PI*2,r=f.t*1.6;g.globalAlpha=Math.max(0,1-f.t/60);g.fillStyle=f.c;g.fillRect(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r+f.t*f.t*0.01,3,3)}g.globalAlpha=1}
+}
+function loop(now){const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;update(dt);draw();requestAnimationFrame(loop)}
+
+/* =================== scenes (station canvas) =================== */
+function sceneMap(sc,w,h){const L=48,R=18,T=16,B=36,xs=(sc.xr[1]-sc.xr[0]),ys=(sc.yr[1]-sc.yr[0]);return{L,R,T,B,X:x=>L+(x-sc.xr[0])/xs*(w-L-R),Y:y=>h-B-(y-sc.yr[0])/ys*(h-T-B),w,h}}
+function stepFor(span,px,min){for(const s of [1,2,5,10,20,25,50,100])if(s/span*px>=min)return s;return 100}
+const SCH={lobby:["#2a3358","#46528a","#7d86ad"],arena:["#3b2a1e","#7a5636","#e9f3ff"],rideau:["#0f1c45","#36508f","#eef6ff"],field:["#5aa9ff","#bfe3ff","#3f9a3f"],fire:["#3a0d0d","#a8441b","#5a3a20"],ski:["#6fa8e6","#dcecff","#f4f8ff"],hill:["#050a1f","#1d2a5c","#2f5a2f"],farm:["#8fd3ff","#d8f1ff","#7cc56b"]};
+function drawScene(c,sc,st){
+  const w=c.width,h=c.height,x=c.getContext("2d"),m=sceneMap(sc,w,h),col=SCH[sc.theme]||SCH.lobby,dark=["lobby","arena","rideau","fire","hill"].includes(sc.theme);
+  const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,col[0]);gr.addColorStop(1,col[1]);x.fillStyle=gr;x.fillRect(0,0,w,h);
+  x.fillStyle=col[2];x.fillRect(0,m.Y(0),w,h-m.Y(0));
+  const sxs=stepFor(sc.xr[1]-sc.xr[0],w-m.L-m.R,34),sys=stepFor(sc.yr[1]-sc.yr[0],h-m.T-m.B,22);
+  x.strokeStyle=dark?"rgba(255,255,255,.13)":"rgba(20,30,60,.16)";x.lineWidth=1;x.beginPath();
+  for(let v=Math.ceil(sc.xr[0]/sxs)*sxs;v<=sc.xr[1];v+=sxs){x.moveTo(m.X(v),m.T);x.lineTo(m.X(v),m.Y(0))}
+  for(let v=sys;v<=sc.yr[1];v+=sys){x.moveTo(m.L,m.Y(v));x.lineTo(w-m.R,m.Y(v))}x.stroke();
+  x.strokeStyle=dark?"#e9ecf6":"#1b1f33";x.lineWidth=2;x.beginPath();x.moveTo(m.L,m.T);x.lineTo(m.L,m.Y(0));x.lineTo(w-m.R,m.Y(0));x.stroke();
+  x.font=`bold 13px ${FONT}`;x.lineJoin="round";const lab=(t,a,b)=>{x.lineWidth=4;x.strokeStyle="#0b0f1d";x.strokeText(t,a,b);x.fillStyle="#ffffff";x.fillText(t,a,b)};
+  x.textAlign="center";x.textBaseline="top";for(let v=Math.ceil(sc.xr[0]/sxs)*sxs;v<=sc.xr[1];v+=sxs)lab(sn(v),m.X(v),m.Y(0)+5);
+  x.textAlign="right";x.textBaseline="middle";for(let v=0;v<=sc.yr[1];v+=sys)lab(sn(v),m.L-6,m.Y(v));
+  x.textAlign="left";x.textBaseline="alphabetic";x.font=`bold 12px ${FONT}`;lab(sc.xl||"x (m)",w-m.R-64,m.Y(0)+31);lab(sc.xl?"height (m)":"y (m)",4,12);
+  for(const o of sc.objs||[])drawObj(x,m,o,sc);
+  for(const a of sc.arcs||[]){x.strokeStyle=sc.ghost?"rgba(255,255,255,.85)":"#ffcf4a";if(!dark)x.strokeStyle=sc.ghost?"#1b1f33":"#c25a12";x.lineWidth=3;x.setLineDash(sc.ghost?[6,6]:[]);x.beginPath();let first=true;for(let t=a.from;t<=a.to+1e-9;t+=(a.to-a.from)/120){const y=a.a*(t-a.h)*(t-a.h)+a.k;if(first){x.moveTo(m.X(t),m.Y(y));first=false}else x.lineTo(m.X(t),m.Y(y))}x.stroke();x.setLineDash([])}
+  for(const p of sc.marks||[]){x.fillStyle=dark?"#ffcf4a":"#1b1f33";x.beginPath();x.arc(m.X(p[0]),m.Y(p[1]),5,0,7);x.fill();
+    if(st&&st.labels){x.font=`bold 13px ${FONT}`;const lab=`(${sn(p[0])}, ${sn(p[1])})`;x.lineWidth=4;x.strokeStyle=dark?"#000":"#fff";x.strokeText(lab,m.X(p[0])+8,m.Y(p[1])-8);x.fillStyle=dark?"#fff":"#1b1f33";x.fillText(lab,m.X(p[0])+8,m.Y(p[1])-8)}}
+  if(st&&st.shot){const s=st.shot;x.strokeStyle=s.hit?"#3ddc84":"#ff6a5a";x.lineWidth=3;x.beginPath();s.path.forEach((p,i)=>i?x.lineTo(m.X(p[0]),m.Y(p[1])):x.moveTo(m.X(p[0]),m.Y(p[1])));x.stroke();
+    const last=s.path[s.path.length-1];if(last){x.fillStyle=s.ball||"#fff";x.beginPath();x.arc(m.X(last[0]),m.Y(last[1]),7,0,7);x.fill();x.strokeStyle="#1b1f33";x.lineWidth=2;x.stroke()}
+    if(s.over&&!s.hit&&last){x.strokeStyle="#ff6a5a";x.lineWidth=4;x.beginPath();x.moveTo(m.X(last[0])-9,m.Y(last[1])-9);x.lineTo(m.X(last[0])+9,m.Y(last[1])+9);x.moveTo(m.X(last[0])+9,m.Y(last[1])-9);x.lineTo(m.X(last[0])-9,m.Y(last[1])+9);x.stroke()}
+    for(const q of s.parts||[]){x.globalAlpha=Math.max(0,q.l);x.fillStyle=q.c;x.fillRect(m.X(q.x)+q.dx,m.Y(q.y)+q.dy,4,4)}x.globalAlpha=1;
+    if(s.msg){x.font=`16px ${PIX}`;x.textAlign="center";x.lineWidth=5;x.strokeStyle="#000";x.strokeText(s.msg,w/2,44);x.fillStyle=s.hit?"#7fe0a0":"#ff9d93";x.fillText(s.msg,w/2,44);x.textAlign="left"}}
+}
+function drawObj(x,m,o,sc){const X=m.X(o.x),Y0=m.Y(0),px=(m.X(1)-m.X(0)),py=(m.Y(0)-m.Y(1));
+  const r=(c,a,b,cw,ch)=>{x.fillStyle=c;x.fillRect(a,b,cw,ch)};
+  switch(o.t){
+    case"launcher":case"mortar":r("#5c5f6b",X-14,Y0-14,28,14);r(o.t==="mortar"?"#c23b2e":"#2b2f3d",X-6,Y0-30,12,18);break;
+    case"bucket":r("#c9ccd6",X-14,Y0-22,28,22);r("#1b1f33",X-14,Y0-24,28,3);break;
+    case"skater":r("#c23b2e",X-6,Y0-36,12,20);r("#2b2f3d",X-6,Y0-16,4,16);r("#2b2f3d",X+2,Y0-16,4,16);r("#f2c39a",X-5,Y0-46,10,10);x.strokeStyle="#8a5a2b";x.lineWidth=3;x.beginPath();x.moveTo(X+6,Y0-30);x.lineTo(X+14,Y0-2);x.stroke();break;
+    case"net":x.strokeStyle="#c23b2e";x.lineWidth=4;x.strokeRect(X-6,Y0-1.2*py,22,1.2*py);x.strokeStyle="rgba(255,255,255,.6)";x.lineWidth=1;for(let i=0;i<5;i++){x.beginPath();x.moveTo(X-6,Y0-i*py*0.24);x.lineTo(X+16,Y0-i*py*0.24);x.stroke()}break;
+    case"ramp":{const top=m.Y(o.y),Xr=X,d=Math.max(34,Math.min(70,px*0.9));x.strokeStyle="#a87a4a";x.lineWidth=6;x.lineCap="round";x.beginPath();x.moveTo(Xr-d-70,top-80);x.lineTo(Xr-d,top);x.lineTo(Xr,top);x.stroke();x.lineCap="butt";r("#7a5636",Xr-5,top,5,Y0-top);r("#7a5636",Xr-d,top,5,Y0-top);r("#7a5636",Xr-d-40,top-46,5,Y0-top+46);x.font=`bold 12px ${FONT}`;x.lineWidth=3;x.strokeStyle="#0b0f1d";x.strokeText("flat lip",Xr-d,top-8);x.fillStyle="#fff";x.fillText("flat lip",Xr-d,top-8);break}
+    case"snowbank":{const top=m.Y(o.y);x.fillStyle="#fff";x.beginPath();x.moveTo(X-40,Y0);x.quadraticCurveTo(X-30,top-8,X,top-6);x.quadraticCurveTo(X+30,top-8,X+40,Y0);x.fill();x.strokeStyle="#9db6d6";x.lineWidth=2;x.stroke();break}
+    case"kicker":r("#c23b2e",X-5,Y0-34,12,20);r("#e8a920",X-5,Y0-16,4,16);r("#e8a920",X+3,Y0-16,4,16);r("#f2c39a",X-4,Y0-44,10,10);break;
+    case"posts":{const bar=m.Y(3);r("#e8a920",X-3,m.Y(Math.min(sc.yr[1],9)),6,Y0-m.Y(Math.min(sc.yr[1],9)));r("#e8a920",X-26,bar-3,52,6);x.font=`bold 12px ${FONT}`;x.fillStyle="#1b1f33";x.fillText("crossbar 3 m",X+8,bar-8);break}
+    case"pumper":r("#c23b2e",X-24,Y0-26,40,20);r("#2b2f3d",X+6,Y0-46,10,22);x.fillStyle="#111";x.beginPath();x.arc(X-14,Y0-4,7,0,7);x.arc(X+10,Y0-4,7,0,7);x.fill();break;
+    case"blaze":for(let k=0;k<5;k++){x.fillStyle=["#ffb02e","#ff6a1f","#ffd76a"][k%3];x.beginPath();x.moveTo(X-30+k*12,Y0);x.lineTo(X-24+k*12,Y0-28-((k*13+tick)%14));x.lineTo(X-18+k*12,Y0);x.fill()}r("#6b4a2a",X-30,Y0-8,60,8);break;
+    case"wall":{const top=m.Y(o.y);r("#8a3b2a",X-10,top,20,Y0-top);x.strokeStyle="#5a2418";x.lineWidth=1;for(let yy=top+8;yy<Y0;yy+=8){x.beginPath();x.moveTo(X-10,yy);x.lineTo(X+10,yy);x.stroke()}break}
+    case"jumptower":{const top=m.Y(o.y);r("#8a5a2b",X,top,10,Y0-top);x.strokeStyle="#8a5a2b";x.lineWidth=5;x.beginPath();x.moveTo(X-20,top-24);x.lineTo(X+10,top);x.stroke();break}
+    case"tower":{const top=m.Y(sc.yr[1]*0.82);r("#0b0f1d",X-12,top,24,Y0-top);x.fillStyle="#0b0f1d";x.beginPath();x.moveTo(X-12,top);x.lineTo(X,top-26);x.lineTo(X+12,top);x.fill();r("#f6e7a8",X-6,top+16,12,10);break}
+  }}
+
+/* =================== panels =================== */
+function setOv(html){ov.innerHTML=html;ov.hidden=!html;panelOpen=!!html&&S.screen==="room"}
+function closePanel(){setOv("");panelOpen=false;cv.focus()}
+function showIntro(){const R=S.room.R;S.screen="room";
+  setOv(`<div class="card"><span class="tag">${esc(R.lesson)}</span><h2>${esc(R.name)}</h2><p class="hist yr" style="font-family:var(--f-pix);font-size:10px;color:#8a5a1c">${esc(R.place)} · ${esc(R.year)}</p><p>${R.intro}</p>
+  ${R.id==="lobby"?`<p class="ctx">Walk with the arrow keys or WASD, climb ladders with ▲ ▼, and press Space at a machine. Each launcher gives you 2 free test shots${S.mode==="shift"?"; after that, every shot costs 1 battery cell":""}. Read the brass plaque in each room for a history card.</p>`:`<p class="ctx">Finish the 3 machines to unlock the exit. Rex Ratchet is racing you to it: beat him for a bonus. Find the hidden part${S.mode==="shift"?" (+2 battery)":""} and read the plaque.</p>`}
+  <div class="row"><button class="btn go" id="goBtn">Let's go</button></div></div>`);
+  panelOpen=true;document.getElementById("goBtn").onclick=()=>{paused=false;closePanel()};document.getElementById("goBtn").focus();paused=true}
+function openCard(){const R=S.room.R,c=R.card,first=!S.cards.has(R.id);if(first){S.cards.add(R.id);award(25)}
+  setOv(`<div class="card hist"><span class="yr">${esc(c.yr)} · HISTORY CARD ${[...S.cards].length}/8</span><h2>${esc(c.title)}</h2><p>${esc(c.text)}</p><div class="row"><button class="btn go" id="okBtn">Back to the workshop</button>${first?`<span class="tag" style="color:#6b3a10">+${Math.round(25*S.role.mult)} card collected</span>`:""}</div></div>`);
+  document.getElementById("okBtn").onclick=closePanel;document.getElementById("okBtn").focus()}
+
+/* ---- machine panel ---- */
+let cur=null,anim=null;
+function openStation(s){cur=s;const q=s.ch;
+  const launch=q.kind==="launch";
+  const ansHTML=launch?`<div class="eqrow"><span>y =</span><input type="text" id="eq" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Equation"><span class="row"><button class="key" data-ins="²">²</button><button class="key" data-ins="(">(</button><button class="key" data-ins=")">)</button></span><button class="btn fire" id="fireBtn">Fire</button></div><p class="preview" id="pv">Type it like ${q.form==="factored"?"−1/2(x − 2)(x − 10)":"−2(x − 3)² + 8"}. Use / for fractions.</p><div class="shots" id="shots"></div>`
+   :q.ans.type==="choice"?`<div class="row" role="radiogroup">${q.ans.opts.map((o,i)=>`<button class="opt" data-i="${i}" role="radio" aria-checked="false">${o}</button>`).join("")}</div><div class="row"><button class="btn go" id="chkBtn">Check</button></div>`
+   :`<div class="num">${q.ans.fields.map((f,i)=>`<span class="fld">${f.pre?`<span>${f.pre}</span>`:""}<input type="text" id="a${i}" autocomplete="off" aria-label="${esc(f.label)}">${f.post?`<span>${f.post}</span>`:""}</span>`).join("")}<button class="btn go" id="chkBtn">Check</button></div>`;
+  const left=`${q.scene?`<canvas class="scene" id="sc" width="760" height="300"></canvas>`:""}<div>${q.text}</div>`;
+  const right=`${s.done?`<div class="fb good"><strong>${s.steps?"Solved with the worked steps.":"Solved!"}</strong>${launch?`Answer: ${esc(q.ans)}`:""}</div>`:ansHTML}<div id="fb"></div><div id="hint"></div><div class="steps" id="steps" hidden></div><div class="row"><button class="btn" id="hintBtn" ${s.misses>=2&&!s.done?"":"hidden"}>Hint</button><button class="btn go" id="doneBtn" hidden>Back to the room</button></div>`;
+  setOv(`<div class="card wide"><div class="row" style="justify-content:space-between"><span class="tag">${esc(SKILL[q.lesson]||"Warm-up")} · ${launch?"Launcher":"Terminal"}</span><button class="btn" id="xBtn" aria-label="Close">✕</button></div><h2>${esc(q.title)}</h2>
+   ${q.scene?`<div class="cols"><div>${left}</div><div>${right}</div></div>`:`${left}${right}`}</div>`);
+  const $=id=>document.getElementById(id);
+  $("xBtn").onclick=()=>{anim=null;closePanel()};
+  $("hintBtn").onclick=()=>{$("hint").innerHTML=`<div class="fb hint"><strong>Hint</strong>${q.hint}</div>`};
+  $("doneBtn").onclick=()=>{anim=null;closePanel();if(roomDone())toast(S.ri===ROOMS.length-1?"All machines ready! Walk to SHOW to launch the finale.":"Exit unlocked! Head for the door.")};
+  if(s.done&&s.steps)showSteps(q);
+  stDraw();
+  if(s.done)return;
+  if(launch){updShots();const eq=$("eq");eq.focus();
+    eq.addEventListener("input",()=>{const r=parseExpr(eq.value);$("pv").innerHTML=r.ast?`You typed: <b>y = ${esc(pshow(r.ast))}</b>`:"Keep typing…"});
+    eq.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();fire()}});
+    ov.querySelectorAll(".key").forEach(b=>b.onclick=()=>{const v=b.dataset.ins,a=eq.selectionStart??eq.value.length,c=eq.selectionEnd??a;eq.value=eq.value.slice(0,a)+v+eq.value.slice(c);eq.focus();eq.setSelectionRange(a+v.length,a+v.length);eq.dispatchEvent(new Event("input"))});
+    $("fireBtn").onclick=fire;}
+  else if(q.ans.type==="choice"){let ch=null;ov.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(b.disabled)return;ch=+b.dataset.i;ov.querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)))});
+    $("chkBtn").onclick=()=>{if(ch===null)return fbk("hint","Pick an answer first.","");const b=ov.querySelector(`.opt[data-i="${ch}"]`);if(ch===q.ans.correct){b.classList.add("ok");solved()}else{b.classList.add("no");b.disabled=true;ch=null;missed(q.ans.why[+b.dataset.i]||"Check your work.")}}}
+  else{$("a0").focus();ov.querySelectorAll(".num input").forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();checkNum()}}));$("chkBtn").onclick=checkNum}
+}
+function stDraw(){const c=document.getElementById("sc");if(c&&cur&&cur.ch.scene)drawScene(c,cur.ch.scene,{labels:cur.ch.kind==="launch",shot:anim})}
+function fbk(t,title,msg){const el=document.getElementById("fb");if(!el)return;el.innerHTML=`<div class="fb ${t}"><strong>${title}</strong>${msg||""}</div>`}
+function updShots(){const el=document.getElementById("shots");if(!el)return;const free=Math.max(0,2-cur.shots);
+  el.innerHTML=`Free test shots: ${[0,1].map(i=>`<span class="pip ${i<free?"":"used"}"></span>`).join("")} ${free===0?(S.mode==="shift"?"· each shot now costs 1 battery cell":"· practice: shots are free"):""}`}
+function showSteps(q){const el=document.getElementById("steps");el.hidden=false;el.innerHTML=`<strong>Worked steps</strong><ol>${q.steps.map(s=>`<li><span class="why">${s[0]}</span>${s[1]?`<span class="work">${s[1]}</span>`:""}</li>`).join("")}</ol>`}
+function finishUI(){const $=id=>document.getElementById(id);if(!$("doneBtn"))return;ov.querySelectorAll("input,.key,#fireBtn,#chkBtn,.opt").forEach(e=>e.disabled=true);$("hintBtn").hidden=true;$("doneBtn").hidden=false;$("doneBtn").focus()}
+function solved(extra){if(!document.getElementById("fb"))return;const s=cur,q=s.ch;s.done=true;const first=s.misses===0;s.star=first;
+  let pts=q.free?0:first?100:s.misses===1?60:30;const v=pts?award(pts):0;stat(q.lesson,first);
+  fbk("good",first?pick(["Correct!","Nailed it!","Bang on!"]):"Correct!",`${extra||""}${v?` +${v} points`:""}`);finishUI()}
+function missed(msg){if(!document.getElementById("fb"))return;const s=cur,q=s.ch;s.misses++;
+  const freeLeft=q.kind==="launch"?s.shots<=2:s.misses<=1;if(!freeLeft&&!q.free){drain(1)}
+  if(s.misses>=3){s.done=true;s.steps=true;stat(q.lesson,"steps");fbk("bad","Not quite. Here are the worked steps.",msg);showSteps(q);
+    if(q.kind==="launch"){const t=q.target;launchAnim(x=>t[0]+t[1]*x+t[2]*x*x,true)}finishUI();return}
+  fbk("bad","Not quite.",msg+(q.kind!=="launch"&&!freeLeft&&S.mode==="shift"&&!q.free?" (−1 battery)":""));
+  if(s.misses>=2)document.getElementById("hintBtn").hidden=false;
+}
+function checkNum(){const q=cur.ch,A=q.ans,ins=A.fields.map((_,i)=>document.getElementById("a"+i));
+  const ps=ins.map(i=>parseNum(i.value));if(ps.some(p=>!p))return fbk("hint",A.fields.length>1?"Fill in every box.":"Type an answer first.","");
+  if(ps.some(p=>p.bad))return fbk("hint","I can't read that number.","Use a whole number, a fraction like 2/3, or a decimal like 2.5.");
+  let v=ps.map(p=>p.v),t=A.vals.map(fv);const tol=A.fields.map(f=>f.tol);if(A.orderFree){v=[...v].sort((a,b)=>a-b);t=[...t].sort((a,b)=>a-b)}
+  const ok=v.map((x,i)=>nearV(x,t[i],tol[i]));
+  if(ok.every(Boolean)){ins.forEach(i=>i.classList.add("ok"));return solved(q.note?q.note+".":A.vals.some(x=>typeof x!=="number"&&x.d!==1)?`a = ${fs(A.vals[0])}.`:"")}
+  if(!A.orderFree)ins.forEach((i,k)=>{i.classList.toggle("ok",ok[k]);i.classList.toggle("no",!ok[k])});
+  let msg=null;if(q.missFn)msg=q.missFn(ps.map(p=>p.v));
+  if(!msg)for(const mk of q.mistakes||[]){if(!ok[mk.f]&&nearV(v[mk.f],fv(mk.val),tol[mk.f])){msg=mk.msg;break}}
+  if(!msg&&q.fieldMsg){const wr=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(wr.length===1)msg=q.fieldMsg[wr[0]]}
+  missed(msg||"Check each step of your work.")}
+const nearV=(a,b,t)=>Math.abs(a-b)<(t||0.006);
+
+/* ---- launching ---- */
+function fire(){if(anim&&!anim.over)return;const q=cur.ch,eq=document.getElementById("eq");const r=parseExpr(eq.value);
+  if(r.err==="empty")return fbk("hint","Type an equation first.","");
+  if(r.err)return fbk("hint","I can't read that.",r.err==="xdigit"?"For x squared, type x^2 or use the ² button.":r.err==="eq"?"Type only one equals sign (the y = is already there).":"Type it like y = −2(x − 3)² + 8, and check your brackets.");
+  const pv=pev(r.ast);if(ptrim(pv).length>3)return fbk("hint","That's not a parabola.","The highest power of x should be 2.");
+  cur.shots++;updShots();
+  const hit=peq(pv,q.target);const c=ptrim(pv).concat([0,0,0]);const f=x=>c[0]+c[1]*x+c[2]*x*x;
+  launchAnim(f,hit,()=>{
+    if(hit){const formOK=q.form==="factored"?isZerosShape(r.ast)==="ok":isVertexShape(r.ast);
+      solved(formOK?"":`(Right path! Next time try writing it in ${q.form==="factored"?"factored":"vertex"} form.) `)}
+    else{let msg=quadMiss(q.form==="factored"?"zeros":"vertex",pv,q.target);const sx=q.scene.start;
+      if(sx&&Math.abs(f(sx[0])-sx[1])>0.05)msg+=` Your path doesn't start at the launcher: at x = ${sn(sx[0])} it gives y = ${fmt(f(sx[0]))}, not ${sn(sx[1])}.`;
+      missed(msg)}});
+}
+function launchAnim(f,hit,done){
+  const sc=cur.ch.scene,x0=sc.start?sc.start[0]:sc.xr[0],span=sc.xr[1]-sc.xr[0],tx=sc.tgt?sc.tgt[0]:null;
+  anim={path:[],hit,over:false,parts:[],ball:{"posts":"#8a4a1e","snow":"#a87a4a"}[cur.ch.effect]||"#fff",msg:""};
+  let x=x0;const stepX=span/110;const ymax=sc.yr[1]*1.8;
+  const id=setInterval(()=>{if(!anim){clearInterval(id);return}
+    if(!anim.over){x+=stepX;let y=f(x);anim.path.push([x,y]);
+      const reached=hit&&tx!==null&&x>=tx-1e-9;
+      if(reached){anim.path[anim.path.length-1]=[tx,f(tx)];anim.over=true;boom(tx,f(tx));anim.msg={posts:"IT'S GOOD!",snow:"SAFE LANDING!",douse:"FIRE OUT!",burst:"BOOM!",burstpt:"BOOM!",land:"TOUCHDOWN!",bucket:"IN THE BUCKET!"}[cur.ch.effect]||"HIT!"}
+      else if(x>sc.xr[1]||y<sc.yr[0]-0.01&&x>x0+stepX*2||y>ymax||y<-sc.yr[1]){anim.over=true;if(y<sc.yr[0])anim.path[anim.path.length-1]=[x,0];if(hit){boom(x,Math.max(0,y));anim.msg="HIT!"}else anim.msg="MISS"}
+      if(anim.over&&done)setTimeout(done,350)}
+    anim.parts.forEach(p=>{p.dx+=p.vx;p.dy+=p.vy;p.vy+=0.12;p.l-=0.025});anim.parts=anim.parts.filter(p=>p.l>0);
+    stDraw();if(anim.over&&!anim.parts.length){clearInterval(id)}},16);
+}
+function boom(x,y){const cols=cur.ch.effect==="douse"?["#cfe8ff","#ffffff","#9db6d6"]:cur.ch.effect==="snow"?["#ffffff","#dcecff"]:["#ffcf4a","#ff6a5a","#7fd3ff","#7fe0a0","#f39ae0"];
+  for(let i=0;i<46;i++){const a=Math.random()*Math.PI*2,s=1+Math.random()*3.5;anim.parts.push({x,y,dx:0,dy:0,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,l:1,c:pick(cols)})}}
+
+/* ---- test range ---- */
+function openRange(){cur={ch:{kind:"launch",scene:{theme:"lobby",xr:[0,20],yr:[0,20],start:[0,0],objs:[{t:"launcher",x:0}],marks:[]},effect:"burst"}};anim=null;
+  setOv(`<div class="card wide"><div class="row" style="justify-content:space-between"><span class="tag">Test range · no score</span><button class="btn" id="xBtn" aria-label="Close">✕</button></div><h2>Test range</h2><canvas class="scene" id="sc" width="760" height="300"></canvas>
+  <p>Type any quadratic and fire it. Try changing one number at a time: what does a do? h? k? Click Fire again to compare paths.</p><div class="eqrow"><span>y =</span><input type="text" id="eq" autocomplete="off" spellcheck="false" value="-1/4(x - 8)^2 + 16"><button class="btn fire" id="fireBtn">Fire</button></div><p class="preview" id="pv"></p><div id="fb"></div></div>`);
+  const eq=document.getElementById("eq");eq.focus();stDraw();
+  const go=()=>{const r=parseExpr(eq.value);if(r.err){fbk("hint","I can't read that.","Type it like −1/4(x − 8)² + 16.");return}const c=ptrim(pev(r.ast)).concat([0,0,0]);if(ptrim(pev(r.ast)).length>3)return fbk("hint","That's not a parabola.","");
+    const f=x=>c[0]+c[1]*x+c[2]*x*x,V=vparts(ptrim(pev(r.ast)));document.getElementById("fb").innerHTML=V?`<div class="fb hint"><strong>Vertex (${fmt(V.h)}, ${fmt(V.k)}), a = ${fmt(V.a)}</strong>It opens ${V.a>0?"up":"down"}; step pattern ${fmt(V.a)}, ${fmt(3*V.a)}, ${fmt(5*V.a)}.</div>`:"";
+    cur.ch.scene.start=[0,f(0)];launchAnim(f,false,()=>{anim.msg=""})};
+  document.getElementById("fireBtn").onclick=go;eq.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();go()}});
+  eq.addEventListener("input",()=>{const r=parseExpr(eq.value);document.getElementById("pv").innerHTML=r.ast?`You typed: <b>y = ${esc(pshow(r.ast))}</b>`:""});
+  document.getElementById("xBtn").onclick=()=>{anim=null;if(S.screen==="room")closePanel();else titleScreen()}}
+
+/* =================== menus & ending =================== */
+function titleScreen(){S.screen="title";panelOpen=false;paused=true;
+  ov.hidden=false;ov.innerHTML=`<div class="card titlecard"><h1 class="title">LAUNCH LAB</h1><p class="sub">AN OTTAWA QUADRATICS ADVENTURE</p>
+  <p>After hours at Ingenium, Canada's science and technology museum, every exhibit door opens onto a moment in Ottawa history. Fix each launcher with a quadratic, collect the parts, and race Rex Ratchet to the Canada Day finale on Parliament Hill.</p>
+  <div class="row" style="justify-content:center"><button class="btn go" id="startBtn">Start</button><button class="btn" id="rangeBtn">Test range</button></div></div>`;
+  document.getElementById("startBtn").onclick=setup;document.getElementById("rangeBtn").onclick=openRange;document.getElementById("startBtn").focus()}
+function setup(){let mode="shift",role=ROLES[1];
+  ov.innerHTML=`<div class="card"><h2>Sign in at the workshop</h2>
+  <label for="nm"><b>Your inventor name</b> <small>(only shown on screen, never saved)</small></label><input type="text" id="nm" maxlength="14" placeholder="e.g. Sam">
+  <b>Shift</b><div class="choices" id="modes"><button class="choice" data-m="shift" aria-pressed="true"><b>Night shift</b><small>Wrong answers and extra shots drain the battery. If it hits zero, the workshop goes dark.</small></button><button class="choice" data-m="practice" aria-pressed="false"><b>Practice shift</b><small>No battery. Everyone reaches the finale.</small></button></div>
+  <b>Role</b><div class="choices" id="roles">${ROLES.map((r,i)=>`<button class="choice" data-r="${i}" aria-pressed="${i===1}"><b>${r.name}</b><small>${r.desc}</small></button>`).join("")}</div>
+  <div class="row"><button class="btn go" id="beginBtn">Open the workshop</button><button class="btn" id="backBtn">Back</button></div></div>`;
+  ov.querySelectorAll("#modes .choice").forEach(b=>b.onclick=()=>{mode=b.dataset.m;ov.querySelectorAll("#modes .choice").forEach(o=>o.setAttribute("aria-pressed",String(o===b)))});
+  ov.querySelectorAll("#roles .choice").forEach(b=>b.onclick=()=>{role=ROLES[+b.dataset.r];ov.querySelectorAll("#roles .choice").forEach(o=>o.setAttribute("aria-pressed",String(o===b)))});
+  document.getElementById("backBtn").onclick=titleScreen;
+  document.getElementById("beginBtn").onclick=()=>{S.name=document.getElementById("nm").value.trim();S.mode=mode;S.role=role;S.battery=role.bat;S.score=0;S.parts=[];S.cards=new Set();S.rexWins=0;S.stats={};S.ended=false;enterRoom(0)};
+  document.getElementById("nm").focus()}
+function finale(){S.screen="title";paused=true;panelOpen=true;ov.innerHTML="";ov.hidden=true;fw=[];
+  let n=0;const id=setInterval(()=>{for(let k=0;k<2;k++)fw.push({x:200+Math.random()*560,y:100+Math.random()*170,t:0,c:pick(["#ffcf4a","#ff6a5a","#7fd3ff","#7fe0a0","#f39ae0"])});if(++n>22){clearInterval(id);endRun(true)}},180)}
+function endRun(won){if(S.ended)return;S.ended=true;anim=null;S.screen="title";paused=true;
+  const rows=Object.entries(S.stats).sort().map(([k,v])=>{const pct=v.n?v.first/v.n:0;return`<tr><td>${esc(k)}</td><td>${v.first} of ${v.n} first try</td><td>${pct>=.67?"Strong":pct>=.34?"Getting there":"Review this"}</td></tr>`}).join("");
+  const weak=Object.entries(S.stats).filter(([k,v])=>v.n&&v.first/v.n<.5).map(([k])=>k);
+  const all=S.parts.length===7&&S.cards.size===8;
+  ov.hidden=false;ov.innerHTML=`<div class="card wide"><span class="tag">${won?"Canada Day finale":"The workshop went dark"}</span><h2>${won?"The show lit up the Hill!":"Out of battery"}</h2>
+  <p>${S.name?esc(S.name)+", y":"Y"}${won?`ou built every launcher${S.rexWins?` and beat Rex to ${S.rexWins} exit${S.rexWins>1?"s":""}`:""}.`:`our battery ran out in ${esc(S.room.R.name)}. Try the Practice shift, or start a new Night shift.`}</p>
+  <div class="row"><span class="big">Score ${S.score}</span><span>· Parts ${S.parts.length}/7 · Cards ${S.cards.size}/8 · Beat Rex ${S.rexWins}×${S.mode==="shift"?` · Battery left ${S.battery}`:""}</span></div>
+  ${all?`<p class="fb good"><strong>Master inventor</strong>You found every part and read every history card.</p>`:""}
+  <h3>Skill report</h3><table class="report"><tr><th>Skill</th><th>Machines</th><th></th></tr>${rows||"<tr><td colspan=3>No machines finished yet.</td></tr>"}</table>
+  ${weak.length?`<p>Before the test, review: <b>${weak.map(esc).join(", ")}</b>. The Unit 3 Practice page has endless questions on each.</p>`:"<p>Nice work across the board.</p>"}
+  <div class="row"><button class="btn go" id="againBtn">Play again</button></div></div>`;
+  document.getElementById("againBtn").onclick=setup}
+
+/* =================== input wiring =================== */
+const KEYMAP={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down",a:"a",d:"d",w:"w",s:"s",A:"a",D:"d",W:"w",S:"s"};
+window.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"){if(e.key==="Escape"&&S.screen==="room"&&panelOpen&&!paused){anim=null;closePanel()}return}
+  if(e.key==="Escape"&&panelOpen&&S.screen==="room"&&!paused){anim=null;closePanel();return}
+  const k=KEYMAP[e.key];if(k&&S.screen==="room"&&!panelOpen){keys[k]=true;e.preventDefault()}
+  if((e.key===" "||e.key==="Enter")&&S.screen==="room"&&!panelOpen&&!paused){e.preventDefault();act()}
+});
+window.addEventListener("keyup",e=>{const k=KEYMAP[e.key];if(k)keys[k]=false});
+window.addEventListener("blur",()=>{keys={}});
+document.querySelectorAll("#pad button").forEach(b=>{const k=b.dataset.k;
+  const on=e=>{e.preventDefault();if(k==="act")act();else keys[k]=true},off=e=>{e.preventDefault();if(k!=="act")keys[k]=false};
+  b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off)});
+window.__ll={S,me,ROOMS,ROOMCH,enterRoom,openStation:i=>openStation(S.room.st[i]),nearObj,act,keys,cur:()=>cur,parseExpr,pev,peq,setKeys:o=>Object.assign(keys,o)};
+titleScreen();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
