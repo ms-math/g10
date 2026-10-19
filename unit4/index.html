@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Unit 4 review for Grade 10 math: a practice page and a review game.">
+<meta name="robots" content="noindex">
+<title>Unit 4 Review · Trigonometry</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("fonts/atkinson-hyperlegible-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Big Shoulders Stencil Display";src:url("fonts/big-shoulders-stencil-display-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Big Shoulders Stencil Display";src:url("fonts/big-shoulders-stencil-display-900.woff") format("woff");font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/ibm-plex-mono-500.woff") format("woff");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url("fonts/ibm-plex-mono-600.woff") format("woff");font-weight:600;font-style:normal;font-display:swap}
+:root{--paper:#f7f9fc;--grid:rgba(40,88,170,.075);--card:#fff;--line:#d6dde8;--ink:#15233b;--muted:#56637a;--pen:#1f4fb0;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;font-size:17px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:40px 16px 56px}
+h1{font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.1;margin:0;letter-spacing:-.01em}
+h1 span{display:block;font-family:"Kalam","Comic Sans MS",cursive;font-weight:700;color:var(--pen)}
+.lede{color:var(--muted);margin:10px 0 28px;max-width:56ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.card{display:flex;flex-direction:column;gap:8px;text-decoration:none;border-radius:12px;padding:22px;min-height:220px;transition:transform .12s ease}
+.card:hover{transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.card .kicker{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.card .go{margin-top:auto;font-weight:700}
+.plain{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
+.plain .t{font-size:1.45rem;font-weight:700;line-height:1.2}
+.plain .t span{font-family:"Kalam","Comic Sans MS",cursive;color:var(--pen)}
+.plain p{margin:0;color:var(--muted)}
+.plain .go{color:var(--pen)}
+.game{background:#111410;color:#ecefe3;border:3px solid #394236;box-shadow:inset 0 0 0 2px #f0b63a}
+.game .t{font-family:"Big Shoulders Stencil Display","Arial Narrow",Impact,sans-serif;font-weight:900;font-size:2rem;line-height:1;text-transform:uppercase;letter-spacing:.03em;color:#f0b63a}
+.game p{margin:0;font-family:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;font-size:1rem;opacity:.92}
+.game .go{color:#7fe39a;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.85rem;letter-spacing:.08em}
+footer{margin-top:32px;font-size:.88rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Unit 4 Review <span>Trigonometry</span></h1>
+  <p class="lede">Practise each lesson at your own level, then test yourself in the review game.</p>
+  <div class="cards">
+    <a class="card plain" href="practice/">
+      <span class="kicker">Practice</span>
+      <span class="t">Unit 4 <span>Practice</span></span>
+      <p>SOH CAH TOA, finding sides and angles, right-triangle word problems, the sine law, the cosine law and oblique problems. Three levels, hints and worked steps.</p>
+      <span class="go">Start practising →</span>
+    </a>
+    <a class="card game" href="bunker/">
+      <span class="kicker">Review game</span>
+      <span class="t">Diefenbunker Lockdown</span>
+      <p>Escape Canada&rsquo;s Cold War bunker near Carp in 1962. Measure the rooms, solve each terminal, and read your way up to the blast tunnel.</p>
+      <span class="go">&gt; ENTER THE BUNKER</span>
+    </a>
+  </div>
+  <footer>Nothing you type on these pages is sent anywhere.</footer>
+</div>
+</body>
+</html>

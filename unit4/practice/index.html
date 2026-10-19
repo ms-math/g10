@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Unit 4 practice: Trigonometry. Three levels, hints and worked steps.">
+<meta name="robots" content="noindex">
+<title>Unit 4 Practice · Trigonometry</title>
+<style>
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-hyperlegible-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-hyperlegible-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:"Atkinson Hyperlegible";src:url("../fonts/atkinson-hyperlegible-400-italic.woff") format("woff");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-400.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Kalam";src:url("../fonts/kalam-700.woff") format("woff");font-weight:700;font-style:normal;font-display:swap}
+html,body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one centred column on graph paper — controls, then a single question card (text, triangle diagram, answer), then the worked steps in "blue pen". Same look as the Unit 1–3 practice pages. */
+:root{
+  --paper:#f7f9fc; --grid:rgba(40,88,170,.075); --card:#ffffff; --line:#d6dde8;
+  --ink:#15233b; --muted:#56637a; --pen:#1f4fb0; --pen-soft:#e7eefb; --pen-ink:#ffffff;
+  --good:#17703f; --good-soft:#e2f3e9; --bad:#b0302a; --bad-soft:#fbe8e6; --hl:#fff0a0; --hl-ink:#3d3300;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-pen:"Kalam", "Comic Sans MS", "Segoe Print", cursive;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0f141c; --grid:rgba(140,170,225,.06); --card:#161e2a; --line:#2a3546;
+  --ink:#e5ebf4; --muted:#9ba8bc; --pen:#8db0ff; --pen-soft:#1c2a45; --pen-ink:#0f141c;
+  --good:#6fd39a; --good-soft:#14301f; --bad:#ff8f86; --bad-soft:#3a1b19; --hl:#4a4113; --hl-ink:#fff3b8; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-size:1.9rem;line-height:1.15;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 .pen{font-family:var(--f-pen);color:var(--pen);font-weight:700}
+.lede{margin:4px 0 0;color:var(--muted);max-width:52ch}
+.score{display:flex;gap:14px;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.score b{color:var(--ink);font-size:1.15rem}
+.controls{display:flex;flex-direction:column;gap:10px}
+.label{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:.95rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button small{color:var(--muted);font-size:.78rem;margin-left:4px}
+.seg button[aria-pressed="true"]{background:var(--pen);border-color:var(--pen);color:var(--pen-ink)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.levelnote{font-size:.88rem;color:var(--muted);margin:4px 0 0}
+.card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:22px clamp(16px,4vw,28px);display:flex;flex-direction:column;gap:16px;min-width:0}
+.qtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qtag{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--pen)}
+.rule{font-size:.9rem;color:var(--muted)}
+.prompt{font-size:1.05rem;display:flex;flex-direction:column;gap:8px}
+.prompt p{margin:0}
+.prompt .hl{font-weight:700;background:linear-gradient(transparent 58%,var(--hl) 58%);padding-inline:1px}
+.big{font-size:1.45rem;font-weight:700;font-variant-numeric:tabular-nums}
+.figwrap{display:flex;flex-direction:column;gap:4px}
+#fig{display:block;width:100%;height:auto;border:1.5px solid var(--line);border-radius:8px;background:var(--card)}
+.fignote{font-size:.85rem;color:var(--muted);margin:0}
+.sketchbtn{align-self:flex-start}
+.answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;font-size:1.3rem;font-weight:700}
+.answer .fld{display:inline-flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.answer input{font:inherit;font-weight:700;width:6.2em;padding:6px 8px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);text-align:center}
+.answer input:focus{outline:none;border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.answer input.ok{border-color:var(--good)} .answer input.no{border-color:var(--bad)}
+.choices{display:flex;flex-direction:column;gap:8px;width:100%;font-size:1.15rem}
+.opt{font:inherit;font-weight:700;text-align:left;padding:9px 14px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
+.opt .key{font-size:.8rem;color:var(--muted);min-width:1.2em}
+.opt:hover{border-color:var(--pen)}
+.opt[aria-checked="true"]{border-color:var(--pen);box-shadow:0 0 0 3px var(--pen-soft)}
+.opt.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.no{border-color:var(--bad);color:var(--bad);text-decoration:line-through;opacity:.7;cursor:default}
+.lblgrid{display:flex;flex-direction:column;gap:8px;width:100%;font-size:1.1rem}
+.lblrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lblname{min-width:5.5em;font-variant-numeric:tabular-nums}
+.ohA{display:inline-flex;gap:6px}
+.ohA button{font:inherit;font-weight:700;font-size:1rem;min-width:2.6em;padding:5px 10px;border:2px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);cursor:pointer}
+.ohA button[aria-checked="true"]{border-color:var(--pen);background:var(--pen);color:var(--pen-ink)}
+.ohA button:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.lblrow.ok .ohA button[aria-checked="true"]{background:var(--good);border-color:var(--good)}
+.lblrow.no .ohA button[aria-checked="true"]{background:var(--bad);border-color:var(--bad)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:.98rem;padding:9px 16px;border-radius:8px;border:1.5px solid var(--pen);background:var(--card);color:var(--pen);cursor:pointer}
+.btn.primary{background:var(--pen);color:var(--pen-ink)}
+.btn.quiet{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px;padding-inline:6px}
+.btn:focus-visible,.seg button:focus-visible,.opt:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.feedback{border-radius:8px;padding:12px 14px;font-size:1rem}
+.feedback.good{background:var(--good-soft);color:var(--good)}
+.feedback.bad{background:var(--bad-soft);color:var(--bad)}
+.feedback.hint{background:var(--hl);color:var(--hl-ink)}
+.feedback strong{display:block;margin-bottom:2px}
+.steps{border-top:1.5px dashed var(--line);padding-top:14px}
+.steps h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.steps ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.steps li::marker{color:var(--muted);font-size:.9rem}
+.why{display:block;font-size:.9rem;color:var(--muted)}
+.work{display:block;font-family:var(--f-pen);color:var(--pen);font-size:1.3rem;line-height:1.45;overflow-x:auto}
+.work.final{display:inline;background:linear-gradient(transparent 55%,var(--hl) 55%);padding-inline:2px}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.8em;line-height:1.1;text-align:center;margin:0 .12em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+table.tbl{border-collapse:collapse;margin:4px 0;font-variant-numeric:tabular-nums}
+table.tbl th{font-family:var(--f-body);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;text-align:left;padding:0 18px 2px 0}
+table.tbl td{padding:0 18px 0 0;white-space:nowrap}
+.note{font-family:var(--f-body);font-size:.8rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+footer{font-size:.85rem;color:var(--muted)}
+@media (max-width:480px){h1{font-size:1.55rem}.big{font-size:1.25rem}.answer{font-size:1.15rem}.answer input{width:5.4em}.choices{font-size:1.05rem}.work{font-size:1.15rem}}
+@media (prefers-reduced-motion:no-preference){.feedback,.steps{animation:rise .18s ease-out}@keyframes rise{from{transform:translateY(4px);opacity:.6}to{transform:none;opacity:1}}}
+[hidden]{display:none!important}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Unit 4 <span class="pen">Trigonometry</span></h1>
+      <p class="lede">Pick a skill and a level. Answer the question and press Check. If you get it wrong, try the hint, then the full steps.</p>
+    </div>
+    <div class="score" aria-live="polite">
+      <span><b id="sFirst">0</b> first try</span>
+      <span><b id="sDone">0</b> done</span>
+      <span><b id="sStreak">0</b> streak</span>
+    </div>
+  </header>
+
+  <section class="controls" aria-label="Choose practice">
+    <div>
+      <div class="label" id="skillLbl">Skill</div>
+      <div class="seg" id="skills" role="group" aria-labelledby="skillLbl">
+        <button data-skill="ratios">Sides &amp; ratios <small>L1</small></button>
+        <button data-skill="sides">Finding sides <small>L2</small></button>
+        <button data-skill="angles">Finding angles <small>L3</small></button>
+        <button data-skill="rightwp">Right-triangle problems <small>L4</small></button>
+        <button data-skill="sine">Sine law <small>L5</small></button>
+        <button data-skill="cosine">Cosine law <small>L6</small></button>
+        <button data-skill="oblique">Oblique problems <small>L7</small></button>
+        <button data-skill="mixed">Mixed review</button>
+      </div>
+    </div>
+    <div>
+      <div class="label" id="levelLbl">Level</div>
+      <div class="seg" id="levels" role="group" aria-labelledby="levelLbl">
+        <button data-level="0">Support</button>
+        <button data-level="1">On track</button>
+        <button data-level="2">Challenge</button>
+      </div>
+      <p class="levelnote" id="levelNote"></p>
+    </div>
+  </section>
+
+  <main class="card" id="card">
+    <div class="qtop"><span class="qtag" id="qtag"></span><span class="rule" id="rule"></span></div>
+    <div class="prompt" id="prompt"></div>
+    <button class="btn sketchbtn" id="sketchBtn" type="button" hidden>Show the sketch</button>
+    <div class="figwrap" id="figwrap" hidden><canvas id="fig" aria-hidden="true"></canvas><p class="sr" id="figalt"></p><p class="fignote" id="fignote" hidden></p></div>
+    <form class="answer" id="answer" autocomplete="off"></form>
+    <div class="actions">
+      <button class="btn primary" id="checkBtn" type="button">Check</button>
+      <button class="btn" id="hintBtn" type="button">Hint</button>
+      <button class="btn quiet" id="stepsBtn" type="button">Show steps</button>
+      <button class="btn" id="nextBtn" type="button">New question</button>
+    </div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="steps" id="steps" hidden></div>
+  </main>
+
+  <footer>Keep your calculator in degree mode (DEG). Round lengths and angles to 2 decimal places, keeping the full calculator value until the last step (1 decimal place is accepted too). Type fractions like 9/41. You can type ° or units, or leave them off. Every question is new, so you can keep practising.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* =================== helpers =================== */
+const M="−",DEG="°";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const RD=Math.PI/180;
+const S=x=>Math.sin(x*RD),C=x=>Math.cos(x*RD),T=x=>Math.tan(x*RD);
+const aS=v=>Math.asin(v)/RD,aC=v=>Math.acos(v)/RD,aT=v=>Math.atan(v)/RD;
+const FN={sin:S,cos:C,tan:T},FNr={sin:Math.sin,cos:Math.cos,tan:Math.tan},INV={sin:aS,cos:aC,tan:aT},INVr={sin:Math.asin,cos:Math.acos,tan:Math.atan};
+const neg=s=>String(s).replace(/^-/,M);
+function f2(v){let s=(Math.round(v*100)/100).toFixed(2);if(s==="-0.00")s="0.00";return neg(s)}
+function nf(v){if(Math.abs(v-Math.round(v))<1e-9)return neg(String(Math.round(v)));return neg(String(Math.round(v*100)/100))}
+const dg=v=>nf(v)+DEG, d2=v=>f2(v)+DEG;
+const fr=(n,d)=>`<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const r1=v=>Math.round(v*10)/10;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const RADMSG="Your calculator is in radian mode. Switch it to degree mode (DEG) and try again.";
+const RADMSG2="That's the angle in radians. Switch your calculator to degree mode (DEG) and do it again.";
+const ROLEW={O:"opposite",A:"adjacent",H:"hypotenuse"};
+const PAIRFN=(r1,r2)=>{const s=[r1,r2].sort().join("");return s==="HO"?"sin":s==="AH"?"cos":"tan"};
+const NUMDEN={sin:["O","H"],cos:["A","H"],tan:["O","A"]};
+const ACR={sin:"SOH",cos:"CAH",tan:"TOA"};
+const TRIPLES=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29],[9,40,41],[12,35,37],[11,60,61],[28,45,53],[33,56,65],[6,8,10],[9,12,15]];
+const LETTERS=[["A","B","C"],["D","E","F"],["P","Q","R"],["X","Y","Z"],["R","S","T"],["J","K","L"],["G","H","I"],["L","M","N"]];
+
+/* =================== figures: shapes in math coordinates =================== */
+/* fig = {segs:[{a,b,lab,role,lw,dash,col,away}], angs:[{v,a,b,t,hl,right,when}], vlabs:[{p,t}], txts:[{p,t,align}], center, nts, alt} */
+function rot(p,k,fl){let[x,y]=p;if(fl)x=-x;for(let i=0;i<k;i++)[x,y]=[-y,x];return[x,y]}
+/* right triangle: θ at Q, right angle at R, P across from... A = QR, O = RP, H = QP */
+function rtFig(th,lab,opt={}){
+  const disp=clamp(th,26,64),o=Math.tan(disp*RD);
+  const k=opt.rot??ri(0,3),fl=opt.flip??(Math.random()<.5);
+  const Q=rot([1,0],k,fl),R=rot([0,0],k,fl),P=rot([0,o],k,fl);
+  const cen=[(Q[0]+R[0]+P[0])/3,(Q[1]+R[1]+P[1])/3];
+  const fig={segs:[{a:Q,b:R,lab:lab.A||"",role:"A",away:cen},{a:R,b:P,lab:lab.O||"",role:"O",away:cen},{a:Q,b:P,lab:lab.H||"",role:"H",away:cen}],
+    angs:[{v:Q,a:R,b:P,t:opt.angT??(th+DEG),hl:true},{v:R,a:Q,b:P,right:true}],center:cen,nts:Math.abs(disp-th)>0.5};
+  if(opt.other)fig.angs.push({v:P,a:Q,b:R,t:opt.other,hl:false});
+  if(opt.vl)fig.vlabs=[{p:Q,t:opt.vl[0]},{p:R,t:opt.vl[1]},{p:P,t:opt.vl[2]}];
+  return fig;
+}
+/* oblique triangle from sides a,b,c (opposite angles A,B,C). show: {ang:[t0,t1,t2], side:[s0,s1,s2], vl:[..], hl:[bool..]} */
+function obFig(tri,show){
+  const {a,b,c,A}=tri;
+  let V=[[0,0],[c,0],[b*C(A),b*S(A)]];
+  if(Math.random()<.5){V=V.map(p=>[c-p[0],p[1]])}
+  const cen=[(V[0][0]+V[1][0]+V[2][0])/3,(V[0][1]+V[1][1]+V[2][1])/3];
+  const opp=i=>[V[(i+1)%3],V[(i+2)%3]];
+  const fig={segs:[0,1,2].map(i=>{const [p,q]=opp(i);return{a:p,b:q,lab:(show.side&&show.side[i])||"",away:cen,unk:show.side&&show.side[i]==="x"}}),
+    angs:[0,1,2].filter(i=>show.ang&&show.ang[i]).map(i=>({v:V[i],a:V[(i+1)%3],b:V[(i+2)%3],t:show.ang[i],hl:!!(show.hl&&show.hl[i])})),
+    vlabs:show.vl?[0,1,2].map(i=>({p:V[i],t:show.vl[i]})):[],center:cen};
+  return fig;
+}
+function triSides(A,B,given,gi){const Cc=180-A-B,ang=[A,B,Cc],k=given/S(ang[gi]);return{A,B,C:Cc,a:k*S(A),b:k*S(B),c:k*S(Cc)}}
+function triSSS(a,b,c){const A=aC((b*b+c*c-a*a)/(2*b*c)),B=aC((a*a+c*c-b*b)/(2*a*c));return{a,b,c,A,B,C:180-A-B}}
+
+/* =================== numbers in answers =================== */
+function sideMistakes(th,kv,s){
+  const out=[{f:0,val:s.top?kv*FNr[s.fn](th):kv/FNr[s.fn](th),msg:RADMSG}];
+  for(const fn of ["sin","cos","tan"])for(const op of ["mul","div"]){
+    if(fn===s.fn&&(op==="mul")===s.top)continue;
+    const val=op==="mul"?kv*FN[fn](th):kv/FN[fn](th);
+    let msg;
+    if(fn===s.fn)msg=s.top?`x is on top of the fraction, so multiply both sides by ${nf(kv)}. Don't divide.`:`x is on the bottom. Multiply both sides by x, then divide by ${s.fn} ${th}°.`;
+    else msg=`Check your ratio. From the ${th}° angle you have the ${ROLEW[s.nu]} and the ${ROLEW[s.de]}, so use ${ACR[s.fn]} (${s.fn}).`;
+    out.push({f:0,val,msg});
+  }
+  return out;
+}
+function rtCalc(th,known,kv,unk){const fn=PAIRFN(known,unk),[nu,de]=NUMDEN[fn],top=unk===nu;return{fn,nu,de,top,x:top?kv*FN[fn](th):kv/FN[fn](th)}}
+function labelLine(vals){return ["O","A","H"].map(r=>`${r} = ${vals[r]}`).join(", ")}
+function sideSteps(th,known,kv,unk,s,unit,angWord){
+  const v={O:"—",A:"—",H:"—"};v[known]=nf(kv);v[unk]="x";
+  const third=["O","A","H"].find(r=>r!==known&&r!==unk);v[third]="(not needed)";
+  const n=s.top?"x":nf(kv),d=s.top?nf(kv):"x";
+  const st=[[`Label the sides from ${angWord||"the "+th+"° angle"}`,labelLine(v)],
+    [`You have the ${ROLEW[known]} and the ${ROLEW[unk]}, so use ${ACR[s.fn]}`,`${s.fn} θ = ${fr(s.nu,s.de)}`],
+    ["Sub in the values",`${s.fn} ${th}° = ${fr(n,d)}`]];
+  if(s.top)st.push([`Multiply both sides by ${nf(kv)}`,`${nf(kv)} ${s.fn} ${th}° = x`]);
+  else st.push(["Multiply both sides by x",`x ${s.fn} ${th}° = ${nf(kv)}`],[`Divide both sides by ${s.fn} ${th}°`,`x = ${fr(nf(kv),s.fn+" "+th+"°")}`]);
+  st.push(["Calculate in degree mode",`x = ${f2(s.x)}${unit?" "+unit:""}`]);
+  return st;
+}
+function angCalc(r1,v1,r2,v2){const fn=PAIRFN(r1,r2),[nu,de]=NUMDEN[fn];const n=r1===nu?v1:v2,d=r1===nu?v2:v1;return{fn,nu,de,n,d,th:INV[fn](n/d)}}
+function angMistakes(s){
+  const out=[{f:0,val:90-s.th,msg:`That's the other acute angle. From θ you have the ${ROLEW[s.nu]} and the ${ROLEW[s.de]}, so use ${s.fn}⁻¹.`},
+    {f:0,val:INVr[s.fn](s.n/s.d),msg:RADMSG2},
+    {f:0,val:FN[s.fn](s.n/s.d),msg:`Use the inverse button: θ = ${s.fn}⁻¹(${nf(s.n)}/${nf(s.d)}), not ${s.fn}(${nf(s.n)}/${nf(s.d)}).`},
+    {f:0,val:s.n/s.d,msg:`That's the ratio ${s.fn} θ. Use ${s.fn}⁻¹ to turn it into an angle.`}];
+  for(const fn of ["sin","cos","tan"])for(const fl of [false,true]){
+    const v=fl?s.d/s.n:s.n/s.d;if(fn!=="tan"&&v>1)continue;if(fn===s.fn&&!fl)continue;
+    out.push({f:0,val:INV[fn](v),msg:fn===s.fn?`Check the fraction: ${s.fn} θ = ${ROLEW[s.nu]} ÷ ${ROLEW[s.de]}.`:`Check your ratio. From θ you have the ${ROLEW[s.nu]} and the ${ROLEW[s.de]}, so use ${ACR[s.fn]} (${s.fn}⁻¹).`});
+  }
+  return out;
+}
+function angSteps(r1,v1,r2,v2,s,angWord){
+  const v={O:"—",A:"—",H:"—"};v[r1]=nf(v1);v[r2]=nf(v2);const third=["O","A","H"].find(r=>r!==r1&&r!==r2);v[third]="(not needed)";
+  return[[`Label the sides from ${angWord||"θ"}`,labelLine(v)],
+    [`You have the ${ROLEW[s.nu]} and the ${ROLEW[s.de]}, so use ${ACR[s.fn]}`,`${s.fn} θ = ${fr(s.nu,s.de)}`],
+    ["Sub in the values",`${s.fn} θ = ${fr(nf(s.n),nf(s.d))}`],
+    ["Use the inverse button",`θ = ${s.fn}⁻¹(${fr(nf(s.n),nf(s.d))})`],
+    ["Calculate in degree mode",`θ = ${d2(s.th)}`]];
+}
+/* nice right triangle sides from θ and one side */
+function sidesFrom(th,role,val){const H=role==="H"?val:role==="O"?val/S(th):val/C(th);return{O:H*S(th),A:H*C(th),H}}
+
+/* =================== L1 sides & ratios =================== */
+function tripleTri(L){const t=pick(TRIPLES),k=pick(L===0?[1,1,2]:[1,2,3]);const [l1,l2,h]=t.map(v=>v*k);const oFirst=Math.random()<.5;return{O:oFirst?l1:l2,A:oFirst?l2:l1,H:h}}
+function genRatios(L){
+  const type=pick(L===0?["label","label","write","eval","similar"]:L===1?["label","write","write","eval","similar"]:["write","cofn","cofn","eval","label","similar"]);
+  if(type==="label"){
+    const t=tripleTri(L),unit=pick(["cm","m","mm"]),th=aT(t.O/t.A);
+    const names={O:`${t.O} ${unit}`,A:`${t.A} ${unit}`,H:`${t.H} ${unit}`};
+    if(L>=1){const r=pick(["O","A","H"]);names[r]=pick(["x","y"])}
+    const fig=rtFig(th,names,{angT:"θ"});
+    const items=shuffle(["O","A","H"]).map(r=>({name:names[r],role:r}));
+    return{skill:"ratios",text:`<p>Label each side as the <span class="hl">hypotenuse (H), opposite (O) or adjacent (A)</span>, using θ as the reference angle.</p>`,fig,alt:`Right triangle. θ is marked. Sides: ${items.map(i=>i.name).join(", ")}.`,
+      ans:{type:"label",items},
+      steps:[["Hypotenuse: always across from the right angle (the longest side)",`H = ${names.H}`],["Opposite: directly across from θ. It doesn't touch θ.",`O = ${names.O}`],["Adjacent: beside θ, and not the hypotenuse",`A = ${names.A}`],["Conclusion",`∴ H = ${names.H}, O = ${names.O}, A = ${names.A}`]],
+      hint:"Find the right angle first: the side across from it is the hypotenuse. Then look at θ: the side that doesn't touch θ is the opposite."};
+  }
+  if(type==="write"){
+    const t=tripleTri(L),fn=pick(["sin","cos","tan"]),th=aT(t.O/t.A),unit=pick(["cm","m"]);
+    const [nu,de]=NUMDEN[fn],n=t[nu],d=t[de];
+    const fig=rtFig(th,{O:`${t.O}`,A:`${t.A}`,H:`${t.H}`},{angT:"θ"});
+    const mist=[{f:0,val:d/n,msg:`You flipped it. ${fn} θ = ${ROLEW[nu]} ÷ ${ROLEW[de]}.`}];
+    for(const g of ["sin","cos","tan"])if(g!==fn){const[a2,b2]=NUMDEN[g];mist.push({f:0,val:t[a2]/t[b2],msg:`That's ${g} θ (${ACR[g]}). ${fn} θ is ${ROLEW[nu]} over ${ROLEW[de]}: ${ACR[fn]}.`})}
+    return{skill:"ratios",text:`<p>Write <span class="hl">${fn} θ</span> as a fraction. All lengths are in ${unit}.</p>`,fig,alt:`Right triangle with sides ${t.O}, ${t.A} and ${t.H}. θ is marked.`,
+      ans:{type:"frac",n,d,label:`${fn} θ as a fraction`},mistakes:mist,
+      steps:[["Label the sides from θ",labelLine({O:t.O,A:t.A,H:t.H})],[`${fn}: ${ACR[fn]}`,`${fn} θ = ${fr(nu,de)}`],["Conclusion",`∴ ${fn} θ = ${fr(n,d)}`]],
+      hint:"SOH CAH TOA: sin θ = O/H, cos θ = A/H, tan θ = O/A. Label the sides from θ first."};
+  }
+  if(type==="cofn"){
+    const t=pick(TRIPLES),[l1,l2,h]=t;const ask=pick([["sin","cos"],["cos","sin"],["tan","tan"]]);
+    const giv=ask[0],want=ask[1];let n,d;
+    if(giv==="sin"){n=l1;d=h}else if(giv==="cos"){n=l2;d=h}else{n=l1;d=l2}
+    const ans=want==="tan"?{n:d,d:n}:{n,d};
+    const th=aT(l1/l2),fig=rtFig(th,{O:"",A:"",H:""},{angT:"",vl:["A","C","B"]});
+    fig.angs=fig.angs.filter(g=>g.right);
+    const why=want==="tan"?`From ∠B, the side opposite A becomes adjacent and the side adjacent to A becomes opposite, so tan B = ${fr(d,n)}, the reciprocal.`:`The side opposite ∠A is adjacent to ∠B, so ${want} B = ${giv} A.`;
+    return{skill:"ratios",text:`<p>In right triangle ABC, ∠C = 90° and <span class="hl">${giv} A = ${n}/${d}</span>. Write <span class="hl">${want} B</span> as a fraction.</p>`,fig,alt:"Right triangle ABC with the right angle at C.",
+      ans:{type:"frac",n:ans.n,d:ans.d,label:`${want} B as a fraction`},
+      mistakes:want==="tan"?[{f:0,val:n/d,msg:"From ∠B the opposite and adjacent sides swap, so tan B is the reciprocal of tan A."}]:[{f:0,val:d/n,msg:"The hypotenuse stays on the bottom for sin and cos."}],
+      steps:[[`${giv} A = ${fr(n,d)} tells you two sides`,giv==="sin"?`opposite A = ${n}, hypotenuse = ${d}`:giv==="cos"?`adjacent to A = ${n}, hypotenuse = ${d}`:`opposite A = ${n}, adjacent to A = ${d}`],["Relabel from ∠B",why],["Conclusion",`∴ ${want} B = ${fr(ans.n,ans.d)}`]],
+      hint:"∠A + ∠B = 90°. The side opposite ∠A is adjacent to ∠B. Sketch it and relabel."};
+  }
+  if(type==="eval"){
+    const fn=pick(["sin","cos","tan"]),a=fn==="tan"?ri(5,80):ri(5,85),v=FN[fn](a);
+    return{skill:"ratios",text:`<p>Evaluate to <span class="hl">4 decimal places</span>.</p><p class="big">${fn}(${a}°)</p>`,
+      ans:{type:"num",fields:[{pre:`${fn}(${a}°) =`,label:"value",tol:0.00006}],vals:[v],dp:4},
+      mistakes:[{f:0,val:FNr[fn](a),msg:RADMSG,tol:0.0006}],
+      steps:[["Check that your calculator is in degree mode (DEG)",""],["Type the function, then the angle",`${fn}(${a}°) = ${v.toFixed(4)}`],["Conclusion",`∴ ${v.toFixed(4)}`]],
+      hint:"Make sure your calculator shows DEG, not RAD. Round to 4 decimal places."};
+  }
+  /* similar triangles review */
+  const base=pick([[3,4,5],[5,6,9],[4,7,8],[5,12,13],[6,7,10],[3,5,7],[8,9,12]]),k=pick([2,3,1.5,2.5]),yes=Math.random()<.5;
+  let other=base.map(v=>r1(v*k));
+  if(!yes){const i=ri(0,2);other[i]=r1(other[i]+pick([-2,-1,1,2]));other.sort((x,y)=>x-y)}
+  const rat=[0,1,2].map(i=>other[i]/base[i]);const allSame=rat.every(r=>Math.abs(r-rat[0])<1e-9);
+  const [L1,L2]=shuffle(LETTERS.slice()).slice(0,2);
+  return{skill:"ratios",text:`<p>△${L1.join("")} has sides <b>${base.join(", ")}</b>. △${L2.join("")} has sides <b>${shuffle(other.slice()).map(nf).join(", ")}</b>. Are the triangles <span class="hl">similar</span>?</p>`,
+    ans:{type:"choice",opts:["Similar","Not similar"],correct:allSame?0:1,why:allSame?["","Check the ratios again: smallest/smallest, medium/medium, largest/largest."]:["Compare all three ratios. Similar triangles need every ratio to be the same.",""]},
+    steps:[["Sort each triangle's sides from smallest to largest",`${base.join(", ")} and ${other.map(nf).join(", ")}`],["Compare smallest/smallest, medium/medium, largest/largest",[0,1,2].map(i=>`${fr(nf(other[i]),base[i])} = ${nf(Math.round(rat[i]*1000)/1000)}`).join(" , ")],["Conclusion",allSame?`∴ Every ratio is ${nf(rat[0])}, so the triangles are similar`:"∴ The ratios are not all the same, so the triangles are not similar"]],
+    hint:"Two triangles are similar if smallest/smallest = medium/medium = largest/largest."};
+}
+
+/* =================== L2 finding sides =================== */
+function genSides(L){
+  const type=pick(L===0?["solve","diagram","diagram"]:L===1?["solve","diagram","diagram","diagram"]:["diagram","diagram","two"]);
+  const th=ri(L===0?20:12,L===0?70:78);
+  let known,unk;
+  if(L===0)[known,unk]=pick([["H","O"],["H","A"],["A","O"]]);
+  else{known=pick(["O","A","H"]);unk=pick(["O","A","H"].filter(r=>r!==known))}
+  const kv=L===2&&Math.random()<.4?r1(ri(30,800)/10):ri(4,60);
+  const s=rtCalc(th,known,kv,unk);
+  if(type==="solve"){
+    const n=s.top?"x":nf(kv),d=s.top?nf(kv):"x";
+    return{skill:"sides",text:`<p>Solve for x. Round to 2 decimal places.</p><p class="big">${s.fn} ${th}° = ${fr(n,d)}</p>`,
+      ans:{type:"num",fields:[{pre:"x =",label:"x"}],vals:[s.x]},mistakes:sideMistakes(th,kv,s),
+      steps:sideSteps(th,known,kv,unk,s,"").slice(2).concat([["Conclusion",`∴ x = ${f2(s.x)}`]]),
+      hint:s.top?`x is on top. Multiply both sides by ${nf(kv)}.`:"x is on the bottom. Multiply both sides by x, then divide both sides by the trig value."};
+  }
+  const unit=pick(["cm","m"]);
+  if(type==="two"){
+    const sd=sidesFrom(th,known,kv),others=["O","A","H"].filter(r=>r!==known);
+    const lab={};lab[known]=`${nf(kv)} ${unit}`;lab[others[0]]="x";lab[others[1]]="y";
+    const sx=rtCalc(th,known,kv,others[0]),sy=rtCalc(th,known,kv,others[1]);
+    const fig=rtFig(th,lab);
+    return{skill:"sides",text:`<p>Find <span class="hl">x and y</span>. Round to 2 decimal places.</p>`,fig,alt:`Right triangle with a ${th}° angle. ${ROLEW[known]} = ${nf(kv)} ${unit}, ${ROLEW[others[0]]} = x, ${ROLEW[others[1]]} = y.`,
+      ans:{type:"num",fields:[{pre:"x =",post:unit,label:"x"},{pre:"y =",post:unit,label:"y"}],vals:[sd[others[0]],sd[others[1]]]},
+      fieldMsg:[`Your y is right. For x, use the ${ROLEW[known]} and the ${ROLEW[others[0]]}: ${ACR[sx.fn]}.`,`Your x is right. For y, use the ${ROLEW[known]} and the ${ROLEW[others[1]]}: ${ACR[sy.fn]}.`],
+      steps:[["Label the sides from the "+th+"° angle",labelLine({[known]:nf(kv),[others[0]]:"x",[others[1]]:"y"})],[`x: ${ROLEW[known]} and ${ROLEW[others[0]]} → ${ACR[sx.fn]}`,`${sx.fn} ${th}° = ${fr(sx.top?"x":nf(kv),sx.top?nf(kv):"x")} → x = ${sx.top?nf(kv)+" "+sx.fn+" "+th+"°":fr(nf(kv),sx.fn+" "+th+"°")} = ${f2(sx.x)}`],[`y: ${ROLEW[known]} and ${ROLEW[others[1]]} → ${ACR[sy.fn]}`,`${sy.fn} ${th}° = ${fr(sy.top?"y":nf(kv),sy.top?nf(kv):"y")} → y = ${sy.top?nf(kv)+" "+sy.fn+" "+th+"°":fr(nf(kv),sy.fn+" "+th+"°")} = ${f2(sy.x)}`],["Check with the Pythagorean theorem",`${f2(sd.O)}² + ${f2(sd.A)}² ≈ ${f2(sd.H)}²`],["Conclusion",`∴ x = ${f2(sd[others[0]])} ${unit}, y = ${f2(sd[others[1]])} ${unit}`]],
+      hint:"Use the given side both times, not your rounded x. Each unknown gets its own SOH CAH TOA choice."};
+  }
+  const lab={O:"",A:"",H:""};lab[known]=`${nf(kv)} ${unit}`;lab[unk]="x";
+  const fig=rtFig(th,lab);
+  return{skill:"sides",text:`<p>Find the length of <span class="hl">x</span>. Round to 2 decimal places.</p>`,fig,alt:`Right triangle with a ${th}° angle. The ${ROLEW[known]} is ${nf(kv)} ${unit} and the ${ROLEW[unk]} is x.`,
+    ans:{type:"num",fields:[{pre:"x =",post:unit,label:"x"}],vals:[s.x]},mistakes:sideMistakes(th,kv,s),
+    steps:sideSteps(th,known,kv,unk,s,unit).concat([["Conclusion",`∴ x = ${f2(s.x)} ${unit}`]]),
+    hint:`Label O, A and H from the ${th}° angle. Which two sides are involved: the one you know and x? Tick them in SOH CAH TOA.`};
+}
+
+/* =================== L3 finding angles =================== */
+function twoSides(L){
+  const pr=pick([["O","H"],["A","H"],["O","A"]]);
+  let v1,v2;
+  if(pr[1]==="H"){v2=ri(6,L===2?90:40);v1=ri(2,v2-1)}else{v1=ri(2,40);v2=ri(2,40)}
+  if(L===0&&Math.random()<.5){const t=pick(TRIPLES);const m={O:t[0],A:t[1],H:t[2]};v1=m[pr[0]];v2=m[pr[1]]}
+  return{r1:pr[0],v1,r2:pr[1],v2};
+}
+function genAngles(L){
+  const type=pick(L===0?["inv","diagram","diagram"]:L===1?["inv","diagram","diagram","diagram"]:["diagram","both","both"]);
+  const {r1:ra,v1,r2:rb,v2}=twoSides(L);const s=angCalc(ra,v1,rb,v2);
+  if(type==="inv"){
+    return{skill:"angles",text:`<p>Find θ. Round to 2 decimal places.</p><p class="big">${s.fn} θ = ${fr(nf(s.n),nf(s.d))}</p>`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ in degrees"}],vals:[s.th]},mistakes:angMistakes(s),
+      steps:angSteps(ra,v1,rb,v2,s).slice(3).concat([["Conclusion",`∴ θ = ${d2(s.th)}`]]),
+      hint:`Work backwards with the inverse button: θ = ${s.fn}⁻¹(${nf(s.n)}/${nf(s.d)}). On most calculators it's SHIFT or 2nd, then ${s.fn}.`};
+  }
+  const unit=pick(["cm","m"]);
+  const lab={O:"",A:"",H:""};lab[ra]=`${nf(v1)} ${unit}`;lab[rb]=`${nf(v2)} ${unit}`;
+  const fig=rtFig(s.th,lab,{angT:"θ",other:type==="both"?"α":undefined});
+  if(type==="both"){
+    return{skill:"angles",text:`<p>Find <span class="hl">θ and α</span>. Round to 2 decimal places.</p>`,fig,alt:`Right triangle. The ${ROLEW[ra]} to θ is ${nf(v1)} ${unit} and the ${ROLEW[rb]} is ${nf(v2)} ${unit}. α is the other acute angle.`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ"},{pre:"α =",post:"°",label:"α"}],vals:[s.th,90-s.th]},
+      fieldMsg:["Your α is right. Find θ with SOH CAH TOA from θ's point of view.","Your θ is right. The angles in a triangle add to 180°, so α = 90° − θ."],
+      steps:angSteps(ra,v1,rb,v2,s).concat([["The three angles add to 180°",`α = 180° − 90° − ${d2(s.th)} = ${d2(90-s.th)}`],["Conclusion",`∴ θ = ${d2(s.th)}, α = ${d2(90-s.th)}`]]),
+      hint:"Find θ first with an inverse trig ratio. Then use the sum of the angles: 180° − 90° − θ."};
+  }
+  return{skill:"angles",text:`<p>Find the angle <span class="hl">θ</span>. Round to 2 decimal places.</p>`,fig,alt:`Right triangle. From θ, the ${ROLEW[ra]} is ${nf(v1)} ${unit} and the ${ROLEW[rb]} is ${nf(v2)} ${unit}.`,
+    ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ in degrees"}],vals:[s.th]},mistakes:angMistakes(s),
+    steps:angSteps(ra,v1,rb,v2,s).concat([["Conclusion",`∴ θ = ${d2(s.th)}`]]),
+    hint:"Label O, A and H from θ. Pick the ratio that uses the two sides you know, then use the inverse button (sin⁻¹, cos⁻¹ or tan⁻¹)."};
+}
+
+/* =================== L4 right-triangle word problems =================== */
+/* scenes in math coordinates; θ vertex Q */
+function groundScene(th,lab,words,opt={}){
+  const disp=clamp(th,24,62),o=Math.tan(disp*RD);
+  const Q=[0,0],R=[1,0],P=[1,o],cen=[2/3,o/3];
+  const fig={segs:[{a:[-0.12,0],b:[1.18,0],col:"dim"},{a:Q,b:R,lab:lab.A||"",role:"A",away:cen},{a:R,b:P,lab:lab.O||"",role:"O",away:cen,lw:opt.thickO?4:2},{a:Q,b:P,lab:lab.H||"",role:"H",away:cen,lw:opt.thickH?4:2}],
+    angs:[{v:Q,a:R,b:P,t:lab.ang||(th+DEG),hl:true},{v:R,a:Q,b:P,right:true}],
+    txts:[],center:cen,nts:Math.abs(disp-th)>0.5};
+  if(words.top)fig.txts.push({p:[1.05,o+0.02],t:words.top,align:"left"});
+  if(words.q)fig.txts.push({p:[-0.04,-0.13],t:words.q,align:"center"});
+  return fig;
+}
+function depScene(th,lab,words){
+  const disp=clamp(th,22,58),o=Math.tan(disp*RD);
+  const Tp=[0,o],Rv=[0,0],Ob=[1,0],cen=[1/3,o/3];
+  return{segs:[{a:[-0.1,0],b:[1.15,0],col:"dim"},{a:Tp,b:[1.12,o],dash:true,col:"dim"},{a:Rv,b:Tp,lab:lab.O||"",role:"O",away:cen,lw:4},{a:Rv,b:Ob,lab:lab.A||"",role:"A",away:cen},{a:Tp,b:Ob,lab:lab.H||"",role:"H",away:cen}],
+    angs:[{v:Tp,a:[1,o],b:Ob,t:lab.ang||(th+DEG),hl:true},{v:Ob,a:Rv,b:Tp,t:lab.ang||(th+DEG),hl:true,when:"roles"},{v:Rv,a:Ob,b:Tp,right:true}],
+    txts:[{p:[0.98,o+0.07],t:"horizontal",align:"right"}].concat(words.top?[{p:[-0.03,o+0.09],t:words.top,align:"center"}]:[]).concat(words.ob?[{p:[1.02,-0.12],t:words.ob,align:"center"}]:[]),
+    center:cen,nts:Math.abs(disp-th)>0.5};
+}
+const an=(o,cap)=>{const a=/^[aeiou]/i.test(o)?"an":"a";return (cap?a[0].toUpperCase()+a.slice(1):a)+" "+o};
+const OBJ=["flagpole","tree","office tower","clock tower","radio mast","water tower"];
+function rtWordTemplates(L){
+  const T0=["elevH","ladderUp","rampLen","kiteString","depDist"];
+  const T1=["elevH","elevD","elevAng","ladderUp","ladderFoot","ladderLen","ladderAng","rampLen","rampRun","rampAng","kiteString","kiteH","depDist","depAng","planeDist","shadowAng"];
+  const T2=["eyeH","twoSight","flagpole","depAng","planeDist","ladderAng","rampLen"];
+  return pick(L===0?T0:L===1?T1:T2);
+}
+function genRightWP(L){
+  const id=rtWordTemplates(L);
+  /* side problems: build from (th, known role, kv, unk role, scene) */
+  const side=(cfg)=>{
+    const s=rtCalc(cfg.th,cfg.known,cfg.kv,cfg.unk);
+    const lab={O:"",A:"",H:""};lab[cfg.known]=`${nf(cfg.kv)} ${cfg.unit}`;lab[cfg.unk]="x";
+    const fig=cfg.scene==="dep"?depScene(cfg.th,lab,cfg.words):groundScene(cfg.th,lab,cfg.words,cfg.opt||{});
+    return{skill:"rightwp",text:`<p>${cfg.text}</p>`,fig,figHidden:L>0,alt:cfg.alt||"",
+      ans:{type:"num",fields:[{pre:"",post:cfg.unit,label:cfg.label||"answer"}],vals:[s.x]},mistakes:sideMistakes(cfg.th,cfg.kv,s).concat(cfg.extraM||[]),
+      steps:[["Draw a sketch and mark what you know","See the diagram above."]].concat(cfg.pre||[]).concat(sideSteps(cfg.th,cfg.known,cfg.kv,cfg.unk,s,cfg.unit,cfg.angWord)).concat([["Concluding sentence",`∴ ${cfg.concl(f2(s.x))}`]]),
+      hint:(L>0?"Start with a sketch (it's shown now). ":"")+(cfg.hint||`Label O, A and H from the ${cfg.th}° angle, then pick the ratio with the side you know and x.`)};
+  };
+  const ang=(cfg)=>{
+    const s=angCalc(cfg.r1,cfg.v1,cfg.r2,cfg.v2);
+    const lab={O:"",A:"",H:"",ang:"θ"};lab[cfg.r1]=`${nf(cfg.v1)} ${cfg.unit}`;lab[cfg.r2]=`${nf(cfg.v2)} ${cfg.unit}`;
+    const fig=cfg.scene==="dep"?depScene(s.th,lab,cfg.words):groundScene(s.th,lab,cfg.words,cfg.opt||{});
+    return{skill:"rightwp",text:`<p>${cfg.text}</p>`,fig,figHidden:L>0,alt:cfg.alt||"",
+      ans:{type:"num",fields:[{pre:"",post:"°",label:"angle in degrees"}],vals:[s.th]},mistakes:angMistakes(s),
+      steps:[["Draw a sketch and mark what you know","See the diagram above."]].concat(cfg.pre||[]).concat(angSteps(cfg.r1,cfg.v1,cfg.r2,cfg.v2,s,cfg.angWord)).concat([["Concluding sentence",`∴ ${cfg.concl(d2(s.th))}`]]),
+      hint:(L>0?"Start with a sketch (it's shown now). ":"")+"Label O, A and H from the unknown angle θ, choose the ratio, then use the inverse button."};
+  };
+  const obj=pick(OBJ);
+  switch(id){
+    case "elevH":{const th=ri(25,68),kv=ri(12,80);return side({th,known:"A",kv,unk:"O",unit:"m",scene:"ground",words:{top:obj,q:"you"},opt:{thickO:true},
+      text:`You stand ${kv} m from the base of ${an(obj)}. The angle of elevation to the top is ${th}°. How tall is the ${obj}? Round to 2 decimal places.`,label:"height in metres",concl:x=>`The ${obj} is ${x} m tall.`})}
+    case "elevD":{const th=ri(20,70),kv=ri(15,90);return side({th,known:"O",kv,unk:"A",unit:"m",scene:"ground",words:{top:obj,q:"you"},opt:{thickO:true},
+      text:`${an(obj,1)} is ${kv} m tall. From a point on the ground, the angle of elevation to its top is ${th}°. How far is the point from the base of the ${obj}?`,label:"distance in metres",concl:x=>`The point is ${x} m from the base.`})}
+    case "elevAng":{const v1=ri(10,70),v2=ri(10,80);return ang({r1:"O",v1,r2:"A",v2,unit:"m",scene:"ground",words:{top:obj,q:"you"},opt:{thickO:true},
+      text:`${an(obj,1)} is ${v1} m tall. You stand ${v2} m from its base. What is the angle of elevation to the top?`,concl:x=>`The angle of elevation is ${x}.`})}
+    case "ladderUp":{const th=ri(60,80),kv=ri(4,12);return side({th,known:"H",kv,unk:"O",unit:"m",scene:"ground",words:{top:"wall"},opt:{thickH:true},
+      text:`A ${kv} m ladder leans against a wall and makes an angle of ${th}° with the ground. How far up the wall does it reach?`,label:"height in metres",concl:x=>`The ladder reaches ${x} m up the wall.`})}
+    case "ladderFoot":{const th=ri(60,80),kv=ri(4,12);return side({th,known:"H",kv,unk:"A",unit:"m",scene:"ground",words:{top:"wall"},opt:{thickH:true},
+      text:`A ${kv} m ladder leans against a wall and makes an angle of ${th}° with the ground. How far is the foot of the ladder from the wall?`,label:"distance in metres",concl:x=>`The foot of the ladder is ${x} m from the wall.`})}
+    case "ladderLen":{const th=ri(62,80),kv=ri(4,10);return side({th,known:"O",kv,unk:"H",unit:"m",scene:"ground",words:{top:"wall"},opt:{thickH:true},
+      text:`A ladder must reach a window ${kv} m up a wall. For safety it should make an angle of ${th}° with the ground. How long must the ladder be?`,label:"ladder length in metres",concl:x=>`The ladder must be ${x} m long.`})}
+    case "ladderAng":{const v2=ri(5,12),v1=r1(ri(8,25)/10);return ang({r1:"A",v1,r2:"H",v2,unit:"m",scene:"ground",words:{top:"wall"},opt:{thickH:true},
+      text:`A ${v2} m ladder leans against a wall with its foot ${nf(v1)} m from the wall. What angle does the ladder make with the ground?`,concl:x=>`The ladder makes an angle of ${x} with the ground.`})}
+    case "rampLen":{const th=ri(3,12),kv=r1(ri(4,15)/10);return side({th,known:"O",kv,unk:"H",unit:"m",scene:"ground",words:{top:"ramp"},
+      text:`A wheelchair ramp rises ${nf(kv)} m and its surface makes an angle of ${th}° with the ground. How long is the ramp's surface?`,label:"length in metres",concl:x=>`The ramp is ${x} m long.`,
+      extraM:[{f:0,val:kv/T(th),msg:"That's the run along the ground (tan uses O and A). The ramp's surface is the hypotenuse."}]})}
+    case "rampRun":{const th=ri(3,12),kv=r1(ri(4,15)/10);return side({th,known:"O",kv,unk:"A",unit:"m",scene:"ground",words:{top:"ramp"},
+      text:`A ramp rises ${nf(kv)} m at an angle of ${th}° to the ground. How far does it run along the ground?`,label:"run in metres",concl:x=>`The ramp runs ${x} m along the ground.`})}
+    case "rampAng":{const v2=r1(ri(30,90)/10),v1=r1(ri(3,Math.floor(v2*10*0.4))/10);return ang({r1:"O",v1,r2:"H",v2,unit:"m",scene:"ground",words:{top:"ramp"},
+      text:`A skateboard ramp has a ${nf(v2)} m sloped surface and its top edge is ${nf(v1)} m off the ground. At what angle does the ramp meet the ground?`,concl:x=>`The ramp meets the ground at ${x}.`})}
+    case "kiteString":{const th=ri(30,70),kv=ri(15,60);return side({th,known:"O",kv,unk:"H",unit:"m",scene:"ground",words:{top:"kite",q:"you"},
+      text:`A kite flies ${kv} m above the ground. Its string is straight and makes an angle of ${th}° with the ground. How long is the string?`,label:"string length in metres",concl:x=>`The string is ${x} m long.`})}
+    case "kiteH":{const th=ri(30,70),kv=ri(20,90);return side({th,known:"H",kv,unk:"O",unit:"m",scene:"ground",words:{top:"kite",q:"you"},
+      text:`A kite's string is ${kv} m long and makes an angle of ${th}° with the ground. How high is the kite?`,label:"height in metres",concl:x=>`The kite is ${x} m high.`})}
+    case "depDist":{const th=ri(8,40),kv=ri(20,150),who=pick([["the top of a lighthouse","boat"],["the edge of a cliff","canoe"],["an apartment balcony","car"],["the top of a ski hill","skier"]]);
+      return side({th,known:"O",kv,unk:"A",unit:"m",scene:"dep",words:{top:"you",ob:who[1]},angWord:`the ${th}° angle (moved in with the Z-pattern)`,
+      pre:[["Z-pattern: the angle of depression equals the angle of elevation at the "+who[1],`${th}° at the ${who[1]}`]],
+      text:`From ${who[0]}, ${kv} m above the ground, you see a ${who[1]}. The angle of depression is ${th}°. How far is the ${who[1]} from the base?`,label:"distance in metres",concl:x=>`The ${who[1]} is ${x} m from the base.`,
+      hint:"The angle of depression is outside the triangle. Use the Z-pattern to move it down to the "+who[1]+". Then label O, A and H from there."})}
+    case "depAng":{const v1=ri(20,120),v2=ri(40,400),who=pick([["a lighthouse","boat"],["a cliff","canoe"],["a hotel balcony","pool"]]);
+      return ang({r1:"O",v1,r2:"A",v2,unit:"m",scene:"dep",words:{top:"you",ob:who[1]},angWord:"the angle at the "+who[1],
+      pre:[["Z-pattern: the angle of depression equals the angle at the "+who[1],"Find θ inside the triangle; it's the same angle."]],
+      text:`You stand at the top of ${who[0]}, ${v1} m above the ground. A ${who[1]} is ${v2} m from the base. What is the angle of depression to the ${who[1]}?`,concl:x=>`The angle of depression is ${x}.`})}
+    case "planeDist":{const th=ri(2,6),kv=pick([900,1000,1200,1500,1800,2000,2400]);
+      return side({th,known:"O",kv,unk:"A",unit:"m",scene:"dep",words:{top:"plane",ob:"runway"},angWord:`the ${th}° angle at the runway`,
+      pre:[["Z-pattern: the glide angle at the plane equals the angle at the runway",`${th}° at the runway`]],
+      text:`A plane at an altitude of ${kv} m starts its descent on a straight ${th}° glide path to the runway. How far from the runway, along the ground, does it start? Answer in metres.`,label:"distance in metres",concl:x=>`It starts ${x} m (about ${f2(parseFloat(x.replace(M,"-"))/1000)} km) from the runway.`})}
+    case "shadowAng":{const v1=r1(ri(30,180)/10),v2=r1(ri(20,250)/10);return ang({r1:"O",v1,r2:"A",v2,unit:"m",scene:"ground",words:{top:"tree",q:"shadow tip"},opt:{thickO:true},
+      text:`A ${nf(v1)} m tree casts a ${nf(v2)} m shadow on flat ground. What is the angle of elevation of the sun?`,concl:x=>`The sun's angle of elevation is ${x}.`})}
+    case "eyeH":{const th=ri(20,55),d=ri(15,60),e=pick([1.5,1.6,1.7]);const up=d*T(th),h=up+e;
+      const disp=clamp(th,24,58),o=Math.tan(disp*RD),eh=0.18,cen=[2/3,eh+o/3];
+      const fig={segs:[{a:[-0.12,0],b:[1.18,0],col:"dim"},{a:[0,0],b:[0,eh],lab:`${nf(e)} m`,lw:3,away:[0.5,0.1]},{a:[0,eh],b:[1,eh],lab:`${d} m`,dash:true,away:[0.5,eh+0.5]},{a:[1,0],b:[1,eh+o],lab:"h",lw:4,away:[0,0]},{a:[0,eh],b:[1,eh+o],away:cen}],
+        angs:[{v:[0,eh],a:[1,eh],b:[1,eh+o],t:th+DEG,hl:true},{v:[1,eh],a:[0,eh],b:[1,eh+o],right:true}],txts:[{p:[1.05,eh+o+0.04],t:obj,align:"left"}],center:cen,nts:true};
+      return{skill:"rightwp",text:`<p>A surveyor's eye is ${nf(e)} m above the ground. She stands ${d} m from ${an(obj)} and measures the angle of elevation to the top as ${th}°. How tall is the ${obj}?</p>`,fig,figHidden:true,
+        ans:{type:"num",fields:[{pre:"h =",post:"m",label:"height in metres"}],vals:[h]},
+        mistakes:[{f:0,val:up,msg:`That's the height above her eye. Add her eye height, ${nf(e)} m.`},{f:0,val:d*Math.tan(th)+e,msg:RADMSG},{f:0,val:d/T(th)+e,msg:"x is on top: tan θ = x/d, so multiply by d."}],
+        steps:[["Sketch: the triangle starts at her eye, not the ground","The horizontal from her eye meets the "+obj+" "+nf(e)+" m up."],["Label from the "+th+"° angle",`O = x (above eye level), A = ${d}`],["TOA",`tan ${th}° = ${fr("x",d)}`],["Multiply both sides by "+d,`x = ${d} tan ${th}° = ${f2(up)}`],["Add the eye height",`h = ${f2(up)} + ${nf(e)} = ${f2(h)}`],["Concluding sentence",`∴ The ${obj} is ${f2(h)} m tall.`]],
+        hint:"Start with a sketch (it's shown now). The right triangle sits on top of her eye height. Find the part above her eye, then add the eye height."};}
+    case "twoSight":{const h=ri(20,80),t1=ri(8,20),t2=ri(t1+8,Math.min(t1+30,60)),x1=h/T(t1),x2=h/T(t2),dd=x1-x2,who=pick([["a building","car"],["a lighthouse","boat"],["a cliff","kayak"]]);
+      const d1=clamp(t1,24,36),d2=Math.max(d1+16,clamp(t2,40,64)),o=1,X1=o/Math.tan(d1*RD),X2=o/Math.tan(d2*RD),Tp=[0,o];
+      const fig={segs:[{a:[-0.1,0],b:[X1+0.15,0],col:"dim"},{a:Tp,b:[X1+0.1,o],dash:true,col:"dim"},{a:[0,0],b:Tp,lab:`${h} m`,lw:4,away:[1,0.3]},{a:Tp,b:[X1,0],away:[0,0]},{a:Tp,b:[X2,0],away:[0,0]},{a:[X2,0],b:[X1,0],lab:"d",away:[X2,1]}],
+        angs:[{v:[X1,0],a:[0,0],b:Tp,t:t1+DEG,hl:true},{v:[X2,0],a:[0,0],b:Tp,t:t2+DEG,hl:true},{v:[0,0],a:[1,0],b:Tp,right:true}],
+        txts:[{p:[X1,-0.12],t:"first",align:"center"},{p:[X2,-0.12],t:"second",align:"center"}],center:[X1/2,0.4],nts:true};
+      return{skill:"rightwp",text:`<p>From the top of ${who[0]} ${h} m high, you watch a ${who[1]} move straight toward the base. The angle of depression changes from ${t1}° to ${t2}°. How far does the ${who[1]} travel between the two sightings?</p>`,fig,figHidden:true,
+        ans:{type:"num",fields:[{pre:"d =",post:"m",label:"distance travelled in metres"}],vals:[dd]},
+        mistakes:[{f:0,val:x1,msg:"That's the first distance. Find the second one too, then subtract."},{f:0,val:x2,msg:"That's the second distance. Find the first one too, then subtract."},{f:0,val:h*T(t2)-h*T(t1),msg:`Use the Z-pattern: the angle is at the ${who[1]}, so tan θ = ${h}/distance. Divide, don't multiply.`},{f:0,val:h/Math.tan(t1)-h/Math.tan(t2),msg:RADMSG}],
+        steps:[["Sketch two right triangles that share the "+h+" m side","The Z-pattern puts each angle at the "+who[1]+"."],["First sighting: tan "+t1+"° = "+h+"/x",`x = ${fr(h,"tan "+t1+"°")} = ${f2(x1)} m`],["Second sighting: tan "+t2+"° = "+h+"/y",`y = ${fr(h,"tan "+t2+"°")} = ${f2(x2)} m`],["Subtract (use full calculator values)",`d = ${f2(x1)} ${M} ${f2(x2)} = ${f2(dd)}`],["Concluding sentence",`∴ The ${who[1]} travels ${f2(dd)} m.`]],
+        hint:"Start with a sketch (it's shown now). Find the distance from the base at each sighting, then subtract."};}
+    case "flagpole":{const d=ri(20,60),t1=ri(25,50),t2=ri(t1+4,t1+12),b=d*T(t1),f=d*T(t2),pole=f-b;
+      const o1=Math.tan(30*RD),o2=Math.tan(56*RD);const fig={segs:[{a:[-0.12,0],b:[1.18,0],col:"dim"},{a:[0,0],b:[1,0],lab:`${d} m`,away:[0.5,1]},{a:[1,0],b:[1,o1],lw:4,away:[0,0]},{a:[1,o1],b:[1,o2],lab:"pole",lw:2,away:[0,0]},{a:[0,0],b:[1,o1],away:[1,0]},{a:[0,0],b:[1,o2],away:[1,0]}],
+        angs:[{v:[0,0],a:[1,0],b:[1,o1],t:t1+DEG,hl:true,r:86},{v:[0,0],a:[1,0],b:[1,o2],t:t2+DEG,hl:false,r:40,f:0.8},{v:[1,0],a:[0,0],b:[1,o1],right:true}],txts:[{p:[1.05,o1/2],t:"building",align:"left"}],center:[0.6,0.4],nts:true};
+      return{skill:"rightwp",text:`<p>A flagpole stands on the roof of a building. From a point ${d} m from the building, the angle of elevation to the bottom of the pole is ${t1}° and to the top of the pole is ${t2}°. How tall is the flagpole?</p>`,fig,figHidden:true,
+        ans:{type:"num",fields:[{pre:"",post:"m",label:"pole height in metres"}],vals:[pole]},
+        mistakes:[{f:0,val:f,msg:"That's the height to the top of the pole. Subtract the building's height."},{f:0,val:b,msg:"That's the building's height. Find the height to the top of the pole, then subtract."},{f:0,val:d*T(t2-t1),msg:`You can't use tan(${t2}° − ${t1}°): that triangle has no right angle. Find both heights, then subtract.`},{f:0,val:d*Math.tan(t2)-d*Math.tan(t1),msg:RADMSG}],
+        steps:[["Sketch two right triangles that share the "+d+" m side","Both have their right angle at the base of the building."],["Height to the bottom of the pole",`tan ${t1}° = ${fr("b",d)} → b = ${d} tan ${t1}° = ${f2(b)} m`],["Height to the top of the pole",`tan ${t2}° = ${fr("t",d)} → t = ${d} tan ${t2}° = ${f2(f)} m`],["Subtract",`${f2(f)} ${M} ${f2(b)} = ${f2(pole)}`],["Concluding sentence",`∴ The flagpole is ${f2(pole)} m tall.`]],
+        hint:"Start with a sketch (it's shown now). Find the height to the bottom and to the top of the pole, then subtract."};}
+  }
+}
+
+/* =================== L5 sine law =================== */
+function randAngles(min=30,max=110){for(;;){const A=ri(min,max),B=ri(min,max),Cc=180-A-B;if(Cc>=min&&Cc<=max&&[A,B,Cc].filter(x=>x>90).length<=1)return[A,B,Cc]}}
+function givens(Ls,tri,show){/* show: [[angStr,sideStr,note]..] */const ls=Ls.map(l=>l.toLowerCase());
+  return TBL([0,1,2].map(i=>[`${Ls[i]} = ${show[i][0]}`,`${ls[i]} = ${show[i][1]}`,show[i][2]?`<span class="note">← ${show[i][2]}</span>`:""]))}
+const segName=(Ls,i)=>[Ls[(i+1)%3],Ls[(i+2)%3]].sort().join("");
+function genSine(L){
+  const type=pick(L===0?["side","side","angle"]:L===1?["side","third","angle","angle"]:["third","two","angleC","angle"]);
+  const Ls=pick(LETTERS),ls=Ls.map(l=>l.toLowerCase()),unit=pick(["cm","m"]);
+  const [A,B,Cc]=randAngles(L===0?40:30,L===0?100:115),ang=[A,B,Cc];
+  if(type==="side"||type==="third"||type==="two"){
+    /* matching pair at i (angle + side known); want side j */
+    const i=ri(0,2);let j=(i+ri(1,2))%3;const k=3-i-j;
+    const giv=ri(6,40),tri=triSides(A,B,giv,i),sd=[tri.a,tri.b,tri.c];
+    let knownAng,shown;
+    if(type==="side"){knownAng=[i,j]}else{knownAng=[k,j]}  /* third: the known angles exclude i */
+    if(type==="two")knownAng=[i,j];
+    const showA=[0,1,2].map(n=>knownAng.includes(n)?dg(ang[n]):"");
+    const showS=[0,1,2].map(n=>n===i?`${nf(giv)} ${unit}`:n===j?"x":(type==="two"&&n===k?"y":""));
+    const fig=obFig(tri,{ang:showA,side:showS,vl:Ls});
+    const x=sd[j];const need3=!knownAng.includes(i);
+    const gRows=[0,1,2].map(n=>[knownAng.includes(n)?dg(ang[n]):(n===i&&need3?"?":""),n===i?nf(giv):n===j?"x":(type==="two"&&n===k?"y":""),n===i?"matching pair":n===j?"missing pair":""]);
+    const st=[["Write the givens",givens(Ls,tri,gRows)]];
+    if(need3)st.push([`There's no matching pair yet. Find ∠${Ls[i]} first: the angles add to 180°`,`${Ls[i]} = 180° ${M} ${dg(ang[k])} ${M} ${dg(ang[j])} = ${dg(ang[i])}`]);
+    st.push(["Sine law with the matching pair and the missing pair",`${fr(ls[j],"sin "+Ls[j])} = ${fr(ls[i],"sin "+Ls[i])}`],
+      ["Sub in the values",`${fr("x","sin "+dg(ang[j]))} = ${fr(nf(giv),"sin "+dg(ang[i]))}`],
+      [`Multiply both sides by sin ${dg(ang[j])}`,`x = ${fr(nf(giv)+" sin "+dg(ang[j]),"sin "+dg(ang[i]))}`],
+      ["Calculate in degree mode",`x = ${f2(x)}`]);
+    const mist=[{f:0,val:giv*S(ang[i])/S(ang[j]),msg:`You flipped the sines. x goes with sin ${dg(ang[j])} (its opposite angle): x = ${nf(giv)} sin ${dg(ang[j])} ÷ sin ${dg(ang[i])}.`},
+      {f:0,val:giv*Math.sin(ang[j])/Math.sin(ang[i]),msg:RADMSG},
+      {f:0,val:giv*S(ang[k])/S(ang[i]),msg:`That's the side across from ∠${Ls[k]}. x is across from ∠${Ls[j]}.`}];
+    if(need3)mist.push({f:0,val:giv*S(ang[j])/S(ang[k]),msg:`${nf(giv)} ${unit} isn't across from ${dg(ang[k])}. Find the angle across from it (∠${Ls[i]}) first.`});
+    if(type==="two"){
+      const y=sd[k];
+      st.push(["Same matching pair for y",`y = ${fr(nf(giv)+" sin "+dg(ang[k]),"sin "+dg(ang[i]))} = ${f2(y)}`],[`(∠${Ls[k]} = 180° ${M} ${dg(ang[i])} ${M} ${dg(ang[j])} = ${dg(ang[k])})`,""],["Conclusion",`∴ x = ${f2(x)} ${unit}, y = ${f2(y)} ${unit}`]);
+      return{skill:"sine",text:`<p>Find <span class="hl">x and y</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")}. ∠${Ls[i]} = ${dg(ang[i])}, ∠${Ls[j]} = ${dg(ang[j])}. Side ${segName(Ls,i)} = ${nf(giv)} ${unit}, ${segName(Ls,j)} = x, ${segName(Ls,k)} = y.`,
+        ans:{type:"num",fields:[{pre:"x =",post:unit,label:"x"},{pre:"y =",post:unit,label:"y"}],vals:[x,y]},
+        fieldMsg:["Your y is right. x is across from the "+dg(ang[j])+" angle.",`Your x is right. For y, find ∠${Ls[k]} first (180° minus the other two).`],
+        steps:st,hint:`The matching pair is ∠${Ls[i]} with ${nf(giv)} ${unit}. Use it for both x and y. For y you need the third angle first.`};
+    }
+    st.push(["Conclusion",`∴ ${segName(Ls,j)} = ${f2(x)} ${unit}`]);
+    return{skill:"sine",text:`<p>Find the length of <span class="hl">x</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")}. Angles shown: ${knownAng.map(n=>"∠"+Ls[n]+" = "+dg(ang[n])).join(", ")}. Side ${segName(Ls,i)} = ${nf(giv)} ${unit} and ${segName(Ls,j)} = x.`,
+      ans:{type:"num",fields:[{pre:"x =",post:unit,label:"x"}],vals:[x]},mistakes:mist,steps:st,
+      hint:need3?"Look for a matching pair: an angle and the side across from it. Here the angle across from the known side is missing, so find it first (the angles add to 180°).":"Write the givens. The matching pair is an angle and the side across from it. x is across from the other known angle."};
+  }
+  /* angle: find angle j from side j, given matching pair i (side i > side j so the angle is acute) */
+  for(let t=0;t<100;t++){
+    const [A2,B2,C2]=randAngles(30,115),an=[A2,B2,C2];
+    const i=[0,1,2].sort((p,q)=>an[q]-an[p])[ri(0,1)];   /* matching angle is the largest or middle */
+    const j=[0,1,2].filter(n=>n!==i&&an[n]<an[i])[0];if(j===undefined)continue;const k=3-i-j;
+    const si=ri(8,40),tri=triSides(A2,B2,si,i),sd=[tri.a,tri.b,tri.c];
+    const sj=r1(sd[j]);if(sj>=si||sj<2)continue;
+    const th=aS(sj*S(an[i])/si);
+    const findC=type==="angleC";
+    const showA=[0,1,2].map(n=>n===i?dg(an[i]):n===j?"θ":"");
+    const fig=obFig(tri,{ang:showA,side:[0,1,2].map(n=>n===i?`${nf(si)} ${unit}`:n===j?`${nf(sj)} ${unit}`:""),vl:Ls,hl:[0,1,2].map(n=>n===j)});
+    const st=[["Write the givens",givens(Ls,tri,[0,1,2].map(n=>[n===i?dg(an[i]):n===j?"θ":"",n===i?nf(si):n===j?nf(sj):"",n===i?"matching pair":n===j?"missing pair":""]))],
+      ["Sine law, angle version (sines on top)",`${fr("sin "+Ls[j],ls[j])} = ${fr("sin "+Ls[i],ls[i])}`],
+      ["Sub in the values",`${fr("sin θ",nf(sj))} = ${fr("sin "+dg(an[i]),nf(si))}`],
+      [`Multiply both sides by ${nf(sj)}`,`sin θ = ${fr(nf(sj)+" sin "+dg(an[i]),nf(si))}`],
+      ["Use the inverse button",`θ = sin⁻¹(${fr(nf(sj)+" sin "+dg(an[i]),nf(si))}) = ${d2(th)}`]];
+    const mist=[{f:0,val:Math.asin(clamp(sj*Math.sin(an[i])/si,-1,1)),msg:RADMSG2},{f:0,val:sj*S(an[i])/si,msg:"That's sin θ. Use sin⁻¹ to get the angle."},{f:0,val:180-an[i]-th,msg:`That's the third angle, ∠${Ls[k]}. θ is at ${Ls[j]}.`}];
+    const inv=si*S(an[i])/sj;if(inv<=1)mist.push({f:0,val:aS(inv),msg:`You flipped the sides. sin θ goes with ${nf(sj)} (the side across from θ).`});
+    if(findC){
+      const third=180-an[i]-th;
+      st.push(["The angles add to 180°",`∠${Ls[k]} = 180° ${M} ${dg(an[i])} ${M} ${d2(th)} = ${d2(third)}`],["Conclusion",`∴ θ = ${d2(th)}, ∠${Ls[k]} = ${d2(third)}`]);
+      return{skill:"sine",text:`<p>Find <span class="hl">θ</span>, then the third angle <span class="hl">∠${Ls[k]}</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")}. ∠${Ls[i]} = ${dg(an[i])}. Side across from it = ${nf(si)} ${unit}. Side across from θ (at ${Ls[j]}) = ${nf(sj)} ${unit}.`,
+        ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ"},{pre:`∠${Ls[k]} =`,post:"°",label:"third angle"}],vals:[th,third]},
+        fieldMsg:["Your third angle is right. Check θ with the sine law.",`θ is right. ∠${Ls[k]} = 180° minus the other two angles.`],
+        mistakes:mist,steps:st,hint:"Sine law with sines on top: sin θ / (side across from θ) = sin of the known angle / its side. Then 180° minus the two angles."};
+    }
+    st.push(["Conclusion",`∴ θ = ${d2(th)}`]);
+    return{skill:"sine",text:`<p>Find the angle <span class="hl">θ</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")}. ∠${Ls[i]} = ${dg(an[i])}. Side across from it = ${nf(si)} ${unit}. θ is at ${Ls[j]}; the side across from θ = ${nf(sj)} ${unit}.`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ in degrees"}],vals:[th]},mistakes:mist,steps:st,
+      hint:"Find the matching pair (an angle and the side across from it). Then use sin θ / (side across from θ) = sin(known angle) / (its side), and the inverse button."};
+  }
+  return genSine(L);
+}
+
+/* =================== L6 cosine law =================== */
+const sq=n=>{let k=1;for(let f=Math.floor(Math.sqrt(n));f>1;f--)if(n%(f*f)===0){k=f;break}const r=n/(k*k);return r===1?String(k):(k>1?k:"")+"√"+r};
+function cosSideSteps(a,b,Cv,c,names){
+  return[["Write the givens",`${names.a} = ${nf(a)}, ${names.b} = ${nf(b)}, and the angle between them is ${dg(Cv)}`],["No matching pair, so use the cosine law. The angle between the two sides is C.",`c = √(a² + b² ${M} 2ab cos C)`],
+    ["Sub in the values",`c = √(${nf(a)}² + ${nf(b)}² ${M} 2(${nf(a)})(${nf(b)}) cos ${dg(Cv)})`],["Square, multiply, then multiply by cos C before subtracting",`c = √(${nf(a*a+b*b)} ${M} ${nf(2*a*b)} cos ${dg(Cv)})`],
+    ["Square root",`c = √${f2(c*c)} = ${f2(c)}`]];
+}
+function cosSideMist(a,b,Cv){const inside=(a*a+b*b-2*a*b)*C(Cv),c=Math.sqrt(a*a+b*b-2*a*b*C(Cv));const out=[{f:0,val:c*c,msg:"You forgot to square root at the end."},{f:0,val:Math.sqrt(a*a+b*b+2*a*b*C(Cv)),msg:"It's minus 2ab cos C."},{f:0,val:Math.sqrt(Math.abs(a*a+b*b-2*a*b*Math.cos(Cv))),msg:RADMSG},{f:0,val:Math.sqrt(Math.abs(a*a+b*b-a*b*C(Cv))),msg:"Don't forget the 2 in 2ab cos C."}];
+  if(inside>0)out.push({f:0,val:Math.sqrt(inside),msg:"Order of operations: multiply 2ab by cos C first, then subtract. Don't multiply (a² + b² − 2ab) by cos C."});return out}
+function cosAngSteps(Ls,vi,sd,th,unitless){
+  const a=sd[(vi+1)%3],b=sd[(vi+2)%3],c=sd[vi];
+  return[["Write the givens: three sides, no angles, so no matching pair",`${segName(Ls,(vi+1)%3)} = ${nf(a)}, ${segName(Ls,(vi+2)%3)} = ${nf(b)}, ${segName(Ls,vi)} = ${nf(c)}`],
+    [`Relabel so θ is C. The side across from θ is c`,`c = ${nf(c)}, a = ${nf(a)}, b = ${nf(b)}`],
+    ["Cosine law, angle version",`C = cos⁻¹(${fr("a² + b² "+M+" c²","2ab")})`],
+    ["Sub in the values",`θ = cos⁻¹(${fr(nf(a)+"² + "+nf(b)+"² "+M+" "+nf(c)+"²","2("+nf(a)+")("+nf(b)+")")})`],
+    ["Simplify",`θ = cos⁻¹(${fr(nf(a*a+b*b-c*c),nf(2*a*b))})`],
+    ["Calculate in degree mode",`θ = ${d2(th)}`]];
+}
+function cosAngMist(sd,vi,th,Ls){
+  const a=sd[(vi+1)%3],b=sd[(vi+2)%3],c=sd[vi],v=(a*a+b*b-c*c)/(2*a*b);
+  const others=[1,2].map(o=>{const w=(vi+o)%3,p=sd[(w+1)%3],q=sd[(w+2)%3],r=sd[w];return{w,val:aC((p*p+q*q-r*r)/(2*p*q))}});
+  return[{f:0,val:180-th,msg:"Check the order on top: a² + b² − c², where c is the side across from θ. Flipping the signs gives 180° − θ."},{f:0,val:Math.acos(v),msg:RADMSG2},{f:0,val:v,msg:"That's cos θ. Use cos⁻¹ to turn it into an angle."}]
+    .concat(others.map(o=>({f:0,val:o.val,msg:`That's the angle at ${Ls[o.w]}. For θ, the side across from θ (${nf(c)}) goes in as c.`})));
+}
+function sssTri(L){for(;;){const a=ri(4,L===2?40:25),b=ri(4,L===2?40:25),c=ri(4,L===2?40:25);const s=[a,b,c].sort((x,y)=>x-y);if(s[0]+s[1]<=s[2]+1)continue;const t=triSSS(a,b,c);if(Math.min(t.A,t.B,t.C)<18)continue;return t}}
+function genCosine(L){
+  const type=pick(L===0?["side","side","angle"]:L===1?["side","angle","angle","side"]:["coord","angle","side","coord"]);
+  const Ls=pick(LETTERS),unit=pick(["cm","m"]);
+  if(type==="side"){
+    for(;;){const a=ri(4,30),b=ri(4,30),Cv=ri(L===0?40:25,L===0?100:140);const c=Math.sqrt(a*a+b*b-2*a*b*C(Cv));const t=triSSS(a,b,c);if(Math.min(t.A,t.B)<14)continue;
+      const vi=ri(0,2);/* angle at vertex vi, sides around it: (vi+1)%3 and (vi+2)%3 */
+      const sd=[0,0,0];sd[vi]=c;sd[(vi+1)%3]=a;sd[(vi+2)%3]=b;const tri=triSSS(sd[0],sd[1],sd[2]);
+      const fig=obFig(tri,{ang:[0,1,2].map(n=>n===vi?dg(Cv):""),side:[0,1,2].map(n=>n===vi?"x":`${nf(sd[n])} ${unit}`),vl:Ls});
+      const names={a:segName(Ls,(vi+1)%3),b:segName(Ls,(vi+2)%3)};
+      return{skill:"cosine",text:`<p>Find the length of <span class="hl">x</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")}. ${names.a} = ${nf(a)} ${unit}, ${names.b} = ${nf(b)} ${unit}, and the angle between them at ${Ls[vi]} is ${dg(Cv)}. x = ${segName(Ls,vi)}.`,
+        ans:{type:"num",fields:[{pre:"x =",post:unit,label:"x"}],vals:[c]},mistakes:cosSideMist(a,b,Cv),
+        steps:cosSideSteps(a,b,Cv,c,names).concat([["Conclusion",`∴ ${segName(Ls,vi)} = ${f2(c)} ${unit}`]]),
+        hint:"Two sides and the angle between them: no matching pair, so use c² = a² + b² − 2ab cos C, where C is the angle between a and b."};
+    }
+  }
+  if(type==="angle"){
+    const tri=sssTri(L),sd=[tri.a,tri.b,tri.c],an=[tri.A,tri.B,tri.C],vi=ri(0,2),th=an[vi];
+    const fig=obFig(tri,{ang:[0,1,2].map(n=>n===vi?"θ":""),side:sd.map(v=>`${nf(v)} ${unit}`),vl:Ls,hl:[0,1,2].map(n=>n===vi)});
+    return{skill:"cosine",text:`<p>Find the angle <span class="hl">θ</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle ${Ls.join("")} with sides ${sd.map((v,n)=>segName(Ls,n)+" = "+nf(v)).join(", ")}. θ is at ${Ls[vi]}.`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"θ in degrees"}],vals:[th]},mistakes:cosAngMist(sd,vi,th,Ls),
+      steps:cosAngSteps(Ls,vi,sd,th).concat([["Conclusion",`∴ θ = ${d2(th)}`]]),
+      hint:"Three sides and no angles: cosine law. Relabel so the side across from θ is c. Then C = cos⁻¹((a² + b² − c²) / 2ab)."};
+  }
+  /* coordinates */
+  for(;;){
+    const P=[[ri(-6,2),ri(1,7)],[ri(3,8),ri(-2,6)],[ri(-3,5),ri(-7,-2)]];
+    const d=(p,q)=>(p[0]-q[0])**2+(p[1]-q[1])**2;
+    const n2=[d(P[1],P[2]),d(P[0],P[2]),d(P[0],P[1])],sd=n2.map(Math.sqrt),sqs=sq;
+    if(sd.some(v=>v<3))continue;const tri=triSSS(...sd);if(Math.min(tri.A,tri.B,tri.C)<20)continue;
+    const vi=ri(0,2),an=[tri.A,tri.B,tri.C],th=an[vi];
+    const pts=P.map((p,n)=>`${Ls[n]}(${neg(p[0])}, ${neg(p[1])})`).join(", ");
+    const a=(vi+1)%3,b=(vi+2)%3;
+    const st=[["Find each side with the distance formula (Unit 2)",TBL([0,1,2].map(n=>[`${segName(Ls,n)} = ${sqs(n2[n])}`,sqs(n2[n]).includes("√")?`≈ ${f2(sd[n])}`:""]))],
+      [`Relabel so θ (at ${Ls[vi]}) is C. The side across from it is c`,`c = ${sqs(n2[vi])}, a = ${sqs(n2[a])}, b = ${sqs(n2[b])}`],
+      ["Cosine law, angle version. (√n)² = n, so use the whole numbers",`θ = cos⁻¹(${fr(n2[a]+" + "+n2[b]+" "+M+" "+n2[vi],"2("+sqs(n2[a])+")("+sqs(n2[b])+")")})`],
+      ["Calculate in degree mode",`θ = ${d2(th)}`],["Conclusion",`∴ ∠${Ls[vi]} = ${d2(th)}`]];
+    const PX=P.map(p=>[p[0],p[1]]),cen=[(PX[0][0]+PX[1][0]+PX[2][0])/3,(PX[0][1]+PX[1][1]+PX[2][1])/3];
+    const fig={segs:[{a:[-8,0],b:[9,0],col:"dim",lw:1},{a:[0,-8],b:[0,8],col:"dim",lw:1},{a:PX[0],b:PX[1],away:cen},{a:PX[1],b:PX[2],away:cen},{a:PX[2],b:PX[0],away:cen}],
+      angs:[{v:PX[vi],a:PX[(vi+1)%3],b:PX[(vi+2)%3],t:"θ",hl:true}],vlabs:PX.map((p,n)=>({p,t:`${Ls[n]}(${neg(p[0])}, ${neg(p[1])})`})),center:cen,grid:true};
+    return{skill:"cosine",text:`<p>Triangle ${Ls.join("")} has vertices ${pts}. Find <span class="hl">∠${Ls[vi]}</span>. Round to 2 decimal places.</p>`,fig,alt:`Triangle with vertices ${pts}.`,
+      ans:{type:"num",fields:[{pre:`∠${Ls[vi]} =`,post:"°",label:"angle in degrees"}],vals:[th]},mistakes:cosAngMist(sd,vi,th,Ls),steps:st,
+      hint:"Find all three side lengths with the distance formula. Then use the cosine law with the side across from the angle as c."};
+  }
+}
+
+/* =================== L7 oblique word problems =================== */
+function whichLaw(L){
+  const pat=pick(["right","aas","ssa","sas","sss"]),Ls=pick(LETTERS),unit="m";
+  let tri,show,ans,why;
+  if(pat==="right"){const th=ri(25,65),h=ri(8,30);const fig=rtFig(th,{H:`${h} m`,O:"x",A:""});return{skill:"oblique",text:"<p>Which tool would you use to find <span class=\"hl\">x</span>?</p>",fig,alt:`Right triangle with a ${th}° angle, hypotenuse ${h} m, and x opposite the angle.`,
+    ans:{type:"choice",opts:["SOH CAH TOA","Sine law","Cosine law"],correct:0,why:["","The sine law works, but there's a right angle, so SOH CAH TOA is quicker.","There's a right angle, so SOH CAH TOA is the tool."]},
+    steps:[["Look for a right angle","There's a right angle, so SOH CAH TOA works."],["Conclusion",`∴ SOH CAH TOA: sin ${th}° = x/${h}, x = ${f2(h*S(th))} m`]],hint:"First check for a right angle. If there is one, SOH CAH TOA is the tool."}}
+  const [A,B]=randAngles(35,100);
+  if(pat==="aas"){tri=triSides(A,B,ri(8,30),0);show={ang:[dg(tri.A),dg(tri.B),""],side:[`${nf(r1(tri.a))} m`,"x",""],vl:Ls};ans=1;why="You know two angles and a side. With the angle across from the known side, you have a matching pair: sine law.";}
+  if(pat==="ssa"){tri=triSides(A,B,ri(8,30),0);if(tri.b>=tri.a)return whichLaw(L);show={ang:[dg(tri.A),"θ",""],side:[`${nf(r1(tri.a))} m`,`${nf(r1(tri.b))} m`,""],vl:Ls,hl:[false,true,false]};ans=1;why="An angle and the side across from it make a matching pair, so use the sine law.";}
+  if(pat==="sas"){const a=ri(6,25),b=ri(6,25),Cv=ri(35,120);const c=Math.sqrt(a*a+b*b-2*a*b*C(Cv));tri=triSSS(a,b,c);show={ang:["","",dg(Cv)],side:[`${a} m`,`${b} m`,"x"],vl:Ls};ans=2;why="Two sides and the angle between them: no matching pair, so use the cosine law.";}
+  if(pat==="sss"){tri=sssTri(L);show={ang:["θ","",""],side:[`${tri.a} m`,`${tri.b} m`,`${tri.c} m`],vl:Ls,hl:[true,false,false]};ans=2;why="Three sides and no angles: no matching pair, so use the cosine law.";}
+  const fig=obFig(tri,show);
+  return{skill:"oblique",text:`<p>Which tool would you use to find <span class="hl">${pat==="ssa"||pat==="sss"?"θ":"x"}</span>?</p>`,fig,alt:"Oblique triangle with some sides and angles marked.",
+    ans:{type:"choice",opts:["SOH CAH TOA","Sine law","Cosine law"],correct:ans,why:["There's no right angle in this triangle, so SOH CAH TOA won't work.",ans===2?"The sine law needs a matching pair: an angle and the side across from it. There isn't one here.":"",ans===1?"There's a matching pair, so the sine law is simpler.":""]},
+    steps:[["No right angle, so not SOH CAH TOA",""],["Look for a matching pair (an angle and the side across from it)",why],["Conclusion",`∴ ${["SOH CAH TOA","Sine law","Cosine law"][ans]}`]],
+    hint:"No right angle? Then look for a matching pair: an angle and the side across from it. Matching pair → sine law. No matching pair → cosine law."};
+}
+function genOblique(L){
+  const id=pick(L===0?["which","which","paths","survey"]:L===1?["paths","survey","lot","balloon","which","ships"]:["balloonH","lean","survey","ships","lot"]);
+  if(id==="which")return whichLaw(L);
+  const wrap=(q,words)=>{q.skill="oblique";q.figHidden=L>0;if(words)q.fig.vlabs=q.fig.vlabs.map((v,n)=>({p:v.p,t:words[n]}));if(L>0)q.hint="Start with a sketch (it's shown now). "+q.hint;return q};
+  if(id==="paths"||id==="ships"){
+    let a,b,Cv,text,pre=[],extra=[];
+    const who=pick([["drones","launch pad","Drone A","Drone B"],["canoes","dock","Canoe A","Canoe B"],["hikers","trailhead","Hiker A","Hiker B"]]);
+    if(id==="paths"){a=r1(ri(12,60)/10);b=r1(ri(12,60)/10);Cv=ri(35,130);text=`Two ${who[0]} leave the same ${who[1]}. One travels ${nf(a)} km in a straight line and the other travels ${nf(b)} km. The angle between their paths is ${Cv}°. How far apart are they when they stop?`}
+    else{const s1=ri(12,30),s2=ri(12,30),h=pick([1.5,2,2.5,3]);a=s1*h;b=s2*h;Cv=ri(40,130);who.splice(1,3,"port","Ship A","Ship B");
+      text=`Two ships leave port at the same time. Ship A sails at ${s1} km/h and Ship B at ${s2} km/h, on straight courses ${Cv}° apart. How far apart are they after ${nf(h)} h?`;
+      pre=[["Distance = speed × time",`Ship A: ${s1} × ${nf(h)} = ${nf(a)} km, Ship B: ${s2} × ${nf(h)} = ${nf(b)} km`]];
+      extra=[{f:0,val:Math.sqrt(s1*s1+s2*s2-2*s1*s2*C(Cv)),msg:`That's how far apart they are after 1 h. Multiply each speed by ${nf(h)} h first.`}]}
+    const c=Math.sqrt(a*a+b*b-2*a*b*C(Cv));
+    const tri=triSSS(c,a,b);
+    const fig=obFig(tri,{ang:[dg(Cv),"",""],side:["x",`${nf(a)} km`,`${nf(b)} km`],vl:["","",""]});
+    const st=[["Draw a picture: the start, the two ends, and the angle between the paths","See the diagram above."]].concat(pre).concat(cosSideSteps(a,b,Cv,c,{a:"one path",b:"the other"})).concat([["Concluding sentence",`∴ They are ${f2(c)} km apart.`]]);
+    return wrap({text:`<p>${text} Round to 2 decimal places.</p>`,fig,alt:`Triangle: two paths of ${nf(a)} km and ${nf(b)} km from the start with ${Cv}° between them.`,
+      ans:{type:"num",fields:[{pre:"",post:"km",label:"distance apart in km"}],vals:[c]},mistakes:cosSideMist(a,b,Cv).concat(extra),steps:st,
+      hint:"Two sides and the angle between them, so no matching pair: use the cosine law."},[who[1],who[3],who[2]]);
+  }
+  if(id==="survey"){
+    const [A,B]=randAngles(40,85),d=ri(40,200),Cc=180-A-B;
+    const thing=pick([["tree","river"],["cabin","lake"],["rock","canyon"],["buoy","bay"]]);
+    const tri=triSides(A,B,d,2);const AC=tri.b;
+    const fig=obFig(tri,{ang:[dg(A),dg(B),""],side:["","x",`${d} m`],vl:["A","B","C"]});
+    const st=[["Draw a picture and write the givens",givens(["A","B","C"],tri,[[dg(A),"",""],[dg(B),"x","missing pair"],["?",nf(d),"matching pair (once you find ∠C)"]])],
+      ["The angles add to 180°",`∠C = 180° ${M} ${dg(A)} ${M} ${dg(B)} = ${dg(Cc)}`],["Sine law",`${fr("x","sin "+dg(B))} = ${fr(nf(d),"sin "+dg(Cc))}`],[`Multiply both sides by sin ${dg(B)}`,`x = ${fr(nf(d)+" sin "+dg(B),"sin "+dg(Cc))} = ${f2(AC)}`],["Concluding sentence",`∴ The ${thing[0]} is ${f2(AC)} m from A.`]];
+    return wrap({text:`<p>A surveyor wants the distance to a ${thing[0]} (C) across a ${thing[1]}. She marks points A and B, ${d} m apart, on her side. She measures ∠CAB = ${A}° and ∠CBA = ${B}°. How far is the ${thing[0]} from A? Round to 2 decimal places.</p>`,fig,alt:`Triangle ABC with AB = ${d} m, ∠A = ${A}°, ∠B = ${B}°.`,
+      ans:{type:"num",fields:[{pre:"AC =",post:"m",label:"distance in metres"}],vals:[AC]},
+      mistakes:[{f:0,val:d*S(A)/S(Cc),msg:"That's BC, the distance from B. AC is across from ∠B."},{f:0,val:d*S(B)/S(A),msg:`${d} m is across from ∠C, not ∠A. Find ∠C first.`},{f:0,val:d*Math.sin(B)/Math.sin(Cc),msg:RADMSG},{f:0,val:d*S(Cc)/S(B),msg:"You flipped the sines: x goes with sin of the angle across from it."}],steps:st,
+      hint:"Find ∠C first (the angles add to 180°). Then ∠C and the side between A and B are a matching pair. AC is across from ∠B."},["A","B","C ("+thing[0]+")"]);
+  }
+  if(id==="lot"){
+    const tri=sssTri(L),sd=[tri.a,tri.b,tri.c],an=[tri.A,tri.B,tri.C],vi=ri(0,2),th=an[vi],what=pick(["garden","parking lot","park","sail"]);
+    const fig=obFig(tri,{ang:[0,1,2].map(n=>n===vi?"θ":""),side:sd.map(v=>`${nf(v)} m`),vl:["","",""],hl:[0,1,2].map(n=>n===vi)});
+    const a=sd[(vi+1)%3],b=sd[(vi+2)%3];
+    return wrap({text:`<p>A triangular ${what} has sides of ${nf(a)} m, ${nf(b)} m and ${nf(sd[vi])} m. Find the angle between the ${nf(a)} m and ${nf(b)} m sides. Round to 2 decimal places.</p>`,fig,alt:`Triangle with sides ${sd.map(nf).join(", ")} m.`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"angle in degrees"}],vals:[th]},mistakes:cosAngMist(sd,vi,th,["the "+nf(sd[0])+" m side's corner","",""]).slice(0,3),
+      steps:[["Draw a picture. The angle between two sides is across from the third side","θ is across from "+nf(sd[vi])+" m."]].concat(cosAngSteps(["P","Q","R"],vi,sd,th).slice(1)).concat([["Concluding sentence",`∴ The angle is ${d2(th)}.`]]),
+      hint:"Three sides and no angles: cosine law. The side across from the angle you want goes in as c."});
+  }
+  if(id==="balloon"||id==="balloonH"){
+    const [A,B]=randAngles(35,75),d=r1(ri(15,60)/10),Cc=180-A-B;const tri=triSides(A,B,d,2),AC=tri.b,h=AC*S(A);
+    const fig=obFig(tri,{ang:[dg(A),dg(B),""],side:["",id==="balloon"?"x":"",`${nf(d)} km`],vl:["A","B","balloon"]});
+    if(id==="balloonH"){fig.segs.push({a:fig.angs[0]?fig.vlabs[2].p:[0,0],b:[fig.vlabs[2].p[0],0],dash:true,col:"dim",lab:"h",away:fig.vlabs[0].p});}
+    const st=[["Draw a picture: the balloon is between the stations",""],["Angle at the balloon",`180° ${M} ${dg(A)} ${M} ${dg(B)} = ${dg(Cc)}`],["Sine law: the distance from A is across from ∠B",`x = ${fr(nf(d)+" sin "+dg(B),"sin "+dg(Cc))} = ${f2(AC)}`]];
+    if(id==="balloonH"){st.push(["Drop a vertical line from the balloon: a right triangle at A",`sin ${dg(A)} = ${fr("h",f2(AC))} → h = ${f2(AC)} sin ${dg(A)} = ${f2(h)}`],["Concluding sentence",`∴ The balloon is ${f2(h)} km high.`]);
+      return wrap({text:`<p>Two weather stations, A and B, are ${nf(d)} km apart. A balloon floats between them. The angle of elevation to the balloon is ${A}° from A and ${B}° from B. How high is the balloon? Round to 2 decimal places.</p>`,fig,alt:`Triangle with base ${nf(d)} km and angles ${A}° and ${B}°.`,
+        ans:{type:"num",fields:[{pre:"h =",post:"km",label:"height in km"}],vals:[h]},mistakes:[{f:0,val:AC,msg:"That's the distance from A to the balloon. Now use a right triangle to get the height."},{f:0,val:tri.a,msg:"That's the distance from B to the balloon. Use it with sin "+dg(B)+", or use AC with sin "+dg(A)+"."},{f:0,val:AC*C(A),msg:"The height is opposite the "+dg(A)+" angle: use sin, not cos."}],steps:st,
+        hint:"Use the sine law to find the distance from A to the balloon. Then the height is the opposite side in a right triangle at A."});}
+    st.push(["Concluding sentence",`∴ The balloon is ${f2(AC)} km from station A.`]);
+    return wrap({text:`<p>Two weather stations, A and B, are ${nf(d)} km apart. A balloon floats between them. The angle of elevation to the balloon is ${A}° from A and ${B}° from B. How far is the balloon from station A? Round to 2 decimal places.</p>`,fig,alt:`Triangle with base ${nf(d)} km and angles ${A}° and ${B}°.`,
+      ans:{type:"num",fields:[{pre:"",post:"km",label:"distance in km"}],vals:[AC]},mistakes:[{f:0,val:tri.a,msg:"That's the distance from B. The distance from A is across from ∠B."},{f:0,val:d*S(B)/S(A),msg:"The base isn't across from ∠A. Find the angle at the balloon first."},{f:0,val:d*Math.sin(B)/Math.sin(Cc),msg:RADMSG}],steps:st,
+      hint:"Find the angle at the balloon first. It pairs with the base. Then the distance from A is across from ∠B."});
+  }
+  /* lean: W4.07 #6 style */
+  for(;;){
+    const Av=ri(30,55),b=ri(8,25),a=ri(b+2,b+14);const Bv=aS(b*S(Av)/a);const Cv=180-Av-Bv;if(Cv<95||Cv>135)continue;
+    const c=a*S(Cv)/S(Av);const tri={a,b:c,c:b,A:Av,B:Cv,C:Bv};
+    const fig=obFig(tri,{ang:[dg(Av),"θ",""],side:[`${a} m`,"",`${b} m`],vl:["A","base","top"],hl:[false,true,false]});
+    const st=[["Draw a picture and write the givens",`∠A = ${dg(Av)}, the tree (across from A) = ${a} m, the ground from A to the base = ${b} m`],["Find the angle at the top first (sine law)",`sin T = ${fr(b+" sin "+dg(Av),a)} → ∠T = ${d2(Bv)}`],["Angles add to 180°",`θ = 180° ${M} ${dg(Av)} ${M} ${d2(Bv)} = ${d2(Cv)}`],["Concluding sentence",`∴ The tree meets the ground at ${d2(Cv)}.`]];
+    return wrap({text:`<p>A tree leans away from you. You stand at A, ${b} m from the base of the tree. The angle of elevation from A to the top of the tree is ${Av}°, and the tree is ${a} m long. At what angle θ does the tree meet the ground (on your side)? Round to 2 decimal places.</p>`,fig,alt:`Triangle: A, the top of the tree and its base.`,
+      ans:{type:"num",fields:[{pre:"θ =",post:"°",label:"angle in degrees"}],vals:[Cv]},mistakes:[{f:0,val:Bv,msg:"That's the angle at the top of the tree. Subtract from 180° to get θ."},{f:0,val:180-Cv,msg:"That's the angle on the other side of the tree."}],steps:st,
+      hint:"There's a matching pair: ∠A and the tree. Use the sine law to find the angle at the top, then 180° minus the two angles."});
+  }
+}
+
+const GEN={ratios:genRatios,sides:genSides,angles:genAngles,rightwp:genRightWP,sine:genSine,cosine:genCosine,oblique:genOblique};
+
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;s=String(s).trim().replace(/[−–—]/g,"-").replace(/^[a-zθα∠]+\s*=/i,"").replace(/[°º]|deg(rees)?$/ig,"").replace(/(km|cm|mm|m|units?|s)\s*$/i,"").replace(/^\$/,"").trim();
+  if(/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s))s=s.replace(/,/g,"");else s=s.replace(/^(-?\d+),(\d+)$/,"$1.$2");
+  s=s.replace(/\s+/g,"");
+  if(s==="")return null;
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s))return{v:parseFloat(s),dp:(s.split(".")[1]||"").length};
+  const m=s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2],frac:true,n:+m[1],d:+m[2],dp:9};
+  return{bad:true};
+}
+function okNum(p,t,fd){if(fd&&fd.tol!=null)return Math.abs(p.v-t)<=fd.tol;const tol=p.dp<=1?0.051:Math.max(0.011,Math.abs(t)*2e-4);return Math.abs(p.v-t)<=tol}
+const nearM=(v,m,tol)=>Math.abs(v-m)<=(tol!=null?tol:Math.max(0.06,Math.abs(m)*0.002));
+function check(q,input){
+  const A=q.ans;
+  if(A.type==="choice"){if(input===A.correct)return{s:"ok"};return{s:"miss",msg:A.why[input]||"Check your work and try again."}}
+  if(A.type==="label"){
+    if(!input||input.some(v=>!v))return{s:"empty",msg:"Pick H, O or A for every side."};
+    const wrong=A.items.map((it,i)=>input[i]!==it.role);
+    if(!wrong.some(Boolean))return{s:"ok"};
+    const hWrong=A.items.some((it,i)=>(it.role==="H")!==(input[i]==="H"));
+    return{s:"miss",wrong,msg:hWrong?"Find the right angle first. The hypotenuse is the side across from it (the longest side).":"Your hypotenuse is right. The opposite side is across from θ and doesn't touch it. The adjacent side touches θ."};
+  }
+  if(A.type==="frac"){
+    const p=parseNum(input);if(!p)return{s:"empty",msg:"Type your answer first."};if(p.bad)return{s:"empty",msg:"Type a fraction like 9/41."};
+    const t=A.n/A.d;
+    if(p.frac&&Math.abs(p.v-t)<1e-9){if(p.n!==A.n||p.d!==A.d)return{s:"ok",note:`That's right. It's the same as ${A.n}/${A.d}.`};return{s:"ok"}}
+    if(!p.frac&&Math.abs(p.v-t)<=0.00051)return{s:"ok",note:`As a fraction: ${A.n}/${A.d}.`};
+    for(const mk of q.mistakes||[])if(Math.abs(p.v-mk.val)<(p.frac?1e-9:0.00051))return{s:"miss",msg:mk.msg};
+    return{s:"miss",msg:"Label O, A and H from θ, then check which two sides this ratio uses."};
+  }
+  const ps=input.map(parseNum);
+  if(ps.some(p=>!p))return{s:"empty",msg:A.fields.length>1?"Fill in every box first.":"Type an answer first."};
+  if(ps.some(p=>p.bad))return{s:"empty",msg:"Use a number like 13.30 or 36.03."};
+  const ok=ps.map((p,i)=>okNum(p,A.vals[i],A.fields[i]));
+  if(ok.every(Boolean))return{s:"ok"};
+  for(const mk of q.mistakes||[]){if(mk.msg&&isFinite(mk.val)&&!ok[mk.f]&&!okNum({v:mk.val,dp:2},A.vals[mk.f],A.fields[mk.f])&&nearM(ps[mk.f].v,mk.val,mk.tol))return{s:"miss",msg:mk.msg}}
+  if(q.fieldMsg){const w=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(w.length===1&&q.fieldMsg[w[0]])return{s:"miss",msg:q.fieldMsg[w[0]]}}
+  const close=ps.findIndex((p,i)=>!ok[i]&&Math.abs(p.v-A.vals[i])<=Math.max(0.06,Math.abs(A.vals[i])*0.015));
+  if(close>=0)return{s:"miss",msg:"Very close. Did you round in the middle? Keep the full calculator value until the last step, then round to 2 decimal places."};
+  return{s:"miss",msg:"Check each step of your work."};
+}
+function correctInput(q){const A=q.ans;if(A.type==="choice")return A.correct;if(A.type==="label")return A.items.map(i=>i.role);if(A.type==="frac")return `${A.n}/${A.d}`;return A.vals.map(v=>A.dp?v.toFixed(A.dp):f2(v).replace(M,"-"))}
+
+/* =================== figure drawing (theme-aware) =================== */
+const PAL={light:{ink:"#15233b",dim:"#9aa6ba",pen:"#1f4fb0",hl:"rgba(255,214,0,.55)",red:"#c0392b",bg:"#ffffff",grid:"#e3e8f0"},
+  dark:{ink:"#e5ebf4",dim:"#6e7b90",pen:"#8db0ff",hl:"rgba(255,214,0,.32)",red:"#ff8f86",bg:"#161e2a",grid:"#232e3e"}};
+function isDark(){const t=document.documentElement.getAttribute("data-theme");if(t==="dark")return true;if(t==="light")return false;return !!(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)}
+const FONT='"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+let FW=560,PADX=78;const PADY=44,HMAX=330;
+function layout(fig){
+  const P=[];for(const s of fig.segs||[])P.push(s.a,s.b);for(const t of fig.txts||[])P.push(t.p);
+  const xs=P.map(p=>p[0]),ys=P.map(p=>p[1]);const mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
+  const bw=Math.max(mxx-mnx,1e-6),bh=Math.max(mxy-mny,1e-6);
+  const s=Math.min((FW-2*PADX)/bw,(HMAX-2*PADY)/bh);const H=Math.round(Math.max(bh*s+2*PADY,140));
+  const ox=(FW-bw*s)/2,oy=(H-bh*s)/2;
+  return{H,X:x=>ox+(x-mnx)*s,Y:y=>H-oy-(y-mny)*s};
+}
+let FC=PAL.light;
+function drawFig(cv,fig,st){
+  FC=isDark()?PAL.dark:PAL.light;
+  const pw=cv.parentElement&&cv.parentElement.clientWidth;FW=Math.round(clamp(pw||560,280,560));PADX=FW<460?56:78;
+  const {H,X,Y}=layout(fig),dpr=Math.min(3,window.devicePixelRatio||1);
+  if(cv.width!==Math.round(FW*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(FW*dpr);cv.height=Math.round(H*dpr)}
+  cv.style.maxWidth=FW+"px";
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.fillStyle=FC.bg;c.fillRect(0,0,FW,H);c.lineCap="round";c.lineJoin="round";
+  const P=p=>[X(p[0]),Y(p[1])];
+  const show=e=>!e.when||(e.when==="roles"&&st&&st.roles);
+  const cen=P(fig.center||[0,0]);
+  const nrm=(v)=>{const l=Math.hypot(v[0],v[1])||1;return[v[0]/l,v[1]/l]};
+  if(fig.grid){c.strokeStyle=FC.grid;c.lineWidth=1;c.beginPath();for(let i=-8;i<=9;i++){c.moveTo(X(i),Y(-8));c.lineTo(X(i),Y(8))}for(let j=-8;j<=8;j++){c.moveTo(X(-8),Y(j));c.lineTo(X(9),Y(j))}c.stroke()}
+  /* angle geometry */
+  const angGeo=g=>{const v=P(g.v),pa=P(g.a),pb=P(g.b);const u1=nrm([pa[0]-v[0],pa[1]-v[1]]),u2=nrm([pb[0]-v[0],pb[1]-v[1]]);
+    const l1=Math.hypot(pa[0]-v[0],pa[1]-v[1]),l2=Math.hypot(pb[0]-v[0],pb[1]-v[1]);
+    const r=g.r||Math.min(30,0.38*Math.min(l1,l2));let a1=Math.atan2(u1[1],u1[0]),a2=Math.atan2(u2[1],u2[0]);let d=a2-a1;while(d<=-Math.PI)d+=2*Math.PI;while(d>Math.PI)d-=2*Math.PI;
+    return{v,u1,u2,r,a1,a2,d,ccw:d<0,half:Math.abs(d)/2}};
+  for(const g of fig.angs||[]){if(!show(g)||g.right||!g.hl)continue;const G=angGeo(g);c.fillStyle=FC.hl;c.beginPath();c.moveTo(G.v[0],G.v[1]);c.arc(G.v[0],G.v[1],G.r,G.a1,G.a2,G.ccw);c.closePath();c.fill()}
+  for(const s of fig.segs||[]){const a=P(s.a),b=P(s.b);c.strokeStyle=s.col==="dim"?FC.dim:FC.ink;c.lineWidth=s.lw||2;c.setLineDash(s.dash?[6,6]:[]);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke()}
+  c.setLineDash([]);
+  for(const g of fig.angs||[]){if(!show(g))continue;const G=angGeo(g);c.strokeStyle=FC.ink;c.lineWidth=1.5;
+    if(g.right){const z=13;c.beginPath();c.moveTo(G.v[0]+G.u1[0]*z,G.v[1]+G.u1[1]*z);c.lineTo(G.v[0]+G.u1[0]*z+G.u2[0]*z,G.v[1]+G.u1[1]*z+G.u2[1]*z);c.lineTo(G.v[0]+G.u2[0]*z,G.v[1]+G.u2[1]*z);c.stroke();continue}
+    c.beginPath();c.arc(G.v[0],G.v[1],G.r,G.a1,G.a2,G.ccw);c.stroke()}
+  c.textAlign="center";c.textBaseline="middle";
+  const text=(t,x,y,col,font)=>{c.font=font||`700 15px ${FONT}`;const w=c.measureText(t).width;x=clamp(x,w/2+4,FW-w/2-4);y=clamp(y,10,H-10);c.fillStyle=col;c.fillText(t,x,y);return w};
+  /* side labels */
+  for(const s of fig.segs||[]){
+    const a=P(s.a),b=P(s.b),m=[(a[0]+b[0])/2,(a[1]+b[1])/2];let n=nrm([-(b[1]-a[1]),b[0]-a[0]]);const aw=s.away?P(s.away):cen;
+    if(n[0]*(m[0]-aw[0])+n[1]*(m[1]-aw[1])<0)n=[-n[0],-n[1]];
+    c.font=`700 15px ${FONT}`;const w=s.lab?c.measureText(s.lab).width:0;const off=10+Math.abs(n[0])*w/2+Math.abs(n[1])*9;
+    if(s.lab)text(s.lab,m[0]+n[0]*off,m[1]+n[1]*off,s.lab==="x"||s.lab==="y"||s.lab==="h"||s.lab==="d"?FC.pen:FC.ink);
+    if(st&&st.roles&&s.role){const o2=s.lab?off+Math.abs(n[0])*(w/2+12)+Math.abs(n[1])*18:12;text(s.role,m[0]+n[0]*o2,m[1]+n[1]*o2,FC.red,`700 17px ${FONT}`)}
+  }
+  for(const g of fig.angs||[]){if(!show(g)||g.right||!g.t)continue;const G=angGeo(g);const bis=g.f!=null?[Math.cos(G.a1+G.d*g.f),Math.sin(G.a1+G.d*g.f)]:nrm([G.u1[0]+G.u2[0],G.u1[1]+G.u2[1]]);let dist=G.r+13;if(G.half<0.42)dist=Math.max(dist,Math.min(78,15/Math.sin(Math.max(G.half,0.12))));
+    text(g.t,G.v[0]+bis[0]*dist,G.v[1]+bis[1]*dist,g.t==="θ"||g.t==="α"?FC.pen:FC.ink,`700 15px ${FONT}`)}
+  for(const v of fig.vlabs||[]){if(!v.t)continue;const p=P(v.p);const d=nrm([p[0]-cen[0],p[1]-cen[1]]);c.font=`700 15px ${FONT}`;const w=c.measureText(v.t).width;const off=12+Math.abs(d[0])*w/2+Math.abs(d[1])*9;text(v.t,p[0]+d[0]*off,p[1]+d[1]*off,FC.ink)}
+  for(const t of fig.txts||[]){const p=P(t.p);c.font=`400 14px ${FONT}`;const w=c.measureText(t.t).width;const x=t.align==="left"?p[0]+w/2:t.align==="right"?p[0]-w/2:p[0];text(t.t,x,p[1],FC.dim,`400 14px ${FONT}`)}
+}
+
+/* =================== page =================== */
+const TAG={ratios:"Sides & ratios",sides:"Finding sides",angles:"Finding angles",rightwp:"Right-triangle problems",sine:"Sine law",cosine:"Cosine law",oblique:"Oblique problems"};
+const RULE={ratios:"SOH: sin θ = O/H · CAH: cos θ = A/H · TOA: tan θ = O/A",sides:"Unknown on top: multiply · unknown on the bottom: multiply by x, then divide",angles:"θ = sin⁻¹(O/H) · cos⁻¹(A/H) · tan⁻¹(O/A)",rightwp:"Sketch · label O, A, H · choose the ratio · ∴ sentence",sine:"a/sin A = b/sin B = c/sin C · needs a matching pair",cosine:"c² = a² + b² − 2ab cos C · C = cos⁻¹((a² + b² − c²)/2ab)",oblique:"Matching pair → sine law · no matching pair → cosine law"};
+const SKILLS=Object.keys(TAG);
+const LEVELNOTES=["Support: the diagram is always shown, the unknown is usually on top of the ratio, and the numbers are friendly.","On track: like the questions on your worksheets. In word problems, try your own sketch first; the hint shows one.","Challenge: two-step problems, finding the third angle first, coordinates, eye height and two-sighting problems."];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let skill=store.get("u4.skill","ratios"),level=store.get("u4.level",1);
+if(!SKILLS.includes(skill)&&skill!=="mixed")skill="ratios";if(![0,1,2].includes(level))level=1;
+const stats={first:0,done:0,streak:0};
+let q=null,attempts=0,revealed=false,finished=false,choice=null,labsel=[];
+const fst={roles:false};
+const figEl=$("fig");
+const redraw=()=>{if(q&&q.fig&&!$("figwrap").hidden)drawFig(figEl,q.fig,fst)};
+window.__u4={GEN,check,correctInput,drawFig,parseNum};
+
+function setPressed(){
+  document.querySelectorAll("#skills button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.skill===skill)));
+  document.querySelectorAll("#levels button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.level===level)));
+  $("levelNote").textContent=LEVELNOTES[level];
+}
+function showFig(){if(!q||!q.fig)return;$("figwrap").hidden=false;$("sketchBtn").hidden=true;$("figalt").textContent=q.alt||"";
+  $("fignote").hidden=!q.fig.nts;$("fignote").textContent="Not drawn to scale.";redraw()}
+function newQ(){
+  const k=skill==="mixed"?pick(SKILLS):skill;
+  q=GEN[k](level);window.__q=q;attempts=0;revealed=false;finished=false;choice=null;fst.roles=false;
+  $("qtag").textContent=TAG[q.skill]+(skill==="mixed"?" · mixed":"");
+  $("rule").textContent=RULE[q.skill];
+  $("prompt").innerHTML=q.text;
+  const A=q.ans,f=$("answer");
+  if(A.type==="num")f.innerHTML=A.fields.map((fd,i)=>`<span class="fld">${fd.pre?`<span>${fd.pre}</span>`:""}<input id="a${i}" aria-label="${esc(fd.label)}" inputmode="decimal" spellcheck="false" autocomplete="off">${fd.post?`<span>${fd.post}</span>`:""}</span>`).join("");
+  else if(A.type==="frac")f.innerHTML=`<span class="fld"><input id="a0" aria-label="${esc(A.label)}" inputmode="text" spellcheck="false" autocomplete="off" placeholder="a/b"></span>`;
+  else if(A.type==="choice")f.innerHTML=`<div class="choices" role="radiogroup" aria-label="Answer choices">${A.opts.map((o,i)=>`<button type="button" class="opt" role="radio" aria-checked="false" data-i="${i}"><span class="key">${"ABCDEF"[i]}</span><span>${o}</span></button>`).join("")}</div>`;
+  else{labsel=A.items.map(()=>null);f.innerHTML=`<div class="lblgrid">${A.items.map((it,i)=>`<div class="lblrow" id="lr${i}"><span class="lblname">${esc(it.name)}</span><span class="ohA" role="radiogroup" aria-label="${esc(it.name)} is the">${["H","O","A"].map(r=>`<button type="button" role="radio" aria-checked="false" data-row="${i}" data-r="${r}" aria-label="${{H:"hypotenuse",O:"opposite",A:"adjacent"}[r]}">${r}</button>`).join("")}</span></div>`).join("")}</div>`}
+  $("figwrap").hidden=true;$("sketchBtn").hidden=true;
+  if(q.fig){if(q.figHidden&&level>0){$("sketchBtn").hidden=false}else showFig()}
+  $("fb").innerHTML="";$("steps").hidden=true;$("steps").innerHTML="";
+  $("checkBtn").disabled=false;$("stepsBtn").textContent="Show steps";
+}
+function fb(type,title,msg){$("fb").innerHTML=`<div class="feedback ${type}"><strong>${title}</strong>${msg||""}</div>`}
+function mark(id,ok){const el=$(id);if(el){el.classList.toggle("ok",ok);el.classList.toggle("no",!ok)}}
+function showSteps(){
+  revealed=true;fst.roles=true;if(q.fig)showFig();
+  const items=q.steps.map((s,i)=>`<li><span class="why">${s[0]}</span>${s[1]?`<span class="work${i===q.steps.length-1?" final":""}">${s[1]}</span>`:""}</li>`).join("");
+  $("steps").innerHTML=`<h2>Worked steps</h2><ol>${items}</ol>`;$("steps").hidden=false;$("stepsBtn").textContent="Steps shown";
+}
+function updateScore(){$("sFirst").textContent=stats.first;$("sDone").textContent=stats.done;$("sStreak").textContent=stats.streak}
+function win(extra){
+  if(!finished){finished=true;stats.done++;if(attempts===0&&!revealed){stats.first++;stats.streak++}else stats.streak=0;updateScore();}
+  const praise=attempts===0&&!revealed?pick(["Correct!","Nailed it.","That's right.","Correct, first try."]):"Correct!";
+  fb("good",praise,extra||"");$("checkBtn").disabled=true;
+  $("answer").querySelectorAll("input,.opt,.ohA button").forEach(el=>el.disabled=true);
+  $("nextBtn").focus({preventScroll:true});
+}
+function miss(msg){attempts++;fb("bad","Not quite.",msg+(attempts>=2&&!revealed?" You can also press Show steps.":""))}
+function doCheck(){
+  if(finished)return;
+  const A=q.ans;
+  if(A.type==="choice"){
+    if(choice===null)return fb("hint","Pick an answer first.","Click one of the choices, then press Check.");
+    const r=check(q,choice),b=$("answer").querySelector(`.opt[data-i="${choice}"]`);
+    if(r.s==="ok"){b.classList.add("ok");return win("")}
+    b.classList.add("no");b.disabled=true;b.setAttribute("aria-checked","false");choice=null;return miss(r.msg);
+  }
+  if(A.type==="label"){
+    const r=check(q,labsel);
+    if(r.s==="empty")return fb("hint","Label every side.",r.msg);
+    A.items.forEach((_,i)=>{const row=$("lr"+i);row.classList.remove("ok","no");if(r.s==="ok")row.classList.add("ok");else if(r.wrong[i])row.classList.add("no");else row.classList.add("ok")});
+    if(r.s==="ok"){fst.roles=true;redraw();return win("The red letters on the diagram show the labels.")}
+    return miss(r.msg);
+  }
+  if(A.type==="frac"){
+    const r=check(q,$("a0").value);
+    if(r.s==="empty")return fb("hint","Type your answer first.",r.msg.startsWith("Type your")?"":r.msg);
+    if(r.s==="ok"){mark("a0",true);return win(r.note||"")}
+    mark("a0",false);return miss(r.msg);
+  }
+  const ins=A.fields.map((_,i)=>$("a"+i));
+  const r=check(q,ins.map(i=>i.value));
+  if(r.s==="empty")return fb("hint",ins.some(i=>!i.value.trim())?(ins.length>1?"Fill in every box.":"Type your answer first."):"I can't read that number.",r.msg);
+  if(r.s==="ok"){ins.forEach(i=>mark(i.id,true));return win("")}
+  ins.forEach((inp,k)=>{const p=parseNum(inp.value);mark(inp.id,!!(p&&!p.bad&&okNum(p,A.vals[k],A.fields[k])))});
+  return miss(r.msg);
+}
+/* events */
+$("skills").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;skill=b.dataset.skill;store.set("u4.skill",skill);setPressed();newQ();});
+$("levels").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;level=+b.dataset.level;store.set("u4.level",level);setPressed();newQ();});
+$("checkBtn").addEventListener("click",doCheck);
+$("answer").addEventListener("submit",e=>{e.preventDefault();doCheck();});
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();doCheck();}});
+$("answer").addEventListener("click",e=>{
+  const lb=e.target.closest(".ohA button");if(lb&&!finished){const i=+lb.dataset.row;labsel[i]=lb.dataset.r;lb.parentElement.querySelectorAll("button").forEach(x=>x.setAttribute("aria-checked",String(x===lb)));$("lr"+i).classList.remove("ok","no");return}
+  const b=e.target.closest(".opt");if(!b||b.disabled||finished)return;choice=+b.dataset.i;
+  $("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));});
+document.addEventListener("keydown",e=>{
+  if(!q||q.ans.type!=="choice"||finished)return;if(e.target.closest&&e.target.closest("input"))return;
+  const i="abcdef".indexOf(e.key.toLowerCase());
+  if(i>=0&&i<q.ans.opts.length){const b=$("answer").querySelector(`.opt[data-i="${i}"]`);if(b&&!b.disabled){choice=i;$("answer").querySelectorAll(".opt").forEach(o=>o.setAttribute("aria-checked",String(o===b)));}}
+  else if(e.key==="Enter"&&choice!==null&&!(e.target.closest&&e.target.closest("button"))){e.preventDefault();doCheck();}
+});
+$("sketchBtn").addEventListener("click",showFig);
+$("hintBtn").addEventListener("click",()=>{if(q.fig)showFig();fb("hint","Hint",q.hint)});
+$("stepsBtn").addEventListener("click",()=>{showSteps();if(!finished){stats.streak=0;updateScore();}});
+$("nextBtn").addEventListener("click",()=>{if(!finished&&(revealed||attempts>0)){stats.done++;stats.streak=0;updateScore();}newQ();const a=$("a0");if(a)a.focus({preventScroll:true});});
+if(window.matchMedia){const mq=matchMedia("(prefers-color-scheme: dark)");(mq.addEventListener?mq.addEventListener("change",redraw):mq.addListener(redraw))}
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+window.addEventListener("resize",redraw);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
+setPressed();newQ();updateScore();
+})();
+</script>
+</body>
+</html>
