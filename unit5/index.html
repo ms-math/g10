@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Unit 5 Analytic Geometry review: practice questions and the Where in Ottawa? review game.">
+<meta name="robots" content="noindex">
+<title>Unit 5 Review</title>
+<style>@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/kalam-latin-400-normal.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/kalam-latin-700-normal.woff") format("woff")}@font-face{font-family:"Alfa Slab One";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/alfa-slab-one-latin-400-normal.woff") format("woff")}@font-face{font-family:"Special Elite";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/special-elite-latin-400-normal.woff") format("woff")}html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+:root{--paper:#f7f9fc;--grid:rgba(40,88,170,.075);--card:#ffffff;--line:#d6dde8;--ink:#15233b;--muted:#56637a;--pen:#1f4fb0;
+  --night:#0f1820;--npanel:#172532;--nline:#2f4556;--nfg:#e8eef2;--nmuted:#9db0bf;--gold:#f2c14e;--teal:#3cc6b8;--red:#e2483d;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-pen:"Kalam","Comic Sans MS",cursive;--f-slab:"Alfa Slab One",Rockwell,Georgia,serif;--f-type:"Special Elite","Courier New",monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}
+*{box-sizing:border-box}
+body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 56px;display:grid;gap:24px}
+h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.1;margin:0;text-wrap:balance}
+h1 span{font-family:var(--f-pen);color:var(--pen);font-weight:700}
+.lede{margin:6px 0 0;color:var(--muted);max-width:56ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px}
+a.card{display:grid;gap:8px;align-content:start;text-decoration:none;border-radius:12px;padding:22px;min-width:0}
+a.card:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
+.plain{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
+.plain:hover{border-color:var(--pen)}
+.kick{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.plain h2{margin:0;font-size:1.5rem}
+.plain p,.game p{margin:0}
+.go{font-weight:700;color:var(--pen);margin-top:6px}
+.game{background:radial-gradient(500px 240px at 80% -20%,#1d3142 0,var(--night) 70%),var(--night);border:1.5px solid var(--nline);color:var(--nfg)}
+.game:hover{border-color:var(--gold)}
+.game .kick{font-family:var(--f-type);font-weight:400;color:var(--nmuted);letter-spacing:.06em}
+.game h2{margin:0;font-family:var(--f-slab);font-weight:400;font-size:1.9rem;line-height:1.05}
+.game h2 span{color:var(--gold)}
+.game .go{color:var(--gold);font-family:var(--f-type);font-weight:400}
+.trail{display:block;width:100%;height:auto;margin:4px 0}
+footer{font-size:.86rem;color:var(--muted)}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Unit 5 Review <span>Analytic Geometry</span></h1>
+    <p class="lede">Practise every lesson from length and midpoint to similar triangles, then take on the review game.</p>
+  </header>
+  <div class="cards">
+    <a class="card plain" href="practice/">
+      <span class="kick">Practice</span>
+      <h2>Unit 5 Practice</h2>
+      <p>New questions for lessons L1 to L10 at three levels: Support, On track and Challenge. Check your answer, get a hint, or see the full worked steps.</p>
+      <span class="go">Start practising →</span>
+    </a>
+    <a class="card game" href="magpie/">
+      <span class="kick">Review game · Bytown Detective Agency</span>
+      <h2>Where in <span>Ottawa?</span></h2>
+      <svg class="trail" viewBox="0 0 300 60" aria-hidden="true"><path d="M10 52L80 22L150 40L215 14L290 34" fill="none" stroke="#e2483d" stroke-width="2.5" stroke-dasharray="7 5"/><g stroke="#0f1820" stroke-width="2"><circle cx="10" cy="52" r="5.5" fill="#e2483d"/><circle cx="80" cy="22" r="5.5" fill="#e2483d"/><circle cx="150" cy="40" r="5.5" fill="#e2483d"/><circle cx="215" cy="14" r="5.5" fill="#f2c14e"/><circle cx="290" cy="34" r="5.5" fill="#dfe7ec"/></g></svg>
+      <p>A thief called the Magpie has stolen a 400-year-old astrolabe. Solve each witness’s lead to follow the trail across the city before the Magpie’s train leaves.</p>
+      <span class="go">&gt; Take the case</span>
+    </a>
+  </div>
+  <footer>Nothing you type on these pages is sent anywhere. In the game, handing in your code opens your teacher’s Google Form, and nothing is sent until you press Submit there.</footer>
+</div>
+
+</body>
+</html>
