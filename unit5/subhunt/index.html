@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Battleship by substitution: solve linear systems to aim depth charges at a hidden submarine fleet.">
+<meta name="robots" content="noindex">
+<title>Sub Hunt</title>
+<style>:root{color-scheme:dark}@font-face{font-family:"Orbitron";font-style:normal;font-weight:600;font-display:swap;src:url("../fonts/orbitron-latin-600-normal.woff") format("woff")}@font-face{font-family:"Orbitron";font-style:normal;font-weight:800;font-display:swap;src:url("../fonts/orbitron-latin-800-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url("../fonts/atkinson-hyperlegible-latin-400-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url("../fonts/atkinson-hyperlegible-latin-700-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url("../fonts/atkinson-hyperlegible-latin-400-italic.woff") format("woff")}html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<style>
+/* Layout: a retro sonar/radar console. Title → fleet setup → battle (enemy-waters radar on the left; your fleet, the battle log and three firing solutions on the right) → after-action report. Orbitron for titles only; Atkinson Hyperlegible for every number. One committed dark look. */
+:root{
+  color-scheme:dark;
+  --bg:#04110c; --panel:#0a1c15; --panel2:#0f261d; --line:#1f4636; --fg:#dcf7e9; --muted:#86b8a0;
+  --green:#4cf29b; --green2:#2bbf74; --amber:#ffc24a; --red:#ff6a5f; --ink:#03130b;
+  --f-title:"Orbitron", "Eurostile", "Arial Black", sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.5}
+body{background:radial-gradient(900px 500px at 30% -10%,#0d2b1f 0,var(--bg) 65%) fixed,var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 64px}
+.lbl{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.small{font-size:.88rem;color:var(--muted)}
+.btn{font-weight:700;font-size:1rem;padding:10px 18px;border-radius:8px;border:2px solid var(--green);background:transparent;color:var(--green);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--green);color:var(--ink)}
+.btn.ghost{border-color:var(--line);color:var(--fg)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible,.opt:focus-visible,.cell:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* ---------- title ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center}
+.hero>div{min-width:0}
+.hero h1{font-family:var(--f-title);font-weight:800;font-size:clamp(2.6rem,7vw,5.4rem);line-height:.95;margin:.1em 0 .15em;letter-spacing:.04em;color:var(--green);text-shadow:0 0 18px rgba(76,242,155,.35)}
+.hero .sub{font-family:var(--f-title);font-weight:600;font-size:1.05rem;letter-spacing:.14em;text-transform:uppercase;color:var(--fg)}
+.lede{font-size:1.08rem;max-width:58ch;margin:.6em 0}
+.how{margin:0;padding:0;list-style:none;display:grid;gap:6px;max-width:60ch}
+.how li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px}
+.how li::before{content:"▸";color:var(--green)}
+.heroart{width:100%;height:auto;display:block}
+.setup{margin-top:24px;background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:18px}
+.setup h2{font-size:.82rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+input.txt{font:inherit;font-weight:700;padding:9px 12px;border-radius:8px;border:2px solid var(--line);background:#020c07;color:var(--fg);min-width:0;width:min(100%,300px)}
+input.txt:focus{outline:none;border-color:var(--green)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.opt{text-align:left;background:var(--panel2);border:2px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;display:grid;gap:2px}
+.opt b{font-size:1.03rem}.opt span{font-size:.86rem;color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--green);box-shadow:0 0 0 3px rgba(76,242,155,.16)}
+.resume{border-top:1.5px solid var(--line);padding-top:14px}
+footer{margin-top:24px;font-size:.84rem;color:var(--muted)}
+/* ---------- HUD ---------- */
+.hud{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:8px 14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:6}
+.hud .t{font-family:var(--f-title);font-weight:800;letter-spacing:.08em;color:var(--green);font-size:1.15rem}
+.hud .m{font-size:.82rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-variant-numeric:tabular-nums}
+.chip{display:flex;align-items:baseline;gap:6px;font-size:.92rem;color:var(--muted)}
+.chip b{color:var(--fg);font-size:1.05rem}
+.pips{display:inline-flex;gap:3px;vertical-align:middle}
+.pips i{width:12px;height:12px;border-radius:3px;background:var(--green2);display:block}
+.pips i.x{background:transparent;border:1.5px solid var(--red)}
+.pips.mine i{background:#4fb3e8}
+/* ---------- battle ---------- */
+.battle{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:14px;align-items:start}
+.radarcol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+.radar{position:relative;border-radius:14px;overflow:hidden;border:1.5px solid var(--line);background:#031009}
+.radar svg{display:block;width:100%;height:auto}
+.sweep{position:absolute;pointer-events:none;border-radius:50%;background:conic-gradient(from 0deg,rgba(76,242,155,.22),rgba(76,242,155,0) 60deg,rgba(76,242,155,0));animation:spin 4.5s linear infinite;mix-blend-mode:screen}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.sweep{animation:none;opacity:.4}}
+@keyframes flash{0%{opacity:1}100%{opacity:.25}}
+.flash{animation:flash 1.4s ease-out both}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;opacity:.6}}
+.rhint{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.86rem;color:var(--muted);margin:6px 2px 0}
+.rhint b{color:var(--amber);font-variant-numeric:tabular-nums}
+.side{display:grid;gap:12px;min-width:0}
+.top2{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:12px}
+.mini{border:1.5px solid var(--line);border-radius:10px;background:#031009;padding:6px}
+.mini svg{display:block;width:100%;height:auto}
+.mini .lbl{display:block;margin:0 0 2px 2px}
+.log{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;font-size:.92rem;min-height:120px;max-height:210px;overflow:auto}
+.log p{margin:0 0 6px}.log .me{color:var(--green)}.log .them{color:#9fd3ff}.log .bad{color:var(--red)}.log .gold{color:var(--amber)}
+.cards{display:grid;gap:10px}
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;gap:6px}
+.card.busy{opacity:.55}
+.chead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.chead b{font-family:var(--f-title);font-weight:800;color:var(--green);letter-spacing:.06em}
+.chead span{font-size:.78rem;color:var(--muted)}
+.eqs{display:grid;gap:0;font-size:1.22rem;font-weight:700;font-variant-numeric:tabular-nums}
+.eqs span::before{content:attr(data-n);display:inline-block;width:1.6em;color:var(--muted);font-size:.9rem;font-weight:400}
+.ans{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:1.2rem;font-weight:700}
+.ans input{font:inherit;font-weight:700;width:3.6em;padding:5px 6px;border-radius:7px;border:2px solid var(--line);background:#020c07;color:var(--fg);text-align:center}
+.ans input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(76,242,155,.18)}
+.ans input.x{border-color:var(--red)}
+.fbtn{font-weight:700;font-size:.92rem;padding:6px 12px;border-radius:7px;border:1.5px solid var(--line);background:transparent;cursor:pointer}
+.fbtn.fire{background:var(--amber);border-color:var(--amber);color:#2a1a00;font-size:1rem;padding:6px 16px}
+.fbtn:disabled{opacity:.4;cursor:default}
+.fbtn.nudge{border-color:var(--amber);color:var(--amber)}
+.fbtn:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.msg{border-radius:8px;padding:8px 11px;font-size:.93rem}
+.msg strong{display:block}
+.msg.bad{background:#2c0f0c;color:#ffc9c2;border:1px solid #6e2a22}
+.msg.hint{background:#2a2307;color:#ffe9a6;border:1px solid #6d5a1a}
+.msg.good{background:#0b2e1b;color:#c6ffdd;border:1px solid #2b7a4c}
+.steps{border-top:1px dashed var(--line);padding-top:8px}
+.steps ol{margin:0;padding-left:1.3em;display:grid;gap:5px}
+.steps .why{display:block;font-size:.84rem;color:var(--muted)}
+.steps .work{display:block;font-size:1.05rem;font-weight:700;color:#bfffdc;overflow-x:auto}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;font-size:.82em;line-height:1.1;text-align:center;margin:0 .12em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .15em}
+/* ---------- fleet setup ---------- */
+.setupgrid{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:20px;align-items:start;margin-top:14px}
+.panel{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.panel h2{font-family:var(--f-title);font-weight:800;letter-spacing:.06em;font-size:1.2rem;margin:0 0 6px;color:var(--green)}
+.big{font-family:var(--f-title);font-weight:800;font-size:clamp(2rem,5vw,3.4rem);line-height:1.05;margin:6px 0;letter-spacing:.03em}
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:rgba(2,8,5,.86);z-index:20;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(16px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 24px max(12px,env(safe-area-inset-left,0px))}
+.ovcard{width:min(680px,100%);background:var(--panel);border:1.5px solid var(--green2);border-radius:14px;padding:20px;margin-top:8vh}
+.ovcard h3{font-family:var(--f-title);font-weight:800;letter-spacing:.05em;font-size:1.4rem;margin:2px 0 8px;color:var(--green)}
+.ovcard ul{padding-left:1.2em;margin:.4em 0}
+.savefab{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));z-index:30;font-size:.92rem;padding:8px 14px;background:var(--panel);box-shadow:0 2px 12px rgba(0,0,0,.55)}
+.savelayer{position:fixed;inset:0;z-index:40;background:rgba(2,8,5,.9);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:16px}
+.mcode{font-weight:700;font-size:clamp(1rem,3.2vw,1.45rem);letter-spacing:.07em;background:#020c07;border:2px dashed var(--amber);border-radius:10px;padding:12px;text-align:center;color:var(--amber);word-break:break-all;font-variant-numeric:tabular-nums}
+/* ---------- end + checker ---------- */
+.report{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.84rem;color:var(--muted)}
+table.skills{width:100%;border-collapse:collapse;font-size:.94rem}
+table.skills th{text-align:left;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:4px 6px;border-bottom:1px solid var(--line)}
+table.skills td{padding:6px;border-bottom:1px solid #15362a;vertical-align:top}
+.ok{color:var(--green)}.meh{color:var(--amber)}.no{color:var(--red)}
+.medals{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.medal{border:1.5px solid var(--amber);color:var(--amber);border-radius:999px;padding:3px 12px;font-size:.88rem;font-weight:700}
+.chk{display:grid;gap:12px;max-width:620px}
+.chkres{border-radius:10px;padding:14px;background:var(--panel2);border:1.5px solid var(--line)}
+.drill{display:grid;gap:10px}
+.drillgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+@media (max-width:980px){.battle,.setupgrid,.hero,.report{grid-template-columns:1fr}.radarcol{position:static}}
+@media (max-width:560px){.top2{grid-template-columns:1fr}.eqs{font-size:1.08rem}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+
+<div class="wrap">
+  <!-- ===== TITLE ===== -->
+  <section id="sTitle">
+    <div class="hero">
+      <div>
+        <div class="lbl">Unit 5 · Lesson 4 review · Substitution</div>
+        <h1>SUB HUNT</h1>
+        <div class="sub">Battleship by substitution</div>
+        <p class="lede">An enemy submarine fleet is hiding somewhere in a 10 by 10 grid. Every depth charge you drop is aimed by a linear system, and you have to solve it to fire.</p>
+        <ul class="how">
+          <li><span>Each turn you have <b>three firing solutions</b>. Each one lands on a different square, and you only know where once you solve it. Fire the one that lands where you want.</span></li>
+          <li><span>A depth charge hits a <b>3 by 3 area</b> around the point you fire at.</span></li>
+          <li><span>A wrong answer is a <b>misfire</b>: you lose your shot and the enemy gets a free torpedo.</span></li>
+          <li><span>Sink all three enemy subs before they sink your fleet.</span></li>
+        </ul>
+        <p class="small">Bring scrap paper. Every battle has a new fleet and new systems.</p>
+      </div>
+      <svg class="heroart" id="heroArt" viewBox="0 0 400 400" role="img" aria-label="A sonar screen with a sweeping beam and three contacts"></svg>
+    </div>
+    <div class="setup">
+      <div>
+        <h2>1 · Your name (only for your code, never saved)</h2>
+        <div class="row"><input class="txt" id="pname" maxlength="40" placeholder="First and last name" autocomplete="off" aria-label="Your name"><input class="txt" id="pname2" maxlength="40" placeholder="Player 2’s first and last name" autocomplete="off" aria-label="Player 2’s name" hidden></div>
+      </div>
+      <div>
+        <h2>2 · Choose a game</h2>
+        <div class="opts" id="modeOpts">
+          <button class="opt" type="button" data-mode="battle"><b>Battle the computer</b><span>Scored. The enemy fires back, and you can lose.</span></button>
+          <button class="opt" type="button" data-mode="practice"><b>Target practice</b><span>The enemy doesn’t fire back. Free hints and steps.</span></button>
+          <button class="opt" type="button" data-mode="duel"><b>Two players</b><span>Take turns on one Chromebook. First to sink the other fleet wins.</span></button>
+          <button class="opt" type="button" data-mode="drill"><b>Training drill</b><span>Your teacher’s nine systems. Solve them to reveal a hidden fleet.</span></button>
+        </div>
+      </div>
+      <div id="levelBox">
+        <h2>3 · Choose a rank</h2>
+        <div class="opts" id="levelOpts">
+          <button class="opt" type="button" data-level="0"><b>Cadet</b><span>Starts with y = … and y = …, then works up to standard form and brackets.</span></button>
+          <button class="opt" type="button" data-level="1"><b>Captain</b><span>For a second run: standard form, brackets and fractions from the first shot.</span></button>
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="startBtn" type="button">Launch</button>
+        <span class="small" id="startNote">Type your name and choose a game.</span>
+      </div>
+      <div class="resume">
+        <h2>Or continue a saved game</h2>
+        <p class="small" style="margin:4px 0 8px">Type your name in step 1 exactly as before, paste your save code and press Continue.</p>
+        <div class="row"><input class="txt" id="rcode" placeholder="Paste your save code" aria-label="Save code" autocomplete="off" style="text-transform:uppercase;width:min(100%,30em)"><button class="btn" id="resumeBtn" type="button">Continue</button></div>
+        <p class="small" id="resumeNote" aria-live="polite" style="margin:6px 0 0"></p>
+      </div>
+    </div>
+    <footer>Teachers: <button class="btn ghost" id="toChecker" type="button" style="padding:4px 10px;font-size:.85rem">Check a code</button> · Nothing typed on this page is sent anywhere.</footer>
+  </section>
+
+  <!-- ===== FLEET SETUP ===== -->
+  <section id="sFleet" hidden>
+    <div class="lbl" id="fleetTag"></div>
+    <div class="big" id="fleetTitle">Your fleet</div>
+    <div class="setupgrid">
+      <div class="radar" id="fleetBoard"></div>
+      <div class="panel">
+        <h2>Ready your fleet</h2>
+        <p id="fleetText">Your three ships are placed at random. Shuffle them until you like the layout. Ships never touch, not even at the corners.</p>
+        <ul class="small" id="fleetList"></ul>
+        <div class="row" style="margin-top:12px"><button class="btn" id="shuffleBtn" type="button">Shuffle my fleet</button><button class="btn primary" id="fleetGo" type="button">Start the battle</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BATTLE ===== -->
+  <section id="sGame" hidden>
+    <div class="hud" role="region" aria-label="Battle status">
+      <div><div class="t">SUB HUNT</div><div class="m" id="hudMode"></div></div>
+      <div class="chips" id="chips"></div>
+      <button class="btn ghost" id="howBtn" type="button" style="padding:6px 12px;font-size:.9rem">How to play</button>
+    </div>
+    <div class="battle">
+      <div class="radarcol">
+        <div class="lbl" id="radarLbl" style="margin:0 0 4px 2px">Enemy waters</div>
+        <div class="radar" id="radarBox"><div id="radar"></div></div>
+        <div class="rhint"><span id="hoverTxt">Point at the radar to see where a depth charge would hit.</span><span id="turnTxt"></span></div>
+      </div>
+      <div class="side">
+        <div class="top2">
+          <div class="mini"><span class="lbl" id="miniLbl">Your fleet</span><div id="mini"></div></div>
+          <div class="log" id="log" aria-live="polite"></div>
+        </div>
+        <div class="lbl">Firing solutions · solve, then fire the one you want</div>
+        <div class="cards" id="cards"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRAINING DRILL ===== -->
+  <section id="sDrill" hidden>
+    <div class="hud"><div><div class="t">SUB HUNT</div><div class="m">Training drill · your teacher’s nine systems</div></div><div class="chips" id="dchips"></div><span></span></div>
+    <div class="battle">
+      <div class="radarcol"><div class="lbl" style="margin:0 0 4px 2px">Hidden fleet</div><div class="radar" id="dradarBox"><div id="dradar"></div></div><p class="small">Each answer is one square of a hidden ship. Solve all nine to reveal the whole fleet.</p></div>
+      <div class="side"><div class="cards" id="dcards"></div></div>
+    </div>
+  </section>
+
+  <!-- ===== END ===== -->
+  <section id="sEnd" hidden>
+    <div class="lbl" id="endTag"></div>
+    <div class="big" id="endTitle"></div>
+    <p class="lede" id="endLine"></p>
+    <div class="report">
+      <div class="panel">
+        <h2>After-action report</h2>
+        <div class="stats" id="endStats"></div>
+        <div class="medals" id="medals"></div>
+        <div id="codes"></div>
+      </div>
+      <div class="panel">
+        <h2>Skill report</h2>
+        <table class="skills" id="skillTbl"></table>
+        <p class="small" id="skillNote"></p>
+      </div>
+    </div>
+    <div class="row" style="margin-top:18px"><button class="btn primary" id="againBtn" type="button">New battle</button><button class="btn ghost" id="titleBtn" type="button">Back to the title screen</button></div>
+  </section>
+
+  <!-- ===== CHECKER ===== -->
+  <section id="sCheck" hidden>
+    <div class="lbl">Teacher tool</div>
+    <div class="big">Check a code</div>
+    <p class="lede">Type the student’s name exactly as they entered it (capitals and extra spaces don’t matter) and their code. Nothing is sent or saved.</p>
+    <div class="chk">
+      <input class="txt" id="cName" placeholder="Student name" aria-label="Student name" autocomplete="off">
+      <input class="txt" id="cCode" placeholder="Paste the code" aria-label="Code" autocomplete="off" style="text-transform:uppercase;width:min(100%,30em)">
+      <div class="row"><button class="btn primary" id="cBtn" type="button">Check code</button><button class="btn ghost" id="cBack" type="button">Back</button></div>
+      <div class="chkres" id="cRes" hidden></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="ov" hidden></div>
+<button class="btn savefab" id="saveFab" type="button" hidden>Save &amp; hand in</button>
+<div class="savelayer" id="saveLayer" hidden></div>
+
+<script>
+/* TEACHERS: paste your hand-in Form's pre-filled link between the quotes (the HAND-IN LINK printed by the setup script).
+   Leave it empty and students hand in their code the old way. */
+const HANDIN_URL = "https://docs.google.com/forms/d/e/1FAIpQLSddEaWO3d1sX3o3cmvFcKn-wqxl4sxatjshYuetJ-IKmpuynw/viewform?usp=pp_url&entry.306808541=NAME&entry.1780154738=CODE";
+</script>
+<script>
+(function(){
+"use strict";
+/* =================== helpers =================== */
+const M="−",DEG="°";
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const nz=(a,b)=>{let v;do{v=ri(a,b)}while(v===0);return v};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b]}return a||1};
+const sn=n=>n<0?M+Math.abs(n):String(n);
+const RD=Math.PI/180;
+const aC=v=>Math.acos(Math.max(-1,Math.min(1,v)))/RD;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* rationals */
+function Q(n,d=1){if(d<0){n=-n;d=-d}const g=gcd(n,d);return{n:n/g,d:d/g}}
+const toQ=x=>typeof x==="number"?Q(x,1):x;
+const qneg=a=>{a=toQ(a);return Q(-a.n,a.d)};
+const qa=(a,b)=>{a=toQ(a);b=toQ(b);return Q(a.n*b.d+b.n*a.d,a.d*b.d)};
+const qs=(a,b)=>qa(a,qneg(b));
+const qm=(a,b)=>{a=toQ(a);b=toQ(b);return Q(a.n*b.n,a.d*b.d)};
+const qd=(a,b)=>{a=toQ(a);b=toQ(b);return Q(a.n*b.d,a.d*b.n)};
+const qv=a=>typeof a==="number"?a:a.n/a.d;
+const qint=a=>toQ(a).d===1;
+function fh(x){if(typeof x==="number"&&!Number.isInteger(x))return nf(x);x=toQ(x);if(x.d===1)return sn(x.n);return `${x.n<0?M:""}<span class="fr"><span>${Math.abs(x.n)}</span><span>${x.d}</span></span>`}
+const fa=x=>{x=toQ(x);return x.d===1?String(x.n):x.n+"/"+x.d};
+const par=x=>qv(x)<0?`(${fh(x)})`:fh(x);
+function nf(v){if(Math.abs(v-Math.round(v))<1e-9)return sn(Math.round(v));return sn(Math.round(v*100)/100)}
+function f2(v){let s=(Math.round(v*100)/100).toFixed(2);if(s==="-0.00")s="0.00";return s.replace(/^-/,M)}
+const fr=(n,d)=>`<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+function cxv(c,v="x"){const val=qv(c);if(val===1)return v;if(val===-1)return M+v;return fh(c)+v}
+function lineH(m,b){const mv=qv(m),bv=qv(b);let s="y = ";
+  if(mv!==0){s+=cxv(m);if(bv>0)s+=" + "+fh(b);else if(bv<0)s+=" "+M+" "+fh(qneg(b));}else s+=fh(b);return s}
+const pt=(x,y)=>`(${fh(x)}, ${fh(y)})`;
+const P2=p=>pt(p[0],p[1]);
+function rad(n){let k=1,r=n;for(let i=Math.floor(Math.sqrt(n));i>1;i--){if(n%(i*i)===0){k=i;r=n/(i*i);break}}return{k,r}}
+const isSq=n=>Number.isInteger(Math.sqrt(n));
+function radS(n){if(isSq(n))return String(Math.sqrt(n));const {k,r}=rad(n);return k===1?`√${n}`:`${k}√${r}`}
+function radH(n){if(isSq(n))return `√${n} = ${Math.sqrt(n)}`;const {k,r}=rad(n);return k===1?`√${n}`:`√${n} = ${k}√${r}`}
+function radApprox(n){return isSq(n)?radS(n):`${radS(n)} ≈ ${f2(Math.sqrt(n))}`}
+const SUP=["","","²","³"];
+function poly(ts){let s="";for(const [c,p] of ts){if(c===0)continue;const a=Math.abs(c);const body=p===0?String(a):(a===1?"":a)+(p===1?"x":"x"+SUP[p]);s+=s===""?(c<0?M:"")+body:(c<0?" "+M+" ":" + ")+body}return s||"0"}
+const bin=(v,r)=>`(${v} ${r<0?"+":M} ${Math.abs(r)})`;  /* factor with root r: (x − r) */
+const xMinus=(v,h)=>h===0?v:`(${v} ${h<0?"+":M} ${Math.abs(h)})`;
+const TBL=(rows,head)=>`<table class="tbl">${head?`<tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>`:""}${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+const sub=(a,b)=>`${sn(a)} ${M} ${par(b)}`;
+const add=(a,b)=>`${sn(a)} + ${par(b)}`;
+const mid=(A,B)=>[Q(A[0]+B[0],2),Q(A[1]+B[1],2)];
+const midI=(A,B)=>[(A[0]+B[0])/2,(A[1]+B[1])/2];
+const slope=(A,B)=>Q(B[1]-A[1],B[0]-A[0]);
+const d2=(A,B)=>(B[0]-A[0])**2+(B[1]-A[1])**2;
+const negRec=m=>{m=toQ(m);return Q(-m.d,m.n)};
+const bThrough=(m,p)=>qs(p[1],qm(m,p[0]));
+function interQ(m1,b1,m2,b2){const x=qd(qs(b2,b1),qs(m1,m2));return[x,qa(qm(m1,x),b1)]}
+const LETTERS=[["A","B","C"],["D","E","F"],["P","Q","R"],["J","K","L"],["G","H","I"],["R","S","T"],["X","Y","Z"],["L","M","N"]];
+const PTF=(pre)=>[{pre:(pre?pre+" ":"")+"(",label:"x-coordinate"},{pre:",",post:")",label:"y-coordinate"}];
+const LINEF=[{pre:"y =",post:"x +",label:"slope m"},{label:"y-intercept b"}];
+const VEC=(lo,hi)=>[ri(lo,hi),ri(lo,hi)];
+
+/* ---------- step builders ---------- */
+function distSteps(A,B,nA,nB){
+  const dx=B[0]-A[0],dy=B[1]-A[1],n=dx*dx+dy*dy;
+  return[[`Length of ${nA}${nB}: d = √((Δx)² + (Δy)²)`,`d = √((${sub(B[0],A[0])})² + (${sub(B[1],A[1])})²)`],
+    ["Simplify",`d = √(${par(dx)}² + ${par(dy)}²) = √(${dx*dx} + ${dy*dy}) = ${radH(n)}`]];
+}
+function midStep(A,B,name){const m=mid(A,B);return[`Midpoint of ${name}: M = (${fr("x₁ + x₂",2)}, ${fr("y₁ + y₂",2)})`,`M = (${fr(add(A[0],B[0]),2)}, ${fr(add(A[1],B[1]),2)}) = ${pt(m[0],m[1])}`]}
+function slopeStep(A,B,label){const m=slope(A,B);return[`${label}: m = ${fr("Δy","Δx")}`,`m = ${fr(sub(B[1],A[1]),sub(B[0],A[0]))} = ${fh(m)}`]}
+function bSteps(m,p){const b=bThrough(m,p);const mx=qm(m,p[0]);
+  return[[`y = mx + b → sub ${P2(p)} to get b`,`${fh(p[1])} = ${fh(m)}(${fh(p[0])}) + b`],["Solve for b",`${fh(p[1])} = ${fh(mx)} + b → b = ${fh(b)}`]]}
+function sysSteps(m1,b1,m2,b2){const [x,y]=interQ(m1,b1,m2,b2);const k=qs(m1,m2),r=qs(b2,b1);
+  const rhsTerm=b=>qv(b)<0?`${M} ${fh(qneg(b))}`:`+ ${fh(b)}`;const lhs=(m,b)=>qv(b)===0?cxv(m):`${cxv(m)} ${rhsTerm(b)}`;
+  const collect=`${cxv(m1)} ${qv(m2)<0?"+":M} ${cxv(qv(m2)<0?qneg(m2):m2)} = ${fh(b2)} ${qv(b1)<0?"+":M} ${fh(qv(b1)<0?qneg(b1):b1)}`;
+  return[["Set the equations equal (substitution)",`${lhs(m1,b1)} = ${lhs(m2,b2)}`],
+    ["Collect the x terms on one side and the numbers on the other",`${collect}  →  ${cxv(k)} = ${fh(r)}${qv(k)===1?"":`  →  x = ${fh(x)}`}`],
+    [`Sub x = ${fh(x)} into ① to get y`,`y = ${fh(m1)}(${fh(x)}) ${rhsTerm(b1)} = ${fh(y)}`]]}
+/* =================== checking =================== */
+function parseNum(s){
+  if(s==null)return null;
+  s=String(s).trim().toLowerCase().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z∠θ⊥()]+=/,"").replace(/(°|º|degrees|deg|units?|km|cm|mm|m)$/,"");
+  if(s==="")return null;
+  s=s.replace(/squareroot|sqrt|root/g,"√").replace(/[*×·]/g,"");
+  let m=s.match(/^(-)?(\d+)?√\(?(\d+)\)?$/);
+  if(m){const k=m[2]?parseInt(m[2],10):1,r=parseInt(m[3],10);return{v:(m[1]?-1:1)*k*Math.sqrt(r),exact:true,root:{k,r},form:`${m[1]?M:""}${k===1?"":k}√${r}`}}
+  if(/^-?\d+(\.\d+)?$/.test(s)||/^-?\.\d+$/.test(s)){const dp=(s.split(".")[1]||"").length;return{v:parseFloat(s),exact:dp===0,dp,form:s.replace("-",M)}}
+  m=s.match(/^(-?\d+)\/(-?\d+)$/);if(m&&+m[2]!==0)return{v:+m[1]/+m[2],exact:true,frac:true,form:`${m[1]}/${m[2]}`.replace(/-/g,M)};
+  return{bad:true};
+}
+function okField(p,t,fd){
+  if(fd&&fd.round)return Math.abs(p.v-t)<=(p.dp>=2?0.011:0.051);
+  if(p.exact)return Math.abs(p.v-t)<1e-6;
+  return Math.abs(p.v-t)<=(p.dp>=2?0.006:0.051);
+}
+const nearV=(p,t)=>Math.abs(p.v-t)<=(p.exact?1e-6:0.051);
+function noteFor(p,t,fd,val){
+  if(fd&&fd.rad&&!isSq(fd.rad)){if(!p.exact)return `The exact answer is ${radS(fd.rad)}.`;if(p.root&&p.form.replace(M,"")!==radS(fd.rad))return `Simplified, that's ${radS(fd.rad)}.`}
+  if(val&&typeof val!=="number"&&val.d!==1&&!p.exact)return `As a fraction, that's ${fa(val)}.`;
+  return "";
+}
+function check(q,input){
+  const A=q.ans;
+  if(A.type==="choice"){if(input===A.correct)return{s:"ok"};return{s:"miss",msg:A.why[input]||"Check your work and try again."}}
+  const ps=input.map(parseNum);
+  if(ps.some(p=>!p))return{s:"empty",msg:A.fields.length>1?"Fill in every box first.":"Type an answer first."};
+  if(ps.some(p=>p.bad))return{s:"empty",msg:"Use a number like 7, −3, 2/3, 4.5 or 5√2."};
+  const T=A.vals.map(qv);
+  const okAt=(i,j)=>okField(ps[i],T[j],A.fields[j]);
+  let ok=ps.map((p,i)=>okAt(i,i)),order=[0,1,2,3];
+  if(A.pairs){if(!ok.every(Boolean)&&[2,3,0,1].every((j,i)=>okAt(i,j))){order=[2,3,0,1];ok=[true,true,true,true]}}
+  if(A.orderFree&&!ok.every(Boolean)&&okAt(0,1)&&okAt(1,0)){order=[1,0];ok=[true,true]}
+  if(ok.every(Boolean)){const notes=[...new Set(ps.map((p,i)=>noteFor(p,T[order[i]],A.fields[order[i]],A.vals[order[i]])).filter(Boolean))];return{s:"ok",note:notes.join(" ")}}
+  if(A.pairs){const p1=okAt(0,0)&&okAt(1,1)||okAt(0,2)&&okAt(1,3),p2=okAt(2,2)&&okAt(3,3)||okAt(2,0)&&okAt(3,1);
+    if(p1!==p2)return{s:"miss",msg:"One of your points is right. Check the other one: sub its x into the line to get y.",ok:[p1,p1,p2,p2]};}
+  if(q.missFn){const m=q.missFn(ps.map(p=>p.v));if(m)return{s:"miss",msg:m,ok}}
+  for(const mk of q.mistakes||[]){const f=mk.f||0;if(!ok[f]&&ps[f]&&nearV(ps[f],qv(mk.val))&&!okField({v:qv(mk.val),exact:true},T[f],A.fields[f]))return{s:"miss",msg:mk.msg,ok}}
+  if(q.fieldMsg){const w=ok.map((o,i)=>o?-1:i).filter(i=>i>=0);if(w.length===1&&q.fieldMsg[w[0]])return{s:"miss",msg:q.fieldMsg[w[0]],ok}}
+  const close=ps.findIndex((p,i)=>!ok[i]&&Math.abs(p.v-T[i])<=Math.max(0.06,Math.abs(T[i])*0.015));
+  if(close>=0)return{s:"miss",msg:"Very close. Check your rounding: keep the full calculator value until the end, then round to 2 decimal places.",ok};
+  return{s:"miss",msg:"Check each step of your work.",ok};
+}
+function correctInput(q){const A=q.ans;if(A.type==="choice")return A.correct;
+  return A.vals.map((v,i)=>{const fd=A.fields[i];if(fd.rad)return radS(fd.rad);if(typeof v!=="number")return fa(v);if(Number.isInteger(v))return String(v);return v.toFixed(2)})}
+
+/* =================== game helpers =================== */
+function latticeOn(r2){const out=[];const r=Math.floor(Math.sqrt(r2));for(let x=-r;x<=r;x++){const y2=r2-x*x;const y=Math.round(Math.sqrt(y2));if(y*y===y2){out.push([x,y]);if(y)out.push([x,-y])}}return out}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function withSeed(seed,fn){const saved=Math.random;Math.random=mulberry32((Math.imul(seed+1,2654435761)^0x5bd1e995)>>>0);try{return fn()}finally{Math.random=saved}}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* signed term after the first: " + 3x", " − x", " − 4" */
+function term(c,v){if(c===0)return "";const a=Math.abs(c);return (c<0?" "+M+" ":" + ")+(v&&a===1?"":a)+v}
+/* expression from [[coef,var],...] e.g. [[2,"x"],[-3,""]] → "2x − 3" */
+function ex(ts){let s="";for(const [c,v] of ts){if(c===0)continue;if(s===""){const a=Math.abs(c);s=(c<0?M:"")+(v&&a===1?"":a)+v}else s+=term(c,v)}return s||"0"}
+const lin=(m,b)=>ex([[m,"x"],[b,""]]);
+
+/* =================== substitution systems, built backwards from a target square =================== */
+const N=10;                         /* board: x and y from 1 to 10 */
+const FORMS=["cmp","iso","std","brk"];
+const FORMNAME={cmp:"Comparison (y = … and y = …)",iso:"One variable already isolated",std:"Standard form (isolate first)",brk:"Brackets (expand first)"};
+const PT=p=>`(${fh(p[0])}, ${fh(p[1])})`;
+const PTF2=[{pre:"(",label:"x-coordinate"},{pre:",",post:")",label:"y-coordinate"}];
+const lcm=(a,b)=>Math.abs(a*b)/gcd(a,b);
+/* expression with rational coefficients: [[Q,"y"],[Q,""]] */
+function exQ(ts){let s="";for(const [c0,v] of ts){const c=toQ(c0),val=qv(c);if(val===0)continue;const a=toQ(Math.abs(c.n)===c.n?c:qneg(c));const one=a.n===1&&a.d===1;
+  const body=(v&&one?"":fh(a))+v;if(s==="")s=(val<0?M:"")+body;else s+=(val<0?" "+M+" ":" + ")+body}return s||"0"}
+const stdH=(a,b,c)=>`${ex([[a,"x"],[b,"y"]])} = ${sn(c)}`;
+const sats=(e,p)=>e[0]*p[0]+e[1]*p[1]===e[2];
+function niceStd(a,b,c){const g=gcd(gcd(a,b),c);a/=g;b/=g;c/=g;if(a<0||(a===0&&b<0)){a=-a;b=-b;c=-c}return[a,b,c]}
+
+/* one system: {form, disp:[html,html], eqs:[[a,b,c],[a,b,c]] in standard form, iso:{eq,v} if one is isolated, brk:[bool,bool]} */
+function makeSystem(x0,y0,form,cap){
+  for(let t=0;t<400;t++){
+    if(form==="cmp"){
+      const m1=cap&&Math.random()<.6?Q(nz(-3,3),pick([2,3])):Q(nz(-4,4),1);const m2=Q(nz(-4,4),1);if(qv(m1)===qv(m2))continue;
+      if(qv(qm(m1,x0))%1!==0)continue;const b1=qs(y0,qm(m1,x0)),b2=qs(y0,qm(m2,x0));if(Math.abs(qv(b1))>24||Math.abs(qv(b2))>24)continue;
+      const e1=niceStd(-m1.n,m1.d,b1.n*m1.d/b1.d);const e2=niceStd(-m2.n,1,qv(b2));
+      return{form,disp:[lineH(m1,b1),lineH(m2,b2)],eqs:[e1,e2],slopes:[[m1,b1],[m2,b2]]};
+    }
+    if(form==="iso"){
+      const A=nz(-5,5),B=nz(-5,5);if(gcd(A,B)!==1)continue;const C=A*x0+B*y0;if(Math.abs(C)>60)continue;
+      const second=[A,B,C],sd=stdH(A,B,C);
+      if(Math.random()<.55){/* y = mx + b */
+        const m=cap&&Math.random()<.5?Q(nz(-3,3),2):Q(nz(-4,4),1);if(qv(qm(m,x0))%1!==0)continue;const b=qs(y0,qm(m,x0));if(Math.abs(qv(b))>24)continue;
+        const e1=niceStd(-m.n,m.d,qv(b)*m.d);if(e1[0]*B===e1[1]*A)continue;
+        return{form,disp:[lineH(m,b),sd],eqs:[e1,second],iso:{eq:0,v:"y",coef:m,cst:b}};
+      }
+      const k=nz(-3,3),c=x0-k*y0;if(Math.abs(c)>20)continue;const e1=niceStd(1,-k,c);if(e1[0]*B===e1[1]*A)continue;
+      return{form,disp:[`x = ${ex([[k,"y"],[c,""]])}`,sd],eqs:[e1,second],iso:{eq:0,v:"x",coef:Q(k),cst:Q(c)}};
+    }
+    if(form==="std"){
+      let a1,b1,a2,b2;
+      if(cap){a1=nz(-5,5);b1=nz(-5,5);a2=nz(-5,5);b2=nz(-5,5);if([a1,b1,a2,b2].some(v=>Math.abs(v)<2))continue}
+      else{const one=pick([1,-1]);if(Math.random()<.5){a1=one;b1=nz(-4,4)}else{a1=nz(-4,4);b1=one}a2=nz(-5,5);b2=nz(-5,5)}
+      if(gcd(a1,b1)!==1||gcd(a2,b2)!==1||a1*b2===a2*b1)continue;
+      const c1=a1*x0+b1*y0,c2=a2*x0+b2*y0;if(Math.abs(c1)>60||Math.abs(c2)>70)continue;
+      const e1=niceStd(a1,b1,c1),e2=niceStd(a2,b2,c2);
+      return{form,disp:[stdH(...e1),stdH(...e2)],eqs:[e1,e2]};
+    }
+    /* brackets: p(x − d) + qy = r  and  Ax = B(y + e) + f */
+    const p=pick([2,3,4]),d=nz(-4,4),qy=nz(-4,4);const r=p*(x0-d)+qy*y0;if(Math.abs(r)>50)continue;
+    const e1=niceStd(p,qy,r+p*d);
+    let disp2,e2;
+    if(cap||Math.random()<.5){const A=pick([2,3,4,5]),B=pick([2,3,4]),e=nz(-4,4);const f=A*x0-B*(y0+e);if(Math.abs(f)>40)continue;
+      e2=niceStd(A,-B,B*e+f);disp2=`${A}x = ${B}${xMinus("y",-e)}${term(f,"")}`;}
+    else{const m=nz(-3,3),bb=y0-m*x0;if(Math.abs(bb)>20)continue;e2=niceStd(-m,1,bb);disp2=lineH(m,bb);}
+    if(e1[0]*e2[1]===e1[1]*e2[0])continue;
+    return{form,disp:[`${p}${xMinus("x",d)} ${qy<0?M:"+"} ${Math.abs(qy)===1?"":Math.abs(qy)}y = ${sn(r)}`,disp2],eqs:[e1,e2],brk:true};
+  }
+  return null;
+}
+
+/* worked steps for any of the systems above */
+function sysStepsFor(S,ans){
+  const [x0,y0]=ans,steps=[];
+  if(S.form==="cmp"){const [[m1,b1],[m2,b2]]=S.slopes;steps.push(...sysSteps(m1,b1,m2,b2));steps.push(["Point of intersection",`${PT(ans)}`]);return steps}
+  const E=S.eqs.map(e=>e.slice());
+  if(S.brk){steps.push(["Expand the brackets and tidy both equations into the form Ax + By = C",`① ${stdH(...E[0])}<br>② ${stdH(...E[1])}`])}
+  let eqI,v,coef,cst;
+  if(S.iso){eqI=S.iso.eq;v=S.iso.v;coef=S.iso.coef;cst=S.iso.cst}
+  else{/* isolate a variable whose coefficient is ±1 if there is one */
+    const opts=[];E.forEach((e,i)=>{if(Math.abs(e[1])===1)opts.push([i,"y"]);if(Math.abs(e[0])===1)opts.push([i,"x"])});
+    if(opts.length)[eqI,v]=opts[0];else{const best=[[0,"x",Math.abs(E[0][0])],[0,"y",Math.abs(E[0][1])],[1,"x",Math.abs(E[1][0])],[1,"y",Math.abs(E[1][1])]].sort((a,b)=>a[2]-b[2])[0];eqI=best[0];v=best[1]}
+    const e=E[eqI],cv=v==="x"?e[0]:e[1],cw=v==="x"?e[1]:e[0];coef=Q(-cw,cv);cst=Q(e[2],cv);
+    steps.push([`Isolate ${v} in ${eqI?"②":"①"}`,`${v} = ${exQ([[coef,v==="x"?"y":"x"],[cst,""]])}`]);}
+  const w=v==="x"?"y":"x",o=E[1-eqI],ov=v==="x"?o[0]:o[1],ow=v==="x"?o[1]:o[0];
+  const isoTxt=exQ([[coef,w],[cst,""]]);
+  steps.push([`Substitute into ${eqI?"①":"②"} (put brackets around it)`,`${ov===1?"":ov===-1?M:sn(ov)}(${isoTxt}) ${ow<0?M:"+"} ${Math.abs(ow)===1?"":Math.abs(ow)}${w} = ${sn(o[2])}`]);
+  const D=lcm(toQ(coef).d,toQ(cst).d);
+  const kW=qa(qm(ov,coef),ow),kC=qm(ov,cst);/* kW·w + kC = o[2] */
+  if(D>1){const a=qm(kW,D),b=qm(kC,D),c=o[2]*D;steps.push([`Multiply every term by ${D} to clear the fractions`,`${exQ([[qm(qm(ov,coef),D),w],[b,""],[ow*D,w]])} = ${sn(c)}`]);
+    steps.push(["Collect like terms",`${exQ([[a,w],[b,""]])} = ${sn(c)}  →  ${exQ([[a,w]])} = ${fh(qs(c,b))}`]);}
+  else{steps.push(["Expand and collect like terms",`${exQ([[qm(ov,coef),w],[kC,""],[ow,w]])} = ${sn(o[2])}  →  ${exQ([[kW,w]])} = ${fh(qs(o[2],kC))}`]);}
+  const wv=w==="x"?x0:y0,vv=v==="x"?x0:y0;
+  steps.push([`Solve for ${w}`,`${w} = ${sn(wv)}`]);
+  steps.push([`Sub ${w} = ${sn(wv)} into ${v} = ${isoTxt}`,`${v} = ${isoTxt.replace(new RegExp(w,"g"),`(${sn(wv)})`)} = ${sn(vv)}`]);
+  steps.push(["Point of intersection",PT(ans)]);
+  return steps;
+}
+const HINTS={cmp:"Both equations say what y equals, so set the right sides equal to each other. Solve for x, then sub x back in to get y.",
+  iso:"One equation already says what one variable equals. Substitute that expression (in brackets) into the other equation, solve, then sub back.",
+  std:"Isolate a variable in one equation (look for a coefficient of 1). Substitute that expression into the other equation, solve, then sub back.",
+  stdCap:"No variable has a coefficient of 1. Isolate one anyway (you’ll get fractions), substitute, then multiply every term by the denominator.",
+  brk:"Expand the brackets and tidy each equation into Ax + By = C first. Then isolate a variable and substitute."};
+function questionFor(S,ans,cap){
+  const [x0,y0]=ans,[e1,e2]=S.eqs;
+  const noOne=S.form==="std"&&!S.eqs.some(e=>Math.abs(e[0])===1||Math.abs(e[1])===1);
+  return{form:S.form,disp:S.disp,ans:{type:"num",fields:PTF2,vals:[x0,y0]},target:ans,
+    hint:noOne?HINTS.stdCap:HINTS[S.form],steps:sysStepsFor(S,ans),
+    missFn:v=>{if(!Number.isInteger(v[0])||!Number.isInteger(v[1]))return "";if(v[0]===y0&&v[1]===x0&&x0!==y0)return "You have the right numbers in the wrong order. Write x first, then y.";
+      const a=sats(e1,v),b=sats(e2,v);if(a&&!b)return "That point works in ① but not in ②. Check your substitution.";if(b&&!a)return "That point works in ② but not in ①. Check your substitution.";return ""},
+    fieldMsg:["Your y is right. Check your x.","Your x is right. Sub it back into one of the equations to get y."]};
+}
+function formFor(turn,cap){
+  if(cap)return pick(["std","std","brk","brk","iso","cmp"]);
+  if(turn<2)return "cmp";if(turn<5)return pick(["iso","iso","cmp"]);if(turn<9)return pick(["std","std","iso"]);return pick(["std","brk","iso","brk"]);
+}
+function makeQuestion(target,form,cap){let S=null;for(let t=0;t<20&&!S;t++)S=makeSystem(target[0],target[1],form,cap);if(!S)S=makeSystem(target[0],target[1],"std",false);return questionFor(S,target,cap)}
+
+/* =================== the teacher's nine systems (training drill) =================== */
+const DRILL=[
+  {form:"cmp",disp:["y = 3x − 2","y = x + 6"],eqs:[[-3,1,-2],[-1,1,6]],slopes:[[Q(3),Q(-2)],[Q(1),Q(6)]],ans:[4,10]},
+  {form:"cmp",disp:["y = −2x + 19","y = x − 2"],eqs:[[2,1,19],[-1,1,-2]],slopes:[[Q(-2),Q(19)],[Q(1),Q(-2)]],ans:[7,5]},
+  {form:"iso",disp:["y = 3x − 4","x + 2y = 6"],eqs:[[-3,1,-4],[1,2,6]],iso:{eq:0,v:"y",coef:Q(3),cst:Q(-4)},ans:[2,2]},
+  {form:"iso",disp:["x = y + 2","2x − 3y = 2"],eqs:[[1,-1,2],[2,-3,2]],iso:{eq:0,v:"x",coef:Q(1),cst:Q(2)},ans:[4,2]},
+  {form:"std",disp:["x − y = 1","2x + y = 20"],eqs:[[1,-1,1],[2,1,20]],ans:[7,6]},
+  {form:"std",disp:["3x + y = 11","4x − 2y = 8"],eqs:[[3,1,11],[4,-2,8]],ans:[3,2]},
+  {form:"std",disp:["2x − y = 7","3x + 4y = 49"],eqs:[[2,-1,7],[3,4,49]],ans:[7,7]},
+  {form:"std",disp:["4x − 3y = −10","2x + 5y = 60"],eqs:[[4,-3,-10],[2,5,60]],ans:[5,10]},
+  {form:"brk",disp:["3(x − 2) + 2y = 13","5x = 4(y + 3) + 5"],eqs:[[3,2,19],[5,-4,17]],brk:true,ans:[5,2]}];
+const DRILL_FLEET=[[[2,2],[3,2],[4,2],[5,2]],[[7,5],[7,6],[7,7]],[[4,10],[5,10]]];
+
+/* =================== fleets, shots and the enemy =================== */
+const SHIPS=[{len:4,mine:"Destroyer",sub:"Attack sub"},{len:3,mine:"Frigate",sub:"Patrol sub"},{len:2,mine:"Patrol boat",sub:"Mini-sub"}];
+const key=(x,y)=>x+","+y;
+const inBoard=(x,y)=>x>=1&&x<=N&&y>=1&&y<=N;
+function placeFleet(){
+  const occ={},fleet=[];
+  for(let s=0;s<SHIPS.length;s++){const L=SHIPS[s].len;
+    for(let t=0;t<500;t++){const hor=Math.random()<.5,x=ri(1,hor?N-L+1:N),y=ri(1,hor?N:N-L+1);
+      const cells=Array.from({length:L},(_,i)=>hor?[x+i,y]:[x,y+i]);
+      if(cells.some(([cx,cy])=>[-1,0,1].some(dx=>[-1,0,1].some(dy=>occ[key(cx+dx,cy+dy)]!=null))))continue;
+      cells.forEach(c=>occ[key(...c)]=s);fleet.push(cells);break}}
+  return fleet;
+}
+const BLAST=[[-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1]],CROSS=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
+const cellsOf=(c,shape)=>shape.map(([dx,dy])=>[c[0]+dx,c[1]+dy]).filter(([x,y])=>inBoard(x,y));
+/* a board: fleet + shots taken at it */
+function newBoard(fleet){const occ={};fleet.forEach((cells,s)=>cells.forEach(c=>occ[key(...c)]=s));return{fleet,occ,shot:{},sunk:new Set()}}
+function fireAt(B,center,shape){/* returns {cells:[{x,y,hit,ship}], sunkNow:[ship]} */
+  const res={cells:[],sunkNow:[]};
+  for(const [x,y] of cellsOf(center,shape)){const k=key(x,y);if(B.shot[k])continue;const s=B.occ[k];B.shot[k]=s!=null?"H":"M";res.cells.push({x,y,hit:s!=null,ship:s})}
+  B.fleet.forEach((cells,s)=>{if(!B.sunk.has(s)&&cells.every(c=>B.shot[key(...c)]==="H")){B.sunk.add(s);res.sunkNow.push(s)}});
+  return res;
+}
+const allSunk=B=>B.sunk.size===B.fleet.length;
+const unknownIn=(B,c,shape)=>cellsOf(c,shape).filter(([x,y])=>!B.shot[key(x,y)]).length;
+function liveHits(B){const out=[];for(const k in B.shot)if(B.shot[k]==="H"&&!B.sunk.has(B.occ[k]))out.push(k.split(",").map(Number));return out}
+/* where the next firing solution lands: often near an unsunk hit, otherwise somewhere useful */
+function pickTarget(B,taken){
+  const all=[];for(let x=1;x<=N;x++)for(let y=1;y<=N;y++)all.push([x,y]);
+  const free=all.filter(c=>!B.shot[key(...c)]&&!taken.some(t=>t[0]===c[0]&&t[1]===c[1]));
+  const hits=liveHits(B);
+  if(hits.length&&Math.random()<.55){const near=free.filter(c=>hits.some(h=>Math.max(Math.abs(h[0]-c[0]),Math.abs(h[1]-c[1]))<=2)&&unknownIn(B,c,BLAST)>=3);if(near.length)return pick(near)}
+  const good=free.filter(c=>unknownIn(B,c,BLAST)>=5&&!taken.some(t=>Math.max(Math.abs(t[0]-c[0]),Math.abs(t[1]-c[1]))<=1));if(good.length)return pick(good);
+  const ok=free.filter(c=>unknownIn(B,c,BLAST)>=2);if(ok.length)return pick(ok);
+  if(free.length)return pick(free);
+  return pick(all.filter(c=>unknownIn(B,c,BLAST)>0));
+}
+const TORP=[[[-1,0],[0,0],[1,0]],[[0,-1],[0,0],[0,1]]];/* the enemy's torpedo run: 3 squares in a row, across or up-down */
+function enemyShot(B){
+  const all=[];for(let x=1;x<=N;x++)for(let y=1;y<=N;y++)all.push([x,y]);
+  const shape=pick(TORP),hits=liveHits(B);
+  if(hits.length&&Math.random()<.6){const near=all.filter(c=>!B.shot[key(...c)]&&hits.some(h=>Math.abs(h[0]-c[0])+Math.abs(h[1]-c[1])===1));if(near.length)return{center:pick(near),shape}}
+  const good=all.filter(c=>!B.shot[key(...c)]&&unknownIn(B,c,shape)>=2);if(good.length)return{center:pick(good),shape};
+  return{center:pick(all.filter(c=>unknownIn(B,c,shape)>0)),shape};
+}
+/* deterministic sub-seeds so a save code can replay a battle exactly */
+const subSeed=(seed,tag,i)=>(fnvS(seed+"|"+tag+"|"+i)&0x7fffffff);
+function fnvS(s){let h=0x811c9dc5;for(let k=0;k<s.length;k++){h^=s.charCodeAt(k);h=Math.imul(h,0x01000193)>>>0}return h>>>0}
+
+/* =================== game state =================== */
+const $=id=>document.getElementById(id);
+let G=null;
+const LETTER="ABC";
+function formForIdx(i,cap){if(cap)return pick(["std","std","brk","brk","iso","cmp"]);if(i<3)return "cmp";if(i<6)return pick(["iso","iso","cmp"]);if(i<10)return pick(["std","std","iso"]);return pick(["std","brk","iso","brk"])}
+function newStats(){return{solved:0,misfire:0,hints:0,steps:0,hits:0,sunk:0,lost:0,dmg:0,turns:0,forms:{cmp:{s:0,f:0},iso:{s:0,f:0},std:{s:0,f:0},brk:{s:0,f:0}}}}
+function makeSide(idx,name,ownFleet,targetBoard){return{idx,name,own:newBoard(ownFleet),target:targetBoard,cards:[null,null,null],cardN:0,stats:newStats(),msgs:[]}}
+function fleetFor(seed,tag,n){return withSeed(subSeed(seed,tag,n),placeFleet)}
+function newCard(side){const i=side.cardN++;const taken=side.cards.filter(Boolean).map(c=>c.target);
+  return withSeed(subSeed(G.seed,"card"+side.idx,i),()=>{const target=pickTarget(side.target,taken);const q=makeQuestion(target,formForIdx(i,G.cap),G.cap);return{i,target,q,tries:0,hinted:false,stepped:false,typed:["",""],msg:""}})}
+function newGame(opts){
+  const seed=opts.seed!=null?opts.seed:Math.floor(Math.random()*4096);
+  G={mode:opts.mode,cap:!!opts.cap,seed,names:opts.names,fleetN:[0,0],enemyN:0,log:[],turn:0,over:false,busy:false,t0:performance.now(),elPrev:0,saves:0,fx:null,efx:null};
+  if(G.mode==="drill"){G.drill={solved:Array(9).fill(false),tries:Array(9).fill(0),hinted:Array(9).fill(false),stepped:Array(9).fill(false),typed:DRILL.map(()=>["",""]),msg:{}};G.stats=newStats();return G}
+  const E=newBoard(fleetFor(seed,"E",0));
+  if(G.mode==="duel"){
+    const F0=fleetFor(seed,"P0",0),F1=fleetFor(seed,"P1",0);
+    G.sides=[makeSide(0,G.names[0],F0,null),makeSide(1,G.names[1],F1,null)];G.sides[0].target=G.sides[1].own;G.sides[1].target=G.sides[0].own;G.cur=0;
+  }else{G.sides=[makeSide(0,G.names[0],fleetFor(seed,"P0",0),E)];G.cur=0}
+  return G;
+}
+function startCards(){for(const s of G.sides){s.cards=[null,null,null];s.cardN=0;for(let k=0;k<3;k++)s.cards[k]=newCard(s)}}
+function reshuffle(pi){G.fleetN[pi]++;const s=G.sides[pi];const nb=newBoard(fleetFor(G.seed,"P"+pi,G.fleetN[pi]));s.own=nb;if(G.mode==="duel")G.sides[1-pi].target=nb}
+const me=()=>G.sides[G.cur],them=()=>G.sides[1-G.cur];
+const realMin=()=>Math.round((performance.now()-G.t0)/60000+G.elPrev);
+
+/* ---------- one turn ---------- */
+function applyFire(slot,quiet){
+  const s=me(),c=s.cards[slot];G.log.push(slot);s.stats.turns++;
+  if(!quiet){s.stats.solved++;const F=s.stats.forms[c.q.form];F.s++;if(c.tries===0)F.f++}
+  const res=fireAt(s.target,c.target,BLAST);const hits=res.cells.filter(x=>x.hit).length;s.stats.hits+=hits;s.stats.sunk+=res.sunkNow.length;
+  const shipName=k=>G.mode==="duel"?SHIPS[k].sub:SHIPS[k].sub;
+  s.msgs.unshift(`<p class="me">▸ ${LETTER[slot]} lands at <b>${PT(c.target)}</b>: ${hits?`<span class="gold">${hits} hit${hits>1?"s":""}!</span>`:"no contact."}${res.sunkNow.map(k=>` <span class="gold">${shipName(k)} (${SHIPS[k].len}) SUNK!</span>`).join("")}</p>`);
+  G.fx={cells:res.cells,center:c.target};
+  const win=allSunk(s.target);
+  s.cards[slot]=win?null:newCard(s);
+  return{res,win};
+}
+function applyMisfire(slot,quiet){const s=me();G.log.push(3);s.stats.turns++;if(!quiet){s.stats.misfire++;const c=s.cards[slot];if(c)c.tries++}
+  s.msgs.unshift(`<p class="bad">▸ Misfire on ${LETTER[slot]}: the answer didn’t match where that solution lands.</p>`);G.fx=null}
+function enemyTurn(n){/* single player only: the computer fires n torpedo runs at your fleet */
+  const s=me();let lostNow=false;const cells=[];
+  for(let k=0;k<n;k++){const sh=withSeed(subSeed(G.seed,"enemy",G.enemyN++),()=>enemyShot(s.own));const res=fireAt(s.own,sh.center,sh.shape);cells.push(...res.cells);
+    const hits=res.cells.filter(x=>x.hit).length;s.stats.dmg+=hits;s.stats.lost+=res.sunkNow.length;
+    s.msgs.unshift(`<p class="them">◂ Enemy torpedo run at <b>${PT(sh.center)}</b> (${sh.shape[0][0]?"across":"up and down"}): ${hits?`<span class="bad">${hits} hit${hits>1?"s":""} on your fleet!</span>`:"missed."}${res.sunkNow.map(k=>` <span class="bad">Your ${SHIPS[k].mine} was sunk.</span>`).join("")}</p>`);
+    if(allSunk(s.own)){lostNow=true;break}}
+  G.efx={cells};return lostNow;
+}
+function replay(log){/* rebuild a saved battle exactly */
+  for(const e of log){if(G.over)break;
+    if(e<3){const {win}=applyFire(e,true);if(win){G.over=true;break}if(G.mode==="battle"&&enemyTurn(1)){G.over=true;break}}
+    else{applyMisfire(0,true);if(G.mode==="battle"&&enemyTurn(2)){G.over=true;break}}
+    G.turn++;}
+  G.fx=null;G.efx=null;
+}
+
+/* =================== boards (SVG) =================== */
+const C=44,ML=34,MR=18,MT=10,MB=32,BW=N*C+ML+MR,BH=N*C+MT+MB;
+const BX=x=>ML+(x-1)*C,BY=y=>MT+(N-y)*C;
+function shipOutline(cells,col,fill,lw=3){const xs=cells.map(c=>c[0]),ys=cells.map(c=>c[1]);const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  return `<rect x="${BX(x0)+5}" y="${BY(y1)+5}" width="${(x1-x0+1)*C-10}" height="${(y1-y0+1)*C-10}" rx="14" fill="${fill}" stroke="${col}" stroke-width="${lw}"/>`}
+function boardSVG(B,o={}){
+  let s=`<svg viewBox="0 0 ${BW} ${BH}" role="img" aria-label="${o.label||"Board"}" ${o.id?`id="${o.id}"`:""}><rect width="${BW}" height="${BH}" fill="#031009"/>`;
+  s+=`<g opacity=".55">${[1,2,3,4].map(r=>`<circle cx="${BX(5.5)+C/2}" cy="${BY(5.5)+C/2}" r="${r*C*1.25}" fill="none" stroke="rgba(76,242,155,.10)"/>`).join("")}</g>`;
+  for(let i=0;i<=N;i++){s+=`<path d="M${ML+i*C} ${MT}V${MT+N*C}M${ML} ${MT+i*C}H${ML+N*C}" stroke="rgba(76,242,155,${i===0||i===N?.45:.16})" stroke-width="${i===0||i===N?1.5:1}"/>`}
+  if(!o.mini){for(let i=1;i<=N;i++){s+=`<text x="${BX(i)+C/2}" y="${MT+N*C+21}" text-anchor="middle" font-size="14" font-weight="700" fill="#86b8a0">${i}</text><text x="${ML-8}" y="${BY(i)+C/2+5}" text-anchor="end" font-size="14" font-weight="700" fill="#86b8a0">${i}</text>`}
+    s+=`<text x="${ML+N*C}" y="${MT+N*C+21}" text-anchor="end" font-size="13" fill="#4cf29b" font-style="italic" dx="11">x</text><text x="${ML-8}" y="${MT-1}" text-anchor="end" font-size="13" fill="#4cf29b" font-style="italic" dy="9">y</text>`}
+  if(o.showShips)B.fleet.forEach((cells,k)=>{s+=shipOutline(cells,B.sunk.has(k)?"#ff6a5f":"#4fb3e8",B.sunk.has(k)?"rgba(255,106,95,.18)":"rgba(79,179,232,.28)",2.5)});
+  else B.fleet.forEach((cells,k)=>{if(B.sunk.has(k))s+=shipOutline(cells,"#ff6a5f","rgba(255,106,95,.16)",3)});
+  for(const k in B.shot){const [x,y]=k.split(",").map(Number),cx=BX(x)+C/2,cy=BY(y)+C/2;
+    if(B.shot[k]==="H")s+=`<g><path d="M${cx-11} ${cy-11}L${cx+11} ${cy+11}M${cx+11} ${cy-11}L${cx-11} ${cy+11}" stroke="${o.showShips?"#ff6a5f":"#ffc24a"}" stroke-width="5" stroke-linecap="round"/></g>`;
+    else s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="none" stroke="#3f8a69" stroke-width="2"/>`}
+  if(o.fx&&o.fx.cells){for(const c of o.fx.cells)s+=`<rect x="${BX(c.x)+2}" y="${BY(c.y)+2}" width="${C-4}" height="${C-4}" rx="6" fill="${c.hit?"rgba(255,194,74,.35)":"rgba(76,242,155,.16)"}" class="flash"/>`;
+    if(o.fx.center){const [cx,cy]=o.fx.center,x0=Math.max(1,cx-1),x1=Math.min(N,cx+1),y0=Math.max(1,cy-1),y1=Math.min(N,cy+1);
+      const L=BX(x0)+1,T=BY(y1)+1,W=(x1-x0+1)*C-2,H=(y1-y0+1)*C-2,mx=BX(cx)+C/2,my=BY(cy)+C/2;
+      s+=`<rect x="${L}" y="${T}" width="${W}" height="${H}" fill="none" stroke="#ffc24a" stroke-width="2" stroke-dasharray="6 5" rx="8"/><path d="M${mx} ${my-7}L${mx+7} ${my}L${mx} ${my+7}L${mx-7} ${my}Z" fill="#ffc24a" stroke="#03130b" stroke-width="1.5"/>`;
+      const lx=Math.max(ML+62,Math.min(ML+N*C-62,L+W/2)),ly=y1<N?T-7:T+H+17;
+      s+=`<text x="${lx}" y="${ly}" text-anchor="middle" font-size="13" font-weight="700" fill="#ffc24a" stroke="#031009" stroke-width="4" paint-order="stroke">Last shot ${PT(o.fx.center)}</text>`}}
+  if(o.drill){for(const [x,y] of o.drill)s+=`<rect x="${BX(x)+3}" y="${BY(y)+3}" width="${C-6}" height="${C-6}" rx="6" fill="rgba(255,194,74,.3)" stroke="#ffc24a" stroke-width="2"/>`}
+  s+=`<g id="${o.id?o.id+"Hov":"hov"}"></g></svg>`;
+  return s;
+}
+function wireHover(svgId){
+  const svg=$(svgId);if(!svg)return;const hov=$(svgId+"Hov");
+  const move=e=>{const r=svg.getBoundingClientRect(),sx=(e.clientX-r.left)*BW/r.width,sy=(e.clientY-r.top)*BH/r.height;
+    const x=Math.floor((sx-ML)/C)+1,y=N-Math.floor((sy-MT)/C);
+    if(x<1||x>N||y<1||y>N){hov.innerHTML="";$("hoverTxt").textContent="Point at the radar to see where a depth charge would hit.";return}
+    hov.innerHTML=`<rect x="${BX(Math.max(1,x-1))}" y="${BY(Math.min(N,y+1))}" width="${(Math.min(N,x+1)-Math.max(1,x-1)+1)*C}" height="${(Math.min(N,y+1)-Math.max(1,y-1)+1)*C}" fill="rgba(76,242,155,.10)" stroke="#4cf29b" stroke-width="2" stroke-dasharray="5 4"/><rect x="${BX(x)+C/2-4}" y="${BY(y)+C/2-4}" width="8" height="8" fill="#4cf29b"/>`;
+    $("hoverTxt").innerHTML=`A depth charge at <b>(${x}, ${y})</b> covers the 3 by 3 area around it.`};
+  svg.addEventListener("mousemove",move);svg.addEventListener("mouseleave",()=>{hov.innerHTML=""});
+}
+function addSweep(boxId){const box=$(boxId);if(!box||box.querySelector(".sweep"))return;const d=document.createElement("div");d.className="sweep";const sz=Math.hypot(box.clientWidth,box.clientHeight);d.style.width=d.style.height=sz+"px";d.style.left=(box.clientWidth-sz)/2+"px";d.style.top=(box.clientHeight-sz)/2+"px";box.appendChild(d)}
+
+/* =================== screens =================== */
+function show(id){["sTitle","sFleet","sGame","sDrill","sEnd","sCheck"].forEach(s=>$(s).hidden=s!==id);
+  $("saveFab").hidden=!((id==="sGame"&&G&&G.mode!=="duel")||id==="sDrill");if(id!=="sGame"&&id!=="sDrill"){$("saveLayer").hidden=true;$("saveLayer").innerHTML=""}closeOv();window.scrollTo(0,0)}
+function openOv(html){const ov=$("ov");ov.innerHTML=html;ov.hidden=false;ov.scrollTop=0;const f=ov.querySelector("button,input");if(f)f.focus({preventScroll:true})}
+function closeOv(){const ov=$("ov");ov.hidden=true;ov.innerHTML=""}
+const msg=(cls,t,b)=>`<div class="msg ${cls}"><strong>${t}</strong>${b||""}</div>`;
+const MODEL={battle:"Battle the computer",practice:"Target practice",duel:"Two players",drill:"Training drill"};
+
+/* ---------- fleet setup ---------- */
+let setupFor=0;
+function showFleet(pi){
+  setupFor=pi;const s=G.sides[pi];show("sFleet");
+  $("fleetTag").textContent=`${MODEL[G.mode]} · ${G.cap?"Captain":"Cadet"}`;$("fleetTitle").textContent=G.mode==="duel"?`${s.name}’s fleet`:"Your fleet";
+  $("fleetText").textContent=G.mode==="duel"?`${s.name}, keep this screen to yourself. Your three ships are placed at random. Shuffle them until you like the layout. Ships never touch, not even at the corners.`:"Your three ships are placed at random. Shuffle them until you like the layout. Ships never touch, not even at the corners.";
+  const names=G.mode==="duel"?SHIPS.map(x=>x.sub):SHIPS.map(x=>x.mine);
+  $("fleetList").innerHTML=SHIPS.map((x,k)=>`<li>${names[k]}: ${x.len} squares</li>`).join("")+(G.mode==="duel"?"":`<li>Enemy subs: ${SHIPS.map(x=>`${x.sub} (${x.len})`).join(", ")}</li>`);
+  $("fleetBoard").innerHTML=boardSVG(s.own,{showShips:true,label:"Your fleet"});
+  $("fleetGo").textContent=G.mode==="duel"&&pi===0?`Done: pass to ${G.sides[1].name}`:"Start the battle";
+}
+$("shuffleBtn").onclick=()=>{reshuffle(setupFor);$("fleetBoard").innerHTML=boardSVG(G.sides[setupFor].own,{showShips:true,label:"Your fleet"})};
+$("fleetGo").onclick=()=>{
+  if(G.mode==="duel"&&setupFor===0){passScreen(1,()=>showFleet(1));return}
+  startCards();G.t0=performance.now();
+  if(G.mode==="duel"){G.cur=0;passScreen(0,()=>{show("sGame");renderGame()})}else{show("sGame");renderGame()}
+};
+function passScreen(pi,go){
+  const n=G.sides[pi].name;$("sFleet").hidden=true;$("sGame").hidden=true;
+  openOv(`<div class="ovcard" role="dialog" aria-label="Pass the Chromebook"><div class="lbl">Two players</div><h3>Pass to ${esc(n)}</h3><p>${esc(G.sides[1-pi].name)}, hand the Chromebook to ${esc(n)} and look away.</p><button class="btn primary" id="passGo" type="button">I’m ${esc(n)}: show my screen</button></div>`);
+  $("passGo").onclick=()=>{closeOv();go()};
+}
+
+/* ---------- battle ---------- */
+function chips(){const s=me(),o=G.mode==="duel"?them():null;
+  const pips=(B,mine)=>`<span class="pips${mine?" mine":""}">${B.fleet.map((_,k)=>`<i class="${B.sunk.has(k)?"x":""}"></i>`).join("")}</span>`;
+  return `<span class="chip">Turn <b>${G.turn+1}</b></span><span class="chip">${G.mode==="duel"?esc(o.name)+"’s subs":"Enemy subs"} ${pips(s.target,false)}</span>${G.mode==="practice"?"":`<span class="chip">Your fleet ${pips(s.own,true)}</span>`}<span class="chip">Misfires <b>${s.stats.misfire}</b></span>`}
+function renderGame(){
+  const s=me();
+  $("hudMode").textContent=`${MODEL[G.mode]} · ${G.cap?"Captain":"Cadet"}${G.mode==="duel"?` · ${s.name}’s turn`:""}`;
+  $("chips").innerHTML=chips();
+  $("radarLbl").textContent=G.mode==="duel"?`${them().name}’s waters`:"Enemy waters";
+  $("radar").innerHTML=boardSVG(s.target,{id:"rsvg",fx:G.fx,label:"Enemy waters"});wireHover("rsvg");addSweep("radarBox");
+  $("miniLbl").textContent=G.mode==="practice"?"Your fleet (safe in practice)":"Your fleet";
+  $("mini").innerHTML=boardSVG(s.own,{mini:true,showShips:true,fx:G.efx,label:"Your fleet"});
+  $("log").innerHTML=s.msgs.slice(0,10).join("")||`<p class="small">Battle log. Solve a firing solution and fire to start.</p>`;
+  $("turnTxt").textContent=`${s.stats.hits} of 9 enemy squares hit`;
+  renderCards();
+}
+function renderCards(){
+  const s=me();
+  $("cards").innerHTML=s.cards.map((c,k)=>{if(!c)return "";const q=c.q;
+    return `<div class="card${G.busy?" busy":""}" id="card${k}"><div class="chead"><b>${LETTER[k]}</b><span>${FORMNAME[q.form]}</span></div>
+      <div class="eqs"><span data-n="①">${q.disp[0]}</span><span data-n="②">${q.disp[1]}</span></div>
+      <div class="ans"><span>(</span><input id="a${k}_0" aria-label="${LETTER[k]} x-coordinate" autocomplete="off" value="${esc(c.typed[0])}"><span>,</span><input id="a${k}_1" aria-label="${LETTER[k]} y-coordinate" autocomplete="off" value="${esc(c.typed[1])}"><span>)</span>
+        <button class="fbtn fire" type="button" id="f${k}" ${G.busy||G.over?"disabled":""}>Fire ${LETTER[k]}</button><button class="fbtn" type="button" id="h${k}">Hint</button><button class="fbtn${c.tries>=3?" nudge":""}" type="button" id="s${k}" ${c.hinted||c.tries>=3?"":"disabled title=\"Open the hint first\""}>Steps</button></div>
+      <div id="m${k}">${c.msg||""}</div><div id="hb${k}">${c.hinted?msg("hint","Hint",q.hint):""}</div><div id="sb${k}">${c.stepped?stepsHTML(q):""}</div></div>`}).join("");
+  s.cards.forEach((c,k)=>{if(!c)return;
+    [0,1].forEach(j=>{const el=$(`a${k}_${j}`);el.addEventListener("input",()=>{c.typed[j]=el.value;el.classList.remove("x")});el.addEventListener("keydown",e=>{if(e.key==="Enter")onFire(k)})});
+    $("f"+k).onclick=()=>onFire(k);$("h"+k).onclick=()=>{if(!c.hinted){c.hinted=true;s.stats.hints++}renderCards()};
+    $("s"+k).onclick=()=>{if(!c.stepped){c.stepped=true;s.stats.steps++}renderCards()};});
+}
+const stepsHTML=q=>`<div class="steps"><ol>${q.steps.map(([w,k])=>`<li><span class="why">${w}</span><span class="work">${k}</span></li>`).join("")}</ol></div>`;
+function onFire(k){
+  if(G.busy||G.over)return;const s=me(),c=s.cards[k];if(!c)return;
+  const vals=[$(`a${k}_0`).value,$(`a${k}_1`).value];const r=check(c.q,vals);
+  if(r.s==="empty"){c.msg=msg("hint","Not yet",r.msg);$("m"+k).innerHTML=c.msg;return}
+  if(r.s==="ok"){
+    const {res,win}=applyFire(k,false);c.msg="";
+    if(win){G.turn++;G.over=true;renderGame();setTimeout(()=>{G.over=false;endGame(true)},900);return}
+    afterShot(1);return;
+  }
+  applyMisfire(k,false);c.msg=msg("bad","Misfire!",r.msg);
+  if(c.tries===2&&!c.hinted){c.hinted=true;s.stats.hints++}
+  afterShot(2);
+}
+function afterShot(n){
+  G.busy=true;renderGame();
+  if(G.mode==="battle"){setTimeout(()=>{const lost=enemyTurn(n);G.turn++;G.busy=false;if(lost)G.over=true;renderGame();if(lost)setTimeout(()=>{G.over=false;endGame(false)},900)},750);return}
+  if(G.mode==="duel"){G.turn+=G.cur===1?1:0;setTimeout(()=>{G.busy=false;const nxt=1-G.cur;
+      const b=document.createElement("div");b.innerHTML=`<div class="row" style="margin-top:8px"><button class="btn primary" id="endTurn" type="button">End turn: pass to ${esc(G.sides[nxt].name)}</button></div>`;
+      $("log").prepend(b);renderCardsLocked();$("endTurn").onclick=()=>{G.cur=nxt;G.fx=null;passScreen(nxt,()=>{show("sGame");renderGame()})};$("endTurn").focus()},500);return}
+  G.turn++;G.busy=false;renderGame();
+}
+function renderCardsLocked(){document.querySelectorAll("#cards .fbtn.fire").forEach(b=>b.disabled=true)}
+
+/* ---------- training drill ---------- */
+function renderDrill(){
+  const D=G.drill,found=DRILL.filter((d,i)=>D.solved[i]).map(d=>d.ans);
+  const B={fleet:DRILL_FLEET,occ:{},shot:{},sunk:new Set()};DRILL_FLEET.forEach((cells,k)=>{if(cells.every(c=>found.some(f=>f[0]===c[0]&&f[1]===c[1])))B.sunk.add(k)});
+  $("dradar").innerHTML=boardSVG(B,{drill:found,label:"Hidden fleet"});addSweep("dradarBox");
+  $("dchips").innerHTML=`<span class="chip">Solved <b>${found.length}</b> of 9</span><span class="chip">Ships found <b>${B.sunk.size}</b> of 3</span><span class="chip">Wrong answers <b>${G.stats.misfire}</b></span>`;
+  $("dcards").innerHTML=`<div class="drillgrid">${DRILL.map((d,i)=>{const q=drillQ(i),ok=D.solved[i];return `<div class="card"><div class="chead"><b>${i+1}</b><span>${FORMNAME[d.form]}</span></div><div class="eqs"><span data-n="①">${d.disp[0]}</span><span data-n="②">${d.disp[1]}</span></div>
+    <div class="ans"><span>(</span><input id="d${i}_0" aria-label="System ${i+1} x" autocomplete="off" value="${ok?d.ans[0]:esc(D.typed[i][0])}" ${ok?"disabled":""}><span>,</span><input id="d${i}_1" aria-label="System ${i+1} y" autocomplete="off" value="${ok?d.ans[1]:esc(D.typed[i][1])}" ${ok?"disabled":""}><span>)</span>
+    ${ok?`<span class="ok" style="font-size:1rem">✓ found</span>`:`<button class="fbtn fire" type="button" id="dc${i}">Check</button><button class="fbtn" type="button" id="dh${i}">Hint</button><button class="fbtn${D.tries[i]>=3?" nudge":""}" type="button" id="ds${i}" ${D.hinted[i]||D.tries[i]>=3?"":"disabled"}>Steps</button>`}</div>
+    <div>${D.msg[i]||""}</div>${!ok&&D.hinted[i]?msg("hint","Hint",q.hint):""}${!ok&&D.stepped[i]?stepsHTML(q):""}</div>`}).join("")}</div>`;
+  DRILL.forEach((d,i)=>{if(D.solved[i])return;[0,1].forEach(j=>{const el=$(`d${i}_${j}`);el.addEventListener("input",()=>{D.typed[i][j]=el.value});el.addEventListener("keydown",e=>{if(e.key==="Enter")drillCheck(i)})});
+    $("dc"+i).onclick=()=>drillCheck(i);$("dh"+i).onclick=()=>{if(!D.hinted[i]){D.hinted[i]=true;G.stats.hints++}renderDrill()};$("ds"+i).onclick=()=>{if(!D.stepped[i]){D.stepped[i]=true;G.stats.steps++}renderDrill()}});
+}
+const drillQs={};function drillQ(i){return drillQs[i]||(drillQs[i]=questionFor(DRILL[i],DRILL[i].ans,false))}
+function drillCheck(i){const D=G.drill,q=drillQ(i);const r=check(q,[$(`d${i}_0`).value,$(`d${i}_1`).value]);
+  if(r.s==="empty"){D.msg[i]=msg("hint","Not yet",r.msg);renderDrill();return}
+  if(r.s==="ok"){D.solved[i]=true;D.msg[i]="";G.stats.solved++;const F=G.stats.forms[DRILL[i].form];F.s++;if(D.tries[i]===0)F.f++;G.stats.hits++;renderDrill();if(D.solved.every(Boolean))setTimeout(()=>endGame(true),900);return}
+  D.tries[i]++;G.stats.misfire++;D.msg[i]=msg("bad","Not quite",r.msg);if(D.tries[i]===2&&!D.hinted[i]){D.hinted[i]=true;G.stats.hints++}renderDrill()}
+
+/* =================== codes =================== */
+const B32="0123456789ABCDEFGHJKMNPQRSTVWXYZ",SALT="subhunt|";
+const normName=n=>String(n).toLowerCase().replace(/\s+/g," ").trim();
+const DAYZ=Date.UTC(2026,0,1);
+function dayNum(d){return Math.max(0,Math.min(2047,Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-DAYZ)/864e5)))}
+const CF=[["ver",2],["mode",2],["level",1],["status",2],["solved",6],["misfire",6],["hints",5],["steps",5],["hits",5],["sunk",2],["lost",2],["dmg",4],["cs",4],["cf",4],["is",4],["if",4],["ss",4],["sf",4],["bs",4],["bf",4],["el",6],["day",11],["name",12],["run",12],["save",4],["fleet",4],["logn",7],["logchk",7]];
+const MODES=["practice","battle","duel","drill"];
+function packCode(o,logBits=""){
+  o.logn=logBits.length;o.logchk=fnvS(SALT+"L"+logBits)&0x7F;
+  let bits="";for(const [k,b] of CF){const v=Math.max(0,Math.min(2**b-1,Math.floor(o[k]||0)));bits+=v.toString(2).padStart(b,"0")}
+  bits+=(fnvS(SALT+bits)&0x1FFF).toString(2).padStart(13,"0");
+  if(logBits)bits+=logBits.padEnd(Math.ceil(logBits.length/5)*5,"0");
+  let s="";for(let i=0;i<bits.length;i+=5)s+=B32[parseInt(bits.slice(i,i+5),2)];return s.match(/.{1,5}/g).join("-")}
+function unpackCode(str){const s=String(str).toUpperCase().replace(/[^0-9A-Z]/g,"").replace(/O/g,"0").replace(/[IL]/g,"1");if(s.length<30)return null;
+  let bits="";for(const ch of s){const k=B32.indexOf(ch);if(k<0)return null;bits+=k.toString(2).padStart(5,"0")}
+  const body=bits.slice(0,137);if((fnvS(SALT+body)&0x1FFF)!==parseInt(bits.slice(137,150),2))return null;
+  const o={};let p=0;for(const [k,b] of CF){o[k]=parseInt(body.slice(p,p+b),2);p+=b}if(o.ver!==1)return null;
+  const lb=bits.slice(150,150+o.logn);o.logOk=lb.length===o.logn&&(fnvS(SALT+"L"+lb)&0x7F)===o.logchk;o.logBits=lb;return o}
+function fnvName(n){return fnvS(normName(n))&0xFFF}
+function codeFor(side,status,withLog){
+  const st=side.stats,F=st.forms;G.saves=Math.min(15,(G.saves||0)+(status===2?1:0));
+  let logBits="";
+  if(withLog){if(G.mode==="drill")logBits=G.drill.solved.map(b=>b?"1":"0").join("");else logBits=G.log.slice(0,63).map(e=>e.toString(2).padStart(2,"0")).join("")}
+  return packCode({ver:1,mode:MODES.indexOf(G.mode),level:G.cap?1:0,status,solved:st.solved,misfire:st.misfire,hints:st.hints,steps:st.steps,hits:st.hits,sunk:st.sunk,lost:st.lost,dmg:st.dmg,
+    cs:F.cmp.s,cf:F.cmp.f,is:F.iso.s,if:F.iso.f,ss:F.std.s,sf:F.std.f,bs:F.brk.s,bf:F.brk.f,el:realMin(),day:dayNum(new Date()),name:fnvName(side.name),run:G.seed,save:G.saves,fleet:G.fleetN[side.idx]||0},logBits);
+}
+function handinLink(name,code){if(typeof HANDIN_URL!=="string"||!/^https:\/\/docs\.google\.com\/forms\//.test(HANDIN_URL.trim()))return "";
+  try{const u=new URL(HANDIN_URL.trim());let n=0;for(const [k,v] of [...u.searchParams]){if(v==="NAME"){u.searchParams.set(k,name);n++}else if(v==="CODE"){u.searchParams.set(k,code);n++}}return n===2?u.toString():""}catch(e){return ""}}
+function openSave(){
+  if(!G||G.over||G.busy||G.mode==="duel")return;const L=$("saveLayer");if(!L.hidden)return;
+  const side=G.mode==="drill"?{idx:0,name:G.names[0],stats:G.stats}:me();
+  if(G.mode!=="drill"&&G.log.length>63){L.innerHTML=`<div class="ovcard"><h3>Too long to save</h3><p>This battle has gone past 63 turns, so it can’t fit in a save code. Finish it here.</p><button class="btn ghost" id="saveBack" type="button">Keep playing</button></div>`;L.hidden=false;$("saveBack").onclick=()=>{L.hidden=true};return}
+  const code=codeFor(side,2,true),hl=handinLink(side.name,code);
+  L.innerHTML=`<div class="ovcard" role="dialog" aria-label="Save and hand in"><div class="lbl">Save &amp; hand in · turn ${G.turn+1}</div><h3>Your save code</h3><div class="mcode" id="saveCode">${code}</div>
+    ${hl?`<p style="margin:14px 0 6px"><a class="btn primary" href="${esc(hl)}" target="_blank" rel="noopener">Hand in this save</a></p><p class="small">Opens your teacher’s Google Form with your name and this code filled in. Press Submit there.</p>`:`<p class="small">Hand this code in with your name, and keep a copy: you need it to continue.</p>`}
+    <p class="small">To continue later: on the title screen, type the same name and paste this code under <b>Or continue a saved game</b>. You’ll be back at this exact turn.</p>
+    <div class="row" style="margin-top:12px"><button class="btn ghost" id="saveCopy" type="button">Copy code</button><button class="btn ghost" id="saveBack" type="button">Keep playing</button></div></div>`;
+  L.hidden=false;$("saveBack").focus({preventScroll:true});$("saveBack").onclick=()=>{L.hidden=true;L.innerHTML=""};
+  $("saveCopy").onclick=()=>{const b=$("saveCopy");const sel=()=>{try{const r=document.createRange();r.selectNodeContents($("saveCode"));const g=getSelection();g.removeAllRanges();g.addRange(r)}catch(e){}b.textContent="Selected: press Ctrl+C"};try{navigator.clipboard.writeText(code).then(()=>{b.textContent="Copied"},sel)}catch(e){sel()}};
+}
+function resumeRun(){
+  const n=$("pname").value.trim(),o=unpackCode($("rcode").value),Nt=$("resumeNote");
+  if(!n){Nt.textContent="Type your name in step 1 first, exactly as you did before.";$("pname").focus();return}
+  if(!o){Nt.textContent="That isn’t a valid save code. Check it for typos.";return}
+  if(o.status!==2){Nt.textContent="That game is already over. Start a new one above.";return}
+  if(fnvName(n)!==o.name){Nt.textContent="This code was saved with a different name. Type your name exactly as before.";return}
+  if(!o.logOk){Nt.textContent="Part of this save code is missing. Paste the whole code.";return}
+  const mode=MODES[o.mode];if(mode==="duel"){Nt.textContent="Two-player games can’t be continued.";return}
+  Nt.textContent="";newGame({mode,cap:!!o.level,names:[n],seed:o.run});
+  if(mode==="drill"){o.logBits.split("").forEach((b,i)=>{if(b==="1"&&i<9)G.drill.solved[i]=true})}
+  else{G.fleetN[0]=o.fleet;G.sides[0].own=newBoard(fleetFor(G.seed,"P0",o.fleet));startCards();const log=[];for(let i=0;i+1<o.logBits.length;i+=2)log.push(parseInt(o.logBits.slice(i,i+2),2));replay(log)}
+  const st=G.mode==="drill"?G.stats:me().stats;Object.assign(st,{solved:o.solved,misfire:o.misfire,hints:o.hints,steps:o.steps});
+  if(G.mode!=="drill"){/* hits, sinks and damage come from the replayed boards; form counts from the code */}
+  st.forms={cmp:{s:o.cs,f:o.cf},iso:{s:o.is,f:o.if},std:{s:o.ss,f:o.sf},brk:{s:o.bs,f:o.bf}};G.elPrev=o.el;G.saves=o.save;
+  if(G.mode==="drill"){G.stats.hits=G.drill.solved.filter(Boolean).length;show("sDrill");renderDrill()}else{show("sGame");renderGame()}
+}
+
+/* =================== end =================== */
+function endGame(win){
+  if(G.over&&$("sEnd").hidden===false)return;G.over=true;G.busy=false;
+  const tag=`${MODEL[G.mode]}${G.mode==="drill"?"":" · "+(G.cap?"Captain":"Cadet")}`;$("endTag").textContent=tag;
+  let sides,title,line;
+  if(G.mode==="drill"){sides=[{idx:0,name:G.names[0],stats:G.stats,res:3}];title=`Drill complete<br><span style="color:var(--amber)">Fleet found</span>`;line="All nine systems solved, and the whole hidden fleet is on the radar. Ready for a real battle?";}
+  else if(G.mode==="duel"){const w=G.sides[G.cur];sides=G.sides.map(s=>Object.assign(s,{res:s===w?1:0}));title=`${esc(w.name)} wins!`;line=`${esc(w.name)} sank all three of ${esc(G.sides[1-G.cur].name)}’s subs in ${w.stats.turns} turns.`;}
+  else{const s=me();sides=[Object.assign(s,{res:win?1:0})];
+    title=win?`Victory!<br><span style="color:var(--amber)">${G.mode==="practice"?"Target practice complete":"Enemy fleet sunk"}</span>`:`Your fleet was sunk<br><span style="color:var(--red)">The subs got away</span>`;
+    line=win?`You sank all three enemy subs in ${s.stats.turns} turns.`:`You hit ${s.stats.hits} of the 9 enemy squares before your last ship went down. Every battle has new systems, so try again.`;}
+  $("endTitle").innerHTML=title;$("endLine").innerHTML=line;
+  const s0=sides[0].stats;const acc=s0.solved+s0.misfire?Math.round(100*s0.solved/(s0.solved+s0.misfire)):0;
+  const st=G.mode==="drill"?[[`${s0.solved}/9`,"systems solved"],[s0.misfire,"wrong answers"],[`${acc}%`,"accuracy"],[s0.hints,"hints"],[s0.steps,"worked steps"],[`${realMin()} min`,"time"]]
+    :G.mode==="duel"?[]:[[s0.turns,"turns"],[s0.solved,"systems solved"],[s0.misfire,"misfires"],[`${acc}%`,"accuracy"],[`${s0.hits}/9`,"enemy squares hit"],[`${s0.sunk}/3`,"subs sunk"],...(G.mode==="battle"?[[`${s0.lost}/3`,"your ships lost"]]:[]),[s0.hints,"hints"],[s0.steps,"worked steps"],[`${realMin()} min`,"time"]];
+  if(G.mode==="duel")G.sides.forEach(s=>{const a=s.stats.solved+s.stats.misfire?Math.round(100*s.stats.solved/(s.stats.solved+s.stats.misfire)):0;st.push([`${s.stats.hits}/9`,`${esc(s.name)}: squares hit`],[`${a}%`,`${esc(s.name)}: accuracy`])});
+  $("endStats").innerHTML=st.map(([b,t])=>`<div class="stat"><b>${b}</b><span>${t}</span></div>`).join("");
+  const med=[];if(G.mode!=="duel"){if(s0.misfire===0&&s0.solved>0)med.push("Sharpshooter: no misfires");if(s0.hints===0&&s0.steps===0&&s0.solved>0)med.push("Solo: no hints or steps");if(win&&G.mode!=="drill"&&s0.turns<=10)med.push("Quick hunt: 10 turns or fewer");if(win&&G.mode==="battle"&&s0.lost===0)med.push("Unsinkable: no ships lost");if(G.cap&&win)med.push("Captain’s stripes")}
+  $("medals").innerHTML=med.map(m=>`<span class="medal">${m}</span>`).join("");
+  $("codes").innerHTML=sides.map((s,k)=>{const code=codeFor(s,s.res,false),hl=handinLink(s.name,code);return `<h2 style="margin-top:16px">${sides.length>1?esc(s.name)+"’s code":"Your code"}</h2><div class="mcode">${code}</div>
+    ${hl?`<p style="margin:10px 0 0"><a class="btn primary" href="${esc(hl)}" target="_blank" rel="noopener">Hand in ${sides.length>1?esc(s.name)+"’s":"my"} code</a></p>`:`<p class="small">Hand this code in with your name. It only works with the name you typed.</p>`}`}).join("")+(handinLink("x","y")?`<p class="small">The button opens your teacher’s Google Form with the name and code filled in. Press Submit there.</p>`:"");
+  const rows=FORMS.map(f=>{const a=sides.map(s=>s.stats.forms[f]);return `<tr><td>${FORMNAME[f]}</td>${a.map(x=>`<td class="${x.s===0?"":x.f===x.s?"ok":"meh"}">${x.s?`${x.f}/${x.s}`:"—"}</td>`).join("")}</tr>`}).join("");
+  $("skillTbl").innerHTML=`<tr><th>Type of system</th>${sides.map(s=>`<th>${sides.length>1?esc(s.name):"First try / solved"}</th>`).join("")}</tr>`+rows;
+  const weak=FORMS.filter(f=>sides[0].stats.forms[f].s>sides[0].stats.forms[f].f);
+  $("skillNote").textContent=G.mode==="duel"?"Each cell shows systems solved on the first try out of systems fired.":weak.length?`Practise these on the Unit 5 Practice page (Substitution, L4): ${weak.map(f=>FORMNAME[f]).join("; ")}.`:"Every system on the first try. Try Captain rank next.";
+  $("againBtn").textContent=G.mode==="drill"?"Try a real battle":"New battle";
+  show("sEnd");
+}
+
+/* =================== teacher checker =================== */
+function runCheck(){
+  const o=unpackCode($("cCode").value),box=$("cRes");box.hidden=false;
+  if(!o){box.innerHTML=`<b class="no">Not a valid code.</b> Check for typos. Codes have at least six groups of five characters.`;return}
+  const ok=fnvName($("cName").value)===o.name,mode=MODES[o.mode];const d=new Date(DAYZ+o.day*864e5).toLocaleDateString(undefined,{timeZone:"UTC",year:"numeric",month:"short",day:"numeric"});
+  const res=o.status===2?"Saved part-way":mode==="drill"?"Drill complete":o.status===1?(mode==="duel"?"Won":"Sank the enemy fleet"):(mode==="duel"?"Lost":"Fleet sunk");
+  const acc=o.solved+o.misfire?Math.round(100*o.solved/(o.solved+o.misfire)):0;
+  const fr=(s,f)=>s?`${f}/${s}`:"—";
+  box.innerHTML=`<p style="margin:0 0 8px"><b class="${ok?"ok":"no"}">${ok?"✓ Valid code for this name":"✗ This code was not made with that name"}</b></p>
+  <table class="skills"><tr><td>Game</td><td>${MODEL[mode]}${mode==="drill"?"":" · "+(o.level?"Captain":"Cadet")}</td></tr><tr><td>Result</td><td><b>${res}</b></td></tr>
+  <tr><td>Systems solved</td><td>${o.solved} · misfires ${o.misfire} · accuracy ${acc}%</td></tr><tr><td>Hints · worked steps</td><td>${o.hints} · ${o.steps}</td></tr>
+  ${mode==="drill"?"":`<tr><td>Enemy squares hit</td><td>${o.hits}/9 · subs sunk ${o.sunk}/3${mode==="battle"||mode==="duel"?` · own ships lost ${o.lost}/3`:""}</td></tr>`}
+  <tr><td>First try / solved</td><td>Comparison ${fr(o.cs,o.cf)} · Isolated ${fr(o.is,o.if)} · Standard form ${fr(o.ss,o.sf)} · Brackets ${fr(o.bs,o.bf)}</td></tr>
+  <tr><td>Time</td><td>${o.el}${o.el>=63?"+":""} min</td></tr><tr><td>Date played</td><td>${d} · game ${o.run}${o.status===2?`, save ${o.save}`:""}</td></tr></table>`;
+}
+
+/* =================== title & wiring =================== */
+function heroArt(){
+  const cx=200,cy=200;let s=`<defs><radialGradient id="scr" cx=".5" cy=".5" r=".55"><stop offset="0" stop-color="#0b2a1c"/><stop offset="1" stop-color="#020a06"/></radialGradient><radialGradient id="blip"><stop offset="0" stop-color="#ffc24a"/><stop offset="1" stop-color="rgba(255,194,74,0)"/></radialGradient></defs>
+    <circle cx="${cx}" cy="${cy}" r="190" fill="url(#scr)" stroke="#1f4636" stroke-width="6"/>`;
+  for(let r=40;r<=170;r+=43)s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(76,242,155,.25)"/>`;
+  s+=`<path d="M${cx-185} ${cy}H${cx+185}M${cx} ${cy-185}V${cy+185}" stroke="rgba(76,242,155,.25)"/>`;
+  s+=`<g class="sweepg"><path d="M${cx} ${cy}L${cx+185} ${cy}A185 185 0 0 0 ${cx+160} ${cy-92}Z" fill="rgba(76,242,155,.28)"/><path d="M${cx} ${cy}L${cx+185} ${cy}" stroke="#4cf29b" stroke-width="2.5"/></g>`;
+  [[262,148,1],[142,258,.8],[236,282,.6]].forEach(([x,y,o])=>s+=`<circle cx="${x}" cy="${y}" r="16" fill="url(#blip)" opacity="${o}"/><circle cx="${x}" cy="${y}" r="4" fill="#ffc24a" opacity="${o}"/>`);
+  s+=`<style>.sweepg{transform-origin:${cx}px ${cy}px;animation:spin 4.5s linear infinite}@media (prefers-reduced-motion:reduce){.sweepg{animation:none}}</style>`;
+  $("heroArt").innerHTML=s;
+}
+const pref={mode:null,level:null};
+function setPressed(group,attr,val){document.querySelectorAll(`#${group} .opt`).forEach(b=>b.setAttribute("aria-pressed",String(b.dataset[attr]===val)))}
+function note(){const n=$("pname").value.trim(),n2=$("pname2").value.trim();
+  $("pname2").hidden=pref.mode!=="duel";$("levelBox").hidden=pref.mode==="drill";
+  $("startNote").textContent=!pref.mode?"Choose a game.":!n?"Type your name for your code.":pref.mode==="duel"&&!n2?"Type player 2’s name too.":pref.mode!=="drill"&&pref.level==null?"Choose a rank.":`${MODEL[pref.mode]}${pref.mode==="drill"?"":" · "+(pref.level==="1"?"Captain":"Cadet")}`}
+function start(){const n=$("pname").value.trim(),n2=$("pname2").value.trim();
+  if(!pref.mode||!n||(pref.mode==="duel"&&!n2)||(pref.mode!=="drill"&&pref.level==null)){note();if(!n)$("pname").focus();return}
+  launch({mode:pref.mode,cap:pref.level==="1",names:pref.mode==="duel"?[n,n2]:[n]})}
+function launch(opts){newGame(opts);if(G.mode==="drill"){show("sDrill");renderDrill();return}showFleet(0)}
+document.querySelectorAll("#modeOpts .opt").forEach(b=>b.onclick=()=>{pref.mode=b.dataset.mode;setPressed("modeOpts","mode",pref.mode);note()});
+document.querySelectorAll("#levelOpts .opt").forEach(b=>b.onclick=()=>{pref.level=b.dataset.level;setPressed("levelOpts","level",pref.level);note()});
+$("pname").addEventListener("input",note);$("pname2").addEventListener("input",note);
+$("startBtn").onclick=start;$("resumeBtn").onclick=resumeRun;$("rcode").addEventListener("keydown",e=>{if(e.key==="Enter")resumeRun()});
+$("saveFab").onclick=openSave;
+$("howBtn").onclick=()=>{openOv(`<div class="ovcard" role="dialog" aria-label="How to play"><div class="lbl">How to play</div><h3>Sub Hunt</h3><ul>
+  <li>Each turn you have three firing solutions, A, B and C. Each is a linear system whose solution is the square it lands on.</li>
+  <li>Solve the systems on paper to find where each one lands. Then type the answer for the one you want and press Fire.</li>
+  <li>A depth charge hits the 3 by 3 area around its landing square: <span style="color:var(--amber)">✕</span> is a hit, ○ is empty water. A sunk sub shows in red.</li>
+  <li>The two solutions you didn’t fire stay for next turn, so solving them now pays off later.</li>
+  <li>A wrong answer is a misfire: no shot, and ${G&&G.mode==="battle"?"the enemy gets a free torpedo run":G&&G.mode==="duel"?"your turn ends":"it counts against your accuracy"}.</li>
+  ${G&&G.mode==="battle"?"<li>After each of your turns, the enemy fires a torpedo run that hits 3 squares in a row on your fleet.</li>":""}
+  <li>Hints and worked steps are free. After 2 misfires on a solution the hint opens, and after 3 the steps unlock. Your teacher sees how many you used.</li>
+  <li>Point at the radar to see the 3 by 3 area a depth charge would cover.</li></ul><button class="btn primary" id="howX" type="button">Back to the battle</button></div>`);$("howX").onclick=closeOv};
+$("againBtn").onclick=()=>{if(!G)return;if(G.mode==="drill"){$("pname").value=G.names[0];pref.mode="battle";setPressed("modeOpts","mode","battle");show("sTitle");note();return}launch({mode:G.mode,cap:G.cap,names:G.names})};
+$("titleBtn").onclick=()=>show("sTitle");$("toChecker").onclick=()=>show("sCheck");$("cBack").onclick=()=>show("sTitle");$("cBtn").onclick=runCheck;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("ov").hidden&&$("passGo")==null)closeOv()});
+window.addEventListener("resize",()=>{document.querySelectorAll(".sweep").forEach(d=>d.remove());if(!$("sGame").hidden)addSweep("radarBox");if(!$("sDrill").hidden)addSweep("dradarBox")});
+heroArt();
+window.__sh={get G(){return G},newGame,launch,startCards,applyFire,applyMisfire,enemyTurn,replay,onFire,drillCheck,packCode,unpackCode,codeFor,check,correctInput,DRILL,endGame,show,renderGame,makeQuestion,fnvName,resumeRun};
+})();
+</script>
+
+</body>
+</html>

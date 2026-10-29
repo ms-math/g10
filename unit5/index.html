@@ -6,22 +6,22 @@
 <meta name="description" content="Unit 5 Analytic Geometry review: practice questions and the Where in Ottawa? review game.">
 <meta name="robots" content="noindex">
 <title>Unit 5 Review</title>
-<style>@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/kalam-latin-400-normal.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/kalam-latin-700-normal.woff") format("woff")}@font-face{font-family:"Alfa Slab One";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/alfa-slab-one-latin-400-normal.woff") format("woff")}@font-face{font-family:"Special Elite";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/special-elite-latin-400-normal.woff") format("woff")}html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<style>@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-700-normal.woff") format("woff")}@font-face{font-family:"Atkinson Hyperlegible";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/atkinson-hyperlegible-latin-400-italic.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/kalam-latin-400-normal.woff") format("woff")}@font-face{font-family:"Kalam";font-style:normal;font-weight:700;font-display:swap;src:url("fonts/kalam-latin-700-normal.woff") format("woff")}@font-face{font-family:"Alfa Slab One";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/alfa-slab-one-latin-400-normal.woff") format("woff")}@font-face{font-family:"Special Elite";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/special-elite-latin-400-normal.woff") format("woff")}@font-face{font-family:"Orbitron";font-style:normal;font-weight:600;font-display:swap;src:url("fonts/orbitron-latin-600-normal.woff") format("woff")}@font-face{font-family:"Orbitron";font-style:normal;font-weight:800;font-display:swap;src:url("fonts/orbitron-latin-800-normal.woff") format("woff")}html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
 </head>
 <body>
 <style>
 :root{--paper:#f7f9fc;--grid:rgba(40,88,170,.075);--card:#ffffff;--line:#d6dde8;--ink:#15233b;--muted:#56637a;--pen:#1f4fb0;
   --night:#0f1820;--npanel:#172532;--nline:#2f4556;--nfg:#e8eef2;--nmuted:#9db0bf;--gold:#f2c14e;--teal:#3cc6b8;--red:#e2483d;
-  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-pen:"Kalam","Comic Sans MS",cursive;--f-slab:"Alfa Slab One",Rockwell,Georgia,serif;--f-type:"Special Elite","Courier New",monospace}
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;--f-pen:"Kalam","Comic Sans MS",cursive;--f-slab:"Alfa Slab One",Rockwell,Georgia,serif;--f-type:"Special Elite","Courier New",monospace;--f-orb:"Orbitron","Arial Black",sans-serif;--rbg:#04110c;--rgreen:#4cf29b;--rline:#1f4636}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}}
 :root[data-theme="dark"]{--paper:#0f141c;--grid:rgba(140,170,225,.06);--card:#161e2a;--line:#2a3546;--ink:#e5ebf4;--muted:#9ba8bc;--pen:#8db0ff;color-scheme:dark}
 *{box-sizing:border-box}
 body{background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
-.wrap{max-width:900px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 56px;display:grid;gap:24px}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 56px;display:grid;gap:24px}
 h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.1;margin:0;text-wrap:balance}
 h1 span{font-family:var(--f-pen);color:var(--pen);font-weight:700}
 .lede{margin:6px 0 0;color:var(--muted);max-width:56ch}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:18px}
 a.card{display:grid;gap:8px;align-content:start;text-decoration:none;border-radius:12px;padding:22px;min-width:0}
 a.card:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 .plain{background:var(--card);border:1.5px solid var(--line);color:var(--ink)}
@@ -37,12 +37,17 @@ a.card:focus-visible{outline:3px solid var(--pen);outline-offset:3px}
 .game h2 span{color:var(--gold)}
 .game .go{color:var(--gold);font-family:var(--f-type);font-weight:400}
 .trail{display:block;width:100%;height:auto;margin:4px 0}
+.radar{background:radial-gradient(420px 220px at 20% -20%,#0d2b1f 0,var(--rbg) 70%),var(--rbg);border:1.5px solid var(--rline);color:#dcf7e9}
+.radar:hover{border-color:var(--rgreen)}
+.radar .kick{color:#86b8a0}
+.radar h2{margin:0;font-family:var(--f-orb);font-weight:800;font-size:1.9rem;letter-spacing:.05em;color:var(--rgreen)}
+.radar .go{color:var(--rgreen);font-family:var(--f-orb);font-weight:600;letter-spacing:.06em}
 footer{font-size:.86rem;color:var(--muted)}
 </style>
 <div class="wrap">
   <header>
     <h1>Unit 5 Review <span>Analytic Geometry</span></h1>
-    <p class="lede">Practise every lesson from length and midpoint to similar triangles, then take on the review game.</p>
+    <p class="lede">Practise every lesson from length and midpoint to similar triangles, then take on the games.</p>
   </header>
   <div class="cards">
     <a class="card plain" href="practice/">
@@ -50,6 +55,13 @@ footer{font-size:.86rem;color:var(--muted)}
       <h2>Unit 5 Practice</h2>
       <p>New questions for lessons L1 to L10 at three levels: Support, On track and Challenge. Check your answer, get a hint, or see the full worked steps.</p>
       <span class="go">Start practising →</span>
+    </a>
+    <a class="card radar" href="subhunt/">
+      <span class="kick">Lesson 4 game · Substitution</span>
+      <h2>SUB HUNT</h2>
+      <svg class="trail" viewBox="0 0 300 60" aria-hidden="true"><g stroke="rgba(76,242,155,.25)" fill="none"><circle cx="150" cy="60" r="20"/><circle cx="150" cy="60" r="40"/><circle cx="150" cy="60" r="58"/></g><path d="M150 60L205 6" stroke="#4cf29b" stroke-width="2.5"/><g fill="#ffc24a"><circle cx="112" cy="30" r="4.5"/><circle cx="196" cy="44" r="4.5"/><circle cx="70" cy="50" r="4.5"/></g></svg>
+      <p>Battleship by substitution. Solve linear systems to aim your depth charges at a hidden submarine fleet, against the computer or a classmate.</p>
+      <span class="go">&gt; Launch</span>
     </a>
     <a class="card game" href="magpie/">
       <span class="kick">Review game · Bytown Detective Agency</span>
@@ -59,7 +71,7 @@ footer{font-size:.86rem;color:var(--muted)}
       <span class="go">&gt; Take the case</span>
     </a>
   </div>
-  <footer>Nothing you type on these pages is sent anywhere. In the game, handing in your code opens your teacher’s Google Form, and nothing is sent until you press Submit there.</footer>
+  <footer>Nothing you type on these pages is sent anywhere. In the games, handing in your code opens your teacher’s Google Form, and nothing is sent until you press Submit there.</footer>
 </div>
 
 </body>
