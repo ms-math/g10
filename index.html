@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lost in the Hedges: a Grade 10 factoring maze review game set at Saunders Farm.">
+<meta name="robots" content="noindex">
+<title>Lost in the Hedges</title>
+<style>@font-face{font-family:"Atkinson Hyperlegible";src:url(../fonts/atkinson-hyperlegible-latin-400-normal.woff) format("woff");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:"Atkinson Hyperlegible";src:url(../fonts/atkinson-hyperlegible-latin-700-normal.woff) format("woff");font-weight:700;font-style:normal;font-display:swap}@font-face{font-family:"Atkinson Hyperlegible";src:url(../fonts/atkinson-hyperlegible-latin-400-italic.woff) format("woff");font-weight:400;font-style:italic;font-display:swap}@font-face{font-family:"Lilita One";src:url(../fonts/lilita-one-latin-400-normal.woff) format("woff");font-weight:400;font-style:normal;font-display:swap}</style>
+<style>
+/* VOICE: a bright autumn field-trip game, playful but easy to read on a Chromebook.
+   IDEA: the farm's own hedge-maze map and wooden gate signs, seen from above.
+   PICTURE: the live maze itself, large, with hedges, gravel paths, gates, pumpkins and the lookout tower.
+   COLOUR and TYPE: hedge green housing, cream sign-board panels, pumpkin orange accent, barn red for penalties; Lilita One for signs, Atkinson Hyperlegible for every number.
+   LAYOUT: HUD strip over a full-width maze; modal sign-boards for gates and reading; stacks to one column under 600px. */
+:root{color-scheme:dark;--hedge:#1d3a1f;--hedge2:#27502a;--leaf:#3f7d3c;--paper:#fbf5e6;--paper2:#f1e7cf;--ink:#2a2118;--muted:#6d5f4c;--pump:#e8731a;--pump2:#c75c0c;--barn:#a63a2a;--ok:#2f7d3a;--bad:#b23a2a;--line:#d8c9a6}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--hedge);color:#f4ecd8;font:17px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+[hidden]{display:none!important}
+button,input{font:inherit}
+button{cursor:pointer}
+.sign{font-family:"Lilita One","Atkinson Hyperlegible",sans-serif;font-weight:400;letter-spacing:.01em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4em;min-height:44px;padding:8px 18px;border-radius:10px;border:2px solid #0000;background:var(--pump);color:#fff;font-weight:700;text-decoration:none;box-shadow:0 3px 0 var(--pump2)}
+.btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--pump2)}
+.btn.ghost{background:transparent;color:inherit;border-color:currentColor;box-shadow:none}
+.btn.quiet{background:var(--paper2);color:var(--ink);box-shadow:0 3px 0 var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+input[type=text]{min-height:44px;font-size:17px;padding:8px 12px;border-radius:8px;border:2px solid var(--line);background:#fff;color:var(--ink);width:100%}
+.wrap{max-width:1100px;margin:0 auto;padding:16px max(3vw,12px)}
+/* title */
+#title .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:28px;align-items:center;padding-top:clamp(8px,3vw,32px)}
+#title h1{font-size:clamp(40px,7vw,72px);line-height:1;margin:0 0 6px;color:#ffe6b8;text-shadow:0 4px 0 #0f2410}
+#title .lede{font-size:19px;color:#e6dcc0;margin:0 0 18px;max-width:34em}
+.card{background:var(--paper);color:var(--ink);border-radius:14px;padding:18px;box-shadow:0 6px 0 #0f2410,0 12px 30px #0006}
+.card h2,.card h3{margin:0 0 10px;font-family:"Lilita One",sans-serif;font-weight:400;color:var(--hedge2)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.mode{border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px;text-align:left;color:var(--ink);min-height:44px}
+.mode b{display:block;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px;color:var(--hedge2)}
+.mode small{color:var(--muted);font-size:14px;display:block;line-height:1.35}
+.mode[aria-pressed=true]{border-color:var(--pump);background:#fff4e8;box-shadow:inset 0 0 0 2px var(--pump)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.links button{background:none;border:0;color:var(--hedge2);text-decoration:underline;padding:8px 4px;min-height:44px;font-weight:700}
+.fine{font-size:14px;color:#cfc4a6;margin-top:14px}
+#heroMaze{width:100%;aspect-ratio:1/1;max-height:440px;display:block;border-radius:18px;box-shadow:0 8px 0 #0f2410}
+/* play */
+#play .hud{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:8px 0}
+.zoneTag{display:flex;flex-direction:column;line-height:1.15}
+.zoneTag .sign{font-size:24px;color:#ffe6b8}
+.zoneTag small{color:#cfe3c6;font-size:14px}
+.clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:30px;background:#0f2410;border-radius:10px;padding:4px 14px;min-width:6.2ch;text-align:center;position:relative}
+.clock small{display:block;font-size:12px;font-weight:400;color:#bcd3b3;line-height:1}
+.pill{background:#0f2410;border-radius:999px;padding:6px 12px;font-weight:700;font-size:16px;white-space:nowrap}
+.hudBtns{display:flex;gap:8px;flex-wrap:wrap}
+.hudBtns .btn{min-height:40px;padding:6px 12px;font-size:15px}
+.stage{position:relative;border-radius:16px;overflow:hidden;box-shadow:0 6px 0 #0f2410;background:#2f5e2c;touch-action:none}
+#cv{display:block;width:100%;height:min(64vh,620px);min-height:300px}
+.toast{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--paper);color:var(--ink);padding:8px 14px;border-radius:10px;font-weight:700;box-shadow:0 4px 0 #0005;pointer-events:none;max-width:90%;text-align:center;transition:opacity .3s}
+.float{position:absolute;right:6px;top:-6px;font-size:16px;font-weight:700;pointer-events:none;animation:up 1.4s forwards}
+.float.p{color:#ff9d8a}.float.b{color:#9fe39a}
+@keyframes up{to{transform:translateY(-26px);opacity:0}}
+.pad{display:none;justify-content:center;gap:6px;margin:10px 0;user-select:none}
+.pad .grid{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,52px);gap:6px}
+.pad button{border:0;border-radius:12px;background:#0f2410;color:#ffe6b8;font-size:22px;touch-action:none}
+.pad .u{grid-column:2}.pad .l{grid-column:1;grid-row:2}.pad .d{grid-column:2;grid-row:2}.pad .r{grid-column:3;grid-row:2}
+@media (pointer:coarse){.pad{display:flex}}
+.help{font-size:14px;color:#cfe3c6;margin:8px 0 0}
+/* modal */
+.modal{position:fixed;inset:0;background:#0b1a0ccc;display:flex;align-items:flex-start;justify-content:center;padding:max(2vh,10px) 10px;z-index:20;overflow:auto}
+.sheet{background:var(--paper);color:var(--ink);border-radius:16px;width:min(760px,100%);padding:18px clamp(14px,3vw,26px) 22px;box-shadow:0 10px 0 #0f2410,0 20px 40px #0008;position:relative;margin:auto 0}
+.sheet.wide{width:min(1100px,100%)}
+.sheet h2{font-family:"Lilita One",sans-serif;font-weight:400;font-size:28px;margin:0 0 4px;color:var(--hedge2);line-height:1.1}
+.sheet .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+.x{position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:10px;border:0;background:var(--paper2);font-size:22px;color:var(--ink)}
+.q{font-size:clamp(26px,5vw,38px);font-weight:700;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums;color:#1d3a1f}
+.q small{display:block;font-size:15px;font-weight:400;color:var(--muted)}
+.keys{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.keys button{min-width:46px;min-height:44px;border-radius:8px;border:2px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:18px}
+.preview{font-size:20px;min-height:30px;color:var(--hedge2);font-weight:700}
+.preview span{font-weight:400;color:var(--muted);font-size:15px}
+.fb{border-radius:10px;padding:10px 12px;margin:10px 0;font-size:16px}
+.fb.ok{background:#e3f3e1;color:#1d4d22;border:2px solid #9fd09a}
+.fb.bad{background:#fbe5df;color:#6e2216;border:2px solid #f0b3a6}
+.fb.mid{background:#fff3d6;color:#5e4510;border:2px solid #f0d08a}
+.fb .ex{display:block;margin-top:4px;font-size:15px;opacity:.9}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hintbox{background:#eef4ff;border:2px solid #b9cdf5;color:#1d2f57;border-radius:10px;padding:10px 12px;margin:8px 0}
+.steps{background:#fff;border:2px dashed #9db8e8;border-radius:10px;padding:10px 12px;margin:8px 0;color:#1f3a73;font-size:16px}
+.steps .st{margin:6px 0 10px}.steps .eq{margin:4px 0 0 1.2em;font-weight:700;line-height:1.7}
+.steps .why{display:block;color:#5a6b8c;font-size:14px;font-style:italic}
+table.box{border-collapse:collapse;margin:8px 0;font-weight:700}
+table.box td{border:2px solid #3b5ea8;min-width:64px;height:40px;text-align:center;padding:4px 8px;background:#f4f8ff}
+table.box td.bl{border:0;background:none;color:#b0441c}
+.scratch{background:var(--paper2);border-radius:12px;padding:12px;margin:10px 0}
+.scratch .bx{display:grid;grid-template-columns:72px minmax(70px,120px) minmax(70px,120px);gap:6px;align-items:center;margin:8px 0}
+.scratch input{min-height:40px;font-size:16px;padding:6px 8px;text-align:center}
+.scratch .lab input{border-color:#e5a77d;color:#b0441c}
+.scratch .cell input{border-color:#8fa9de}
+.scratch .gcf{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.scratch .gcf input{width:80px}
+/* reading */
+.readGrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+.passage{background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px 16px;max-height:68vh;overflow:auto;font-size:16.5px;line-height:1.6}
+.passage h3{margin:0 0 2px;font-size:20px;color:var(--ink)}
+.passage .kind{color:var(--muted);font-size:14px;margin:0 0 8px}
+.passage h4{margin:12px 0 4px;font-size:16px}
+.passage p{margin:0 0 10px;display:grid;grid-template-columns:2em minmax(0,1fr)}
+.passage p .n{font-weight:700;color:var(--muted)}
+.qs{display:flex;flex-direction:column;gap:12px;max-height:68vh;overflow:auto;padding-right:4px}
+.qq{background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px}
+.qq p{margin:0 0 6px;font-weight:700}
+.opt{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;border:2px solid #0000;background:var(--paper2);border-radius:8px;padding:8px 10px;margin:4px 0;color:var(--ink);min-height:44px;font-size:16px}
+.opt .L{font-weight:700;min-width:1.4em}
+.opt[aria-pressed=true]{border-color:var(--pump);background:#fff1e2}
+.opt.right{border-color:var(--ok);background:#e3f3e1}.opt.wrong{border-color:var(--bad);background:#fbe5df}
+.qq .ex{font-size:15px;color:#3b4a3c;margin-top:6px}
+.mz{background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px 16px;line-height:2.25;font-size:17px;max-height:64vh;overflow:auto}
+.ch{display:inline-flex;flex-wrap:wrap;gap:3px;vertical-align:middle;background:#f6efdc;border-radius:8px;padding:1px 3px;margin:0 2px;line-height:1.2}
+.ch button{border:1.5px solid #cdbb92;background:#fff;border-radius:6px;padding:3px 7px;font-size:15.5px;color:var(--ink);min-height:32px}
+.ch button[aria-pressed=true]{background:#2f5e2c;color:#fff;border-color:#2f5e2c}
+.ch.right button.c{background:#2f7d3a;color:#fff;border-color:#2f7d3a}
+.ch.wrong button[aria-pressed=true]{background:#b23a2a;border-color:#b23a2a;color:#fff}
+.ch.wrong button.c{outline:2px solid #2f7d3a}
+.ch.skip{opacity:.55}
+.timerBar{height:10px;border-radius:6px;background:#e7dcc2;overflow:hidden;margin:6px 0 10px}
+.timerBar i{display:block;height:100%;background:var(--pump);width:100%;transition:width 1s linear}
+/* end */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.stat{background:var(--paper2);border-radius:10px;padding:10px 12px}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums}
+.stat span{font-size:14px;color:var(--muted)}
+table.rep{width:100%;border-collapse:collapse;font-size:16px;margin:8px 0}
+table.rep th,table.rep td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+table.rep td.num,table.rep th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.codeBox{font-family:"Atkinson Hyperlegible",monospace;font-size:clamp(17px,3.6vw,24px);font-weight:700;letter-spacing:.06em;background:#fff;border:2px dashed var(--pump);border-radius:10px;padding:10px 12px;text-align:center;word-break:break-all;user-select:all}
+.rank{font-family:"Lilita One",sans-serif;font-size:clamp(30px,6vw,46px);color:var(--pump2);line-height:1}
+.story p{font-size:18px;margin:0 0 12px}
+.story .note{font-size:22px;font-family:"Lilita One",sans-serif;color:var(--barn);text-align:center;margin:14px 0}
+@media (max-width:760px){#title .hero{grid-template-columns:1fr}#heroMaze{max-height:260px;aspect-ratio:16/9}.readGrid{grid-template-columns:1fr}.passage,.qs{max-height:none}}
+@media (max-width:600px){.modes{grid-template-columns:1fr}.clock{font-size:24px}.zoneTag .sign{font-size:20px}#cv{height:52vh}.scratch .bx{grid-template-columns:60px minmax(0,1fr) minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<section id="title" class="wrap">
+  <div class="hero">
+    <div>
+      <h1 class="sign">Lost in the Hedges</h1>
+      <p class="lede">A factoring maze at Saunders Farm. Unlock 19 gates, read your way through the rest stops, and find out who took the map.</p>
+      <div class="card">
+        <label for="nameIn"><b>Your name</b> <small style="color:var(--muted)">(only used to make your code, never saved)</small></label>
+        <input type="text" id="nameIn" autocomplete="off" maxlength="40" placeholder="First and last name">
+        <div class="modes" role="group" aria-label="Choose a mode">
+          <button class="mode" data-mode="1" aria-pressed="true"><b>Maze Run</b><small>Stopwatch on. Wrong answers and help add time; pumpkins and good reading take time off. Lowest time wins.</small></button>
+          <button class="mode" data-mode="0" aria-pressed="false"><b>Practice Walk</b><small>No penalties. Hints and worked steps are free. Everyone reaches the tower.</small></button>
+        </div>
+        <div class="row"><button class="btn" id="startBtn">Enter the maze</button><span id="titleMsg" style="color:var(--bad);font-weight:700"></span></div>
+        <div class="links"><button id="contBtn">Continue a saved maze</button><button id="checkBtn">Check a maze code (teacher)</button></div>
+      </div>
+      <p class="fine">The story and its characters are made up. Nothing you type is sent anywhere unless you press Submit on your teacher's form.</p>
+    </div>
+    <canvas id="heroMaze" aria-label="A hedge maze seen from above, with a lookout tower in the middle"></canvas>
+  </div>
+</section>
+
+<section id="story" class="wrap" hidden>
+  <div class="sheet story" style="margin:4vh auto">
+    <h2 id="storyTitle">Math Day at Saunders Farm</h2>
+    <div id="storyBody"></div>
+    <div class="acts"><button class="btn" id="storyGo">Into the maze</button></div>
+  </div>
+</section>
+
+<section id="play" class="wrap" hidden>
+  <div class="hud">
+    <div class="zoneTag"><span class="sign" id="zoneName">The Front Hedges</span><small id="zoneSkill">Trinomials with a = 1</small></div>
+    <div class="row" style="gap:8px">
+      <div class="clock" id="clock" aria-live="off">0:00<small id="clockLbl">stopwatch</small></div>
+      <span class="pill" id="gatePill">Gates 0/19</span>
+      <span class="pill" id="pumpPill">Pumpkins 0/8</span>
+    </div>
+    <div class="hudBtns"><button class="btn quiet" id="mapBtn" aria-pressed="true">Map</button><button class="btn" id="saveBtn">Save &amp; hand in</button></div>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv" tabindex="0" aria-label="Maze. Use the arrow keys or WASD to walk, or click a spot on the path."></canvas>
+    <div class="toast" id="toast" style="opacity:0"></div>
+  </div>
+  <div class="pad" id="pad"><div class="grid"><button class="u" data-d="0" aria-label="Up">&#9650;</button><button class="l" data-d="3" aria-label="Left">&#9664;</button><button class="d" data-d="2" aria-label="Down">&#9660;</button><button class="r" data-d="1" aria-label="Right">&#9654;</button></div></div>
+  <p class="help">Walk with the arrow keys or WASD, or click/tap a spot on the path. Walk into a locked gate to factor it open. Golden pumpkins hide in dead ends.</p>
+</section>
+
+<section id="end" class="wrap" hidden></section>
+
+<div class="modal" id="gateM" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gateH"></div></div>
+<div class="modal" id="readM" hidden><div class="sheet wide" role="dialog" aria-modal="true"></div></div>
+<div class="modal" id="miscM" hidden><div class="sheet" role="dialog" aria-modal="true"></div></div>
+<script>
+{
+// ===== Factoring engine: polynomials, parser, checker, generators, hints, steps =====
+const MINUS = '−';
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+
+// Polynomials in x, y: Map "i,j" -> integer coefficient
+const P = {
+  c(n) { const m = new Map(); if (n) m.set('0,0', n); return m; },
+  mono(k, i, j) { const m = new Map(); if (k) m.set(i + ',' + j, k); return m; },
+  add(a, b) { const m = new Map(a); for (const [k, v] of b) { const s = (m.get(k) || 0) + v; if (s) m.set(k, s); else m.delete(k); } return m; },
+  neg(a) { const m = new Map(); for (const [k, v] of a) m.set(k, -v); return m; },
+  sub(a, b) { return P.add(a, P.neg(b)); },
+  mul(a, b) {
+    let m = new Map();
+    for (const [ka, va] of a) for (const [kb, vb] of b) {
+      const [i1, j1] = ka.split(',').map(Number), [i2, j2] = kb.split(',').map(Number);
+      m = P.add(m, P.mono(va * vb, i1 + i2, j1 + j2));
+    }
+    return m;
+  },
+  pow(a, n) { let r = P.c(1); for (let i = 0; i < n; i++) r = P.mul(r, a); return r; },
+  eq(a, b) { return P.sub(a, b).size === 0; },
+  deg(a) { let d = -1; for (const k of a.keys()) { const [i, j] = k.split(',').map(Number); d = Math.max(d, i + j); } return d; },
+  content(a) { let g = 0; for (const v of a.values()) g = gcd(g, v); return g; },
+  get(a, i, j) { return a.get(i + ',' + j) || 0; },
+  isConst(a) { return P.deg(a) <= 0; },
+  constVal(a) { return P.get(a, 0, 0); },
+  scale(a, k) { const m = new Map(); if (k) for (const [kk, v] of a) m.set(kk, v * k); return m; },
+  // pretty string, ordered: x^2, xy, y^2, x, y, const (descending x power then y)
+  str(a) {
+    if (a.size === 0) return '0';
+    const terms = [...a.entries()].map(([k, v]) => { const [i, j] = k.split(',').map(Number); return { i, j, v }; });
+    terms.sort((p, q) => (q.i + q.j) - (p.i + p.j) || q.i - p.i);
+    let s = '';
+    terms.forEach((t, idx) => {
+      const neg = t.v < 0, av = Math.abs(t.v);
+      const vars = varStr('x', t.i) + varStr('y', t.j);
+      const coef = (av === 1 && vars) ? '' : String(av);
+      const body = coef + vars;
+      if (idx === 0) s += (neg ? MINUS : '') + body; else s += (neg ? ' ' + MINUS + ' ' : ' + ') + body;
+    });
+    return s;
+  }
+};
+function varStr(v, n) { if (!n) return ''; if (n === 1) return v; const sup = { 2: '²', 3: '³', 4: '⁴' }; return v + (sup[n] || '^' + n); }
+
+// ---------- Parser ----------
+// Returns {poly, top:{terms:[{sign, factors:[poly...], constant}]}} or {error}
+function tokenize(s) {
+  s = s.replace(/[−–—]/g, '-').replace(/[×·⋅]/g, '*')
+    .replace(/²/g, '^2').replace(/³/g, '^3').replace(/⁴/g, '^4')
+    .replace(/[\[{]/g, '(').replace(/[\]}]/g, ')').toLowerCase();
+  const toks = []; let i = 0;
+  while (i < s.length) {
+    const ch = s[i];
+    if (/\s/.test(ch)) { i++; continue; }
+    if (/[0-9]/.test(ch)) { let j = i; while (j < s.length && /[0-9]/.test(s[j])) j++; toks.push({ t: 'n', v: parseInt(s.slice(i, j), 10) }); i = j; continue; }
+    if (ch === 'x' || ch === 'y') { toks.push({ t: 'v', v: ch }); i++; continue; }
+    if ('()+-*^'.includes(ch)) { toks.push({ t: ch }); i++; continue; }
+    return { error: 'letter', ch };
+  }
+  return { toks };
+}
+function parseExpr(input) {
+  const tk = tokenize(input);
+  if (tk.error) return { error: tk.ch === '.' ? 'Use whole numbers only (no decimals).' : 'Use only x, y, numbers, brackets, + and −. (I don’t know “' + tk.ch + '”.)' };
+  const toks = tk.toks; let pos = 0;
+  if (!toks.length) return { error: 'Type your answer first.' };
+  const peek = () => toks[pos], next = () => toks[pos++];
+  function expr() {
+    const terms = [];
+    let sign = 1;
+    if (peek() && (peek().t === '+' || peek().t === '-')) { sign = next().t === '-' ? -1 : 1; }
+    terms.push(term(sign));
+    while (peek() && (peek().t === '+' || peek().t === '-')) {
+      const s = next().t === '-' ? -1 : 1;
+      if (peek() && (peek().t === '+' || peek().t === '-')) throw 'Two signs in a row.';
+      terms.push(term(s));
+    }
+    let poly = P.c(0);
+    for (const t of terms) poly = P.add(poly, t.poly);
+    return { poly, terms };
+  }
+  function term(sign) {
+    const factors = []; let constant = sign;
+    let any = false;
+    while (peek() && (peek().t === 'n' || peek().t === 'v' || peek().t === '(' || peek().t === '*')) {
+      if (peek().t === '*') { next(); if (!any) throw 'Something is missing before ×.'; continue; }
+      const f = factor();
+      any = true;
+      if (f.multi) { constant *= f.constant; for (const ff of f.factors) factors.push(ff); continue; }
+      if (P.isConst(f.poly)) constant *= P.constVal(f.poly);
+      else for (let k = 0; k < f.times; k++) factors.push(f.base);
+    }
+    if (!any) throw 'Something is missing after a + or − sign.';
+    let poly = P.c(constant);
+    for (const f of factors) poly = P.mul(poly, f);
+    return { sign, constant, factors, poly };
+  }
+  function factor() {
+    let base, isParen = false;
+    const t = next();
+    if (!t) throw 'Your answer ends too early.';
+    if (t.t === 'n') base = P.c(t.v);
+    else if (t.t === 'v') base = t.v === 'x' ? P.mono(1, 1, 0) : P.mono(1, 0, 1);
+    else if (t.t === '(') {
+      const e = expr();
+      if (!peek() || peek().t !== ')') throw 'A bracket is missing a “)”.';
+      next(); base = e.poly; isParen = true;
+      if (e.terms.length === 1 && (!peek() || peek().t !== '^')) return { multi: true, constant: e.terms[0].constant, factors: e.terms[0].factors, poly: e.poly };
+    } else if (t.t === ')') throw 'There is an extra “)”.';
+    else throw 'Something is out of place near “' + t.t + '”.';
+    let times = 1;
+    if (peek() && peek().t === '^') {
+      next(); const e = next();
+      if (!e || e.t !== 'n') throw 'Put a number after ^.';
+      times = e.v; if (times > 6) throw 'That power is too big.';
+    }
+    const poly = P.pow(base, times);
+    // a variable alone raised to a power counts as one monomial factor
+    if (!isParen) return { poly, base: poly, times: P.isConst(base) ? 1 : 1 };
+    return { poly, base, times };
+  }
+  try {
+    const e = expr();
+    if (pos < toks.length) {
+      if (toks[pos].t === ')') return { error: 'There is an extra “)”.' };
+      return { error: 'I couldn’t read the end of your answer.' };
+    }
+    return { poly: e.poly, terms: e.terms };
+  } catch (msg) { return { error: typeof msg === 'string' ? msg : 'I couldn’t read that.' }; }
+}
+
+// Is a degree-2 factor still factorable over the integers?
+function quadFactorable(f) {
+  // homogeneous or single-variable quadratic: a*u^2 + b*u*v + c*v^2
+  const keys = [...f.keys()];
+  const hasY = keys.some(k => k.split(',')[1] !== '0');
+  const hasX = keys.some(k => k.split(',')[0] !== '0');
+  let a, b, c;
+  if (hasX && hasY) { a = P.get(f, 2, 0); b = P.get(f, 1, 1); c = P.get(f, 0, 2); if (P.get(f, 1, 0) || P.get(f, 0, 1) || P.get(f, 0, 0)) return false; }
+  else if (hasX) { a = P.get(f, 2, 0); b = P.get(f, 1, 0); c = P.get(f, 0, 0); }
+  else { a = P.get(f, 0, 2); b = P.get(f, 0, 1); c = P.get(f, 0, 0); }
+  if (!a) return false;
+  if (!c) return b !== 0; // x^2 + bx -> x(x+b)
+  const d = b * b - 4 * a * c;
+  if (d < 0) return false;
+  const r = Math.round(Math.sqrt(d));
+  return r * r === d;
+}
+
+// ---------- Problem formatting ----------
+function binStr(p, q, Y) { // p x + q Y  (Y is 'y' or '')
+  const xs = (p === 1 ? '' : p === -1 ? MINUS : String(p)) + 'x';
+  if (!q) return xs;
+  const qa = Math.abs(q);
+  const ys = Y ? ((qa === 1 ? '' : String(qa)) + Y) : String(qa);
+  return xs + (q < 0 ? ' ' + MINUS + ' ' : ' + ') + ys;
+}
+function factStr(pr) {
+  const { g, p, q, r, s, Y } = pr;
+  const A = binStr(p, q, Y), B = binStr(r, s, Y);
+  const pre = g === 1 ? '' : String(g);
+  if (p === r && q === s) return pre + '(' + A + ')²';
+  // put minus bracket first for DoS
+  if (p === r && q === -s) return pre + '(' + (q < 0 ? A : B) + ')(' + (q < 0 ? B : A) + ')';
+  return pre + '(' + A + ')(' + B + ')';
+}
+function makeProblem(skill, g, p, q, r, s, Y, kind) {
+  const X = P.mono(1, 1, 0), YY = Y ? P.mono(1, 0, 1) : P.c(1);
+  const f1 = P.add(P.scale(X, p), P.scale(YY, q)), f2 = P.add(P.scale(X, r), P.scale(YY, s));
+  const inner = P.mul(f1, f2);
+  const target = P.scale(inner, g);
+  const a = p * r, b = p * s + q * r, c = q * s;
+  const pr = { skill, kind, g, p, q, r, s, Y, a, b, c, ac: a * c, m: q * r, n: p * s, inner, target };
+  pr.text = P.str(target);
+  pr.innerText = P.str(inner);
+  pr.answer = factStr(pr);
+  pr.special = (p === r && q === s) ? 'square' : (p === r && q === -s) ? 'dos' : '';
+  if (p === r && q === -s && b === 0) pr.special = 'dos';
+  return pr;
+}
+
+// ---------- Seeded RNG ----------
+function rngFrom(seed) {
+  let a = seed >>> 0;
+  return function () { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function ri(R, a, b) { return a + Math.floor(R() * (b - a + 1)); }
+function pick(R, arr) { return arr[Math.floor(R() * arr.length)]; }
+function sgn(R) { return R() < 0.5 ? -1 : 1; }
+
+// Gate plan: 19 gates; skill index per gate
+const SKILLS = [
+  { id: 'a1', name: 'Trinomials with a = 1', short: 'a = 1' },
+  { id: 'a1x', name: 'a = 1 with negatives and common factors', short: 'a = 1 + common factor' },
+  { id: 'an1', name: 'Trinomials with a ≠ 1', short: 'a ≠ 1' },
+  { id: 'sp', name: 'Difference of squares and perfect squares', short: 'Special products' },
+  { id: 'xy', name: 'Trinomials with x and y', short: 'Two variables' },
+  { id: 'mix', name: 'Mixed: choose the strategy', short: 'Mixed' }
+];
+const GATE_SKILL = [0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5];
+const ZONE_GATES = [3, 3, 4, 3, 3, 3];
+
+function okPair(p, q) { return gcd(p, q) === 1; }
+function genGate(seed, gi) {
+  const R = rngFrom(seed * 977 + gi * 7919 + 13);
+  for (let tries = 0; tries < 400; tries++) {
+    const pr = tryGen(R, gi);
+    if (!pr) continue;
+    const { a, b, c } = pr;
+    if (Math.abs(a * pr.g) > 72 || Math.abs(c * pr.g) > 150 || Math.abs(b * pr.g) > 120) continue;
+    if (!okPair(pr.p, pr.q) || !okPair(pr.r, pr.s)) continue;
+    if (pr.kind !== 'dos' && b === 0) continue;
+    if (pr.special !== 'dos' && pr.special !== 'square' && Math.abs(pr.ac) > 150) continue;
+    if (Math.abs(pr.ac) > 400) continue;
+    if (pr.kind === 'dos' && b !== 0) continue;
+    pr.gate = gi;
+    return pr;
+  }
+  return makeProblem(GATE_SKILL[gi], 1, 1, 2, 1, 3, '', 'a1');
+}
+function tryGen(R, gi) {
+  const sk = GATE_SKILL[gi];
+  let q, s, p, r, g, k, Y = '';
+  switch (gi) {
+    case 0: q = ri(R, 1, 8); s = ri(R, 2, 9); if (q === s) return null; return makeProblem(sk, 1, 1, q, 1, s, '', 'a1');
+    case 1: q = ri(R, 3, 11); s = -ri(R, 1, q - 1); if (q + s === 0) return null; return makeProblem(sk, 1, 1, q, 1, s, '', 'a1');
+    case 2: if (R() < 0.5) { q = -ri(R, 2, 9); s = -ri(R, 1, 9); if (q === s) return null; } else { q = -ri(R, 3, 12); s = ri(R, 1, -q - 1); } return makeProblem(sk, 1, 1, q, 1, s, '', 'a1');
+    case 3: q = sgn(R) * ri(R, 4, 12); s = sgn(R) * ri(R, 2, 12); if (Math.abs(q * s) < 18 || q + s === 0 || q === s) return null; return makeProblem(sk, 1, 1, q, 1, s, '', 'a1');
+    case 4: g = pick(R, [2, 3, 4, 5]); q = ri(R, 1, 7); s = ri(R, 1, 7); if (q === s) return null; return makeProblem(sk, g, 1, q, 1, s, '', 'gcf');
+    case 5: g = pick(R, [2, 3, 5, 6]); q = sgn(R) * ri(R, 1, 8); s = sgn(R) * ri(R, 2, 8); if (q + s === 0 || q === s || (q > 0 && s > 0)) return null; return makeProblem(sk, g, 1, q, 1, s, '', 'gcf');
+    case 6: p = pick(R, [2, 3]); q = ri(R, 1, 7); s = ri(R, 1, 6); return makeProblem(sk, 1, p, q, 1, s, '', 'an1');
+    case 7: p = pick(R, [2, 3, 5]); q = sgn(R) * ri(R, 1, 7); s = sgn(R) * ri(R, 1, 6); if (q > 0 && s > 0) return null; return makeProblem(sk, 1, p, q, 1, s, '', 'an1');
+    case 8: [p, r] = pick(R, [[2, 2], [2, 3], [3, 2], [4, 1], [2, 5], [3, 3]]); q = sgn(R) * ri(R, 1, 7); s = sgn(R) * ri(R, 1, 7); if (p === r && (q === s || q === -s)) return null; return makeProblem(sk, 1, p, q, r, s, '', 'an1');
+    case 9: [p, r] = pick(R, [[2, 3], [4, 3], [6, 1], [4, 1], [2, 5], [3, 4], [5, 2], [4, 5]]); q = sgn(R) * ri(R, 1, 7); s = sgn(R) * ri(R, 1, 7); if (q > 0 && s > 0) return null; return makeProblem(sk, 1, p, q, r, s, '', 'an1');
+    case 10: if (R() < 0.5) { k = ri(R, 3, 12); return makeProblem(sk, 1, 1, -k, 1, k, '', 'dos'); } p = pick(R, [2, 3, 4, 5, 6]); k = ri(R, 1, 9); return makeProblem(sk, 1, p, -k, p, k, '', 'dos');
+    case 11: if (R() < 0.5) { k = sgn(R) * ri(R, 2, 9); return makeProblem(sk, 1, 1, k, 1, k, '', 'square'); } p = pick(R, [2, 3, 4]); k = sgn(R) * ri(R, 1, 5); return makeProblem(sk, 1, p, k, p, k, '', 'square');
+    case 12: g = pick(R, [2, 3, 5]); if (R() < 0.55) { k = ri(R, 2, 7); return makeProblem(sk, g, 1, -k, 1, k, '', 'dos'); } k = sgn(R) * ri(R, 1, 6); return makeProblem(sk, g, 1, k, 1, k, '', 'square');
+    case 13: k = R() < 0.3 ? 1 : ri(R, 2, 6); k *= sgn(R); return makeProblem(sk, 1, 1, k, 1, k, 'y', 'square');
+    case 14: q = sgn(R) * ri(R, 1, 8); s = sgn(R) * ri(R, 2, 9); if (q + s === 0 || q === s) return null; return makeProblem(sk, 1, 1, q, 1, s, 'y', 'a1');
+    case 15: if (R() < 0.5) { p = pick(R, [1, 2, 3, 4, 5]); k = ri(R, 1, 9); if (p === 1 && k === 1) return null; return makeProblem(sk, 1, p, -k, p, k, 'y', 'dos'); }
+      p = pick(R, [2, 3]); q = sgn(R) * ri(R, 1, 5); s = sgn(R) * ri(R, 1, 5); return makeProblem(sk, 1, p, q, 1, s, 'y', 'an1');
+    case 16: g = pick(R, [2, 3]); [p, r] = pick(R, [[2, 1], [3, 1], [2, 3], [5, 1], [3, 2]]); q = sgn(R) * ri(R, 1, 5); s = sgn(R) * ri(R, 1, 5); if (p === r && (q === s || q === -s)) return null; return makeProblem(sk, g, p, q, r, s, '', 'gcf');
+    case 17: g = pick(R, [2, 3, 5]); if (R() < 0.5) { p = pick(R, [1, 2, 3]); k = ri(R, 1, 6); if (p === 1 && k < 3) return null; return makeProblem(sk, g, p, -k, p, k, '', 'dos'); } p = pick(R, [1, 2]); k = sgn(R) * ri(R, 1, 5); return makeProblem(sk, g, p, k, p, k, '', 'square');
+    case 18: g = pick(R, [2, 3, 4]); if (R() < 0.5) { p = pick(R, [1, 2]); q = sgn(R) * ri(R, 1, 4); s = sgn(R) * ri(R, 1, 4); if (q + s === 0 && p === 1) return null; if (q === s) return null; return makeProblem(sk, g, p, q, 1, s, 'y', 'gcf'); }
+      k = sgn(R) * ri(R, 1, 4); return makeProblem(sk, g, 1, k, 1, k, 'y', 'square');
+  }
+  return null;
+}
+
+// ---------- Checking ----------
+// returns {ok, almost, msg, expands}
+function checkAnswer(input, pr) {
+  const raw = (input || '').trim();
+  if (!raw) return { ok: false, empty: true, msg: 'Type your answer first.' };
+  const res = parseExpr(raw);
+  if (res.error) return { ok: false, parse: true, msg: res.error };
+  const T = pr.target, A = res.poly;
+  const expands = P.str(A);
+  const top = res.terms;
+  const isProduct = top.length === 1;
+  if (!isProduct) {
+    if (P.eq(A, T)) return { ok: false, almost: true, msg: 'That’s the question again, written as a sum. Factored form is a product of brackets, like (x + 2)(x + 3).', expands };
+    return { ok: false, msg: 'Write your answer as a product (brackets multiplied together), like (x + 2)(x + 3). Your answer is a sum.', expands };
+  }
+  const t0 = top[0];
+  if (!P.eq(A, T)) return { ok: false, msg: diagnose(A, T, pr, t0), expands };
+  // Equal: is it fully factored?
+  for (const f of t0.factors) {
+    const d = P.deg(f), ct = P.content(f);
+    if (d >= 1 && f.size > 1 && ct > 1) return { ok: false, almost: true, msg: '(' + P.str(f) + ') still has a common factor of ' + ct + '. Take it out front so every bracket is fully factored.', expands };
+    if (d === 2 && f.size > 1 && quadFactorable(f)) return { ok: false, almost: true, msg: '(' + P.str(f) + ') can still be factored. Keep going!', expands };
+  }
+  if (t0.factors.length === 0) return { ok: false, msg: 'That’s just a number.', expands };
+  // notes
+  const notes = [];
+  const brs = t0.factors.filter(f => f.size > 1);
+  if (brs.some(f => leadCoef(f) < 0)) notes.push('Tip: we usually write each bracket starting with a positive x term, like ' + pr.answer + '.');
+  else if (pr.special === 'square' && brs.length === 2 && P.eq(brs[0], brs[1])) notes.push('You can also write this as ' + pr.answer + '.');
+  return { ok: true, msg: notes.join(' '), expands };
+}
+function leadCoef(f) { const terms = [...f.entries()].map(([k, v]) => { const [i, j] = k.split(',').map(Number); return { i, j, v }; }); terms.sort((p, q) => (q.i + q.j) - (p.i + p.j) || q.i - p.i); return terms[0].v; }
+function diagnose(A, T, pr, t0) {
+  const tg = pr.g;
+  // missing common factor out front
+  if (tg > 1 && P.eq(P.scale(A, tg), T)) return 'Your brackets are right, but the common factor ' + tg + ' is missing out front. Write ' + tg + '(…)(…).';
+  if (P.eq(P.neg(A), T)) return 'Every sign is flipped. Check the signs in your brackets.';
+  { const la = leadCoef(A), lt = leadCoef(T); if (la && lt % la === 0 && Math.abs(lt / la) > 1 && P.eq(P.scale(A, lt / la), T)) return 'Your answer is ' + (lt / la) + ' times too small. There\u2019s a common factor of ' + (lt / la) + ' missing \u2014 check every bracket and the number out front.'; }
+  const xy = !!pr.Y;
+  const a2 = xy ? [P.get(A, 2, 0), P.get(A, 1, 1), P.get(A, 0, 2)] : [P.get(A, 2, 0), P.get(A, 1, 0), P.get(A, 0, 0)];
+  const t2 = xy ? [P.get(T, 2, 0), P.get(T, 1, 1), P.get(T, 0, 2)] : [P.get(T, 2, 0), P.get(T, 1, 0), P.get(T, 0, 0)];
+  const otherTerms = P.deg(A) !== 2 || [...A.keys()].some(k => { const [i, j] = k.split(',').map(Number); return xy ? (i + j !== 2) : j !== 0; });
+  if (otherTerms) {
+    if (xy && [...A.keys()].every(k => k.split(',')[1] === '0')) return 'This question has y in it. Each bracket needs an x term and a y term, like (x + 3y).';
+    return 'Your answer doesn’t expand to a trinomial like the question. Check what you put in each bracket.';
+  }
+  const B = xy ? 'xy' : 'x';
+  const gA = tg; // compare against target
+  if (a2[0] !== t2[0]) return 'The first terms in your brackets multiply to ' + monoS(a2[0], xy ? 'x²' : 'x²') + ', but the question starts with ' + monoS(t2[0], 'x²') + '. Check the x terms in your brackets' + (tg > 1 ? ' and the common factor out front.' : '.');
+  if (pr.special === 'dos' && a2[1] !== 0 && a2[2] === t2[2] * -1) return 'That’s a perfect square, not a difference of squares. The question has no middle term, so one bracket needs + and the other needs −.';
+  if (pr.special === 'dos' && a2[1] !== 0) return 'The question has no middle term, so the middle terms must cancel. For a difference of squares, use the same numbers with opposite signs: (… − …)(… + …).';
+  if (pr.special === 'square' && a2[1] === 0) return 'That’s a difference of squares (no middle term). The question has a middle term of ' + monoS(t2[1], B) + ', so both brackets should be the same.';
+  if (a2[2] === t2[2] && a2[1] === -t2[1]) return 'So close! Your numbers multiply correctly, but the signs are switched. Your middle term is ' + monoS(a2[1], B) + '; it needs to be ' + monoS(t2[1], B) + '.';
+  if (a2[2] === t2[2]) {
+    if (pr.a === 1 && tg === 1) return 'Your numbers multiply to ' + t2[2] + ', but they don’t add to ' + t2[1] + '. Your middle term comes out as ' + monoS(a2[1], B) + '.';
+    return 'The last terms multiply correctly, but the middle term comes out as ' + monoS(a2[1], B) + ' instead of ' + monoS(t2[1], B) + '. Try a different pair, or swap the numbers between the brackets.';
+  }
+  if (a2[1] === t2[1]) return 'Your middle term is right, but the last term comes out as ' + monoS(a2[2], xy ? 'y²' : '') + ' instead of ' + monoS(t2[2], xy ? 'y²' : '') + '. The numbers have to multiply to the last term.';
+  if (a2[2] === -t2[2]) return 'Check your signs: the last term comes out as ' + monoS(a2[2], xy ? 'y²' : '') + ', but it should be ' + monoS(t2[2], xy ? 'y²' : '') + '.';
+  return 'Not quite. Expand your answer and compare it with the question.';
+}
+function monoS(k, v) { const s = k < 0 ? MINUS : ''; const a = Math.abs(k); return s + ((a === 1 && v) ? '' : a) + v; }
+
+// ---------- Hints ----------
+function hint1(pr) {
+  const tg = pr.g;
+  if (tg > 1) return 'Common factor first. What number divides into every term of ' + pr.text + '?';
+  if (pr.special === 'dos') return 'There is no middle term, and there is a minus sign between two perfect squares. This is a difference of squares: find the square root of each term.';
+  if (pr.special === 'square') return 'The first and last terms are perfect squares. Check: is the middle term 2 × (root of the first) × (root of the last)? If so, it’s a perfect square.';
+  if (pr.a === 1) return 'Find two numbers that multiply to ' + pr.c + ' and add to ' + pr.b + '.' + (pr.Y ? ' Then put y with each number.' : '');
+  return 'Box method: multiply a × c = ' + pr.a + ' × ' + paren(pr.c) + ' = ' + pr.ac + '. Find two numbers that multiply to ' + pr.ac + ' and add to b = ' + pr.b + '.';
+}
+function paren(n) { return n < 0 ? '(' + MINUS + Math.abs(n) + ')' : String(n); }
+function nm(n) { return n < 0 ? MINUS + Math.abs(n) : String(n); }
+function hint2(pr) {
+  const tg = pr.g, V = pr.Y ? 'xy' : 'x';
+  let s = '';
+  if (tg > 1) s += 'Take out ' + tg + ': ' + pr.text + ' = ' + tg + '(' + pr.innerText + '). Now factor the bracket. ';
+  const [m, n] = [pr.m, pr.n];
+  if (pr.special === 'dos') s += 'In the box, the middle cells are ' + monoS(m, V) + ' and ' + monoS(n, V) + ' (they add to 0).';
+  else s += 'The two numbers are ' + nm(m) + ' and ' + nm(n) + ' (' + nm(m) + ' × ' + paren(n) + ' = ' + (m * n) + ', ' + nm(m) + ' + ' + paren(n) + ' = ' + (m + n) + '). Split the middle term into ' + monoS(m, V) + ' and ' + monoS(n, V) + ' in the box.';
+  return s;
+}
+// Worked steps (HTML), math going down the page
+function stepsHTML(pr) {
+  const V = pr.Y ? 'xy' : 'x', tg = pr.g;
+  const L = [];
+  const why = (t) => '<span class="why">' + t + '</span>';
+  L.push('<div class="st"><b>Question:</b> ' + pr.text + '</div>');
+  if (tg > 1) L.push('<div class="st"><b>1.</b> Common factor first: every term divides by ' + tg + '.<div class="eq">' + pr.text + '<br>= ' + tg + '(' + pr.innerText + ')</div>' + why('Always check for a common factor before anything else.') + '</div>');
+  const a = pr.a, b = pr.b, c = pr.c;
+  const n0 = tg > 1 ? 2 : 1;
+  if (pr.special === 'dos') L.push('<div class="st"><b>' + n0 + '.</b> No middle term, so b = 0. Find two numbers that multiply to a × c = ' + a + ' × ' + paren(c) + ' = ' + pr.ac + ' and add to 0: <b>' + nm(pr.m) + '</b> and <b>' + nm(pr.n) + '</b>.' + why('A difference of squares has no middle term, so the two middle cells cancel out.') + '</div>');
+  else L.push('<div class="st"><b>' + n0 + '.</b> a × c = ' + a + ' × ' + paren(c) + ' = ' + pr.ac + '. Two numbers that multiply to ' + pr.ac + ' and add to ' + b + ': <b>' + nm(pr.m) + '</b> and <b>' + nm(pr.n) + '</b>.' + why('These become the two middle cells of the box.') + '</div>');
+  // box
+  const X = 'x', Yv = pr.Y || '';
+  const lab = (k, v) => monoS(k, v) || '1';
+  const tl = monoS(a, 'x²'), tr = monoS(pr.n, V), bl = monoS(pr.m, V), br = monoS(c, Yv ? 'y²' : '');
+  const L1 = monoS(pr.p, 'x'), L2 = (pr.q < 0 ? MINUS : '+') + ' ' + monoS(Math.abs(pr.q), Yv), T1 = monoS(pr.r, 'x'), T2 = (pr.s < 0 ? MINUS : '+') + ' ' + monoS(Math.abs(pr.s), Yv);
+  L.push('<div class="st"><b>' + (n0 + 1) + '.</b> Fill the box: first term top left, last term bottom right, the split middle terms in the other two cells. Then take the common factor of each row and column.' +
+    '<table class="box"><tr><td class="bl"></td><td class="bl">' + T1 + '</td><td class="bl">' + T2 + '</td></tr>' +
+    '<tr><td class="bl">' + L1 + '</td><td>' + tl + '</td><td>' + tr + '</td></tr>' +
+    '<tr><td class="bl">' + L2 + '</td><td>' + bl + '</td><td>' + br + '</td></tr></table>' +
+    why('The side labels multiply to make each cell. Signs go with the term after them.') + '</div>');
+  L.push('<div class="st"><b>' + (n0 + 2) + '.</b> Read the brackets from the sides of the box:<div class="eq">' + pr.text + '<br>= ' + pr.answer + '</div></div>');
+  L.push('<div class="st"><b>Check:</b> expand ' + pr.answer + ' and you get ' + pr.text + ' ✓</div>');
+  return L.join('');
+}
+
+// ---------- Box scratchpad check ----------
+function parseMono(s) {
+  const r = parseExpr(s); if (r.error) return null;
+  return r.poly;
+}
+function checkBox(pr, vals) {
+  // vals: {g, tl, tr, bl, br, l1, l2, t1, t2}
+  const gStr = (vals.g || '').trim();
+  const g = gStr ? parseInt(gStr.replace(/[−]/g, '-'), 10) : 1;
+  if (!Number.isFinite(g) || g === 0) return { ok: false, msg: 'The common factor box needs a whole number (leave it empty for 1).' };
+  const need = ['tl', 'tr', 'bl', 'br'];
+  const cells = {};
+  for (const k of need) { const v = (vals[k] || '').trim(); if (!v) return { ok: false, msg: 'Fill in all four cells first.' }; const pp = parseMono(v); if (!pp) return { ok: false, msg: 'I can’t read the cell “' + v + '”.' }; cells[k] = pp; }
+  const sum = P.add(P.add(cells.tl, cells.tr), P.add(cells.bl, cells.br));
+  if (!P.eq(P.scale(sum, g), pr.target)) {
+    if (P.eq(sum, pr.target) && pr.g > 1) return { ok: false, msg: 'Your cells add to the whole question, but there’s a common factor to take out first. Put it in the common factor box.' };
+    return { ok: false, msg: 'Your four cells add to ' + P.str(sum) + (g !== 1 ? ' (times ' + g + ')' : '') + ', but they need to make ' + (g !== 1 ? pr.innerText : pr.text) + '.' };
+  }
+  const d1 = P.mul(cells.tl, cells.br), d2 = P.mul(cells.tr, cells.bl);
+  if (!P.eq(d1, d2)) return { ok: false, msg: 'The diagonals don’t match: top-left × bottom-right = ' + P.str(d1) + ', but top-right × bottom-left = ' + P.str(d2) + '. Try a different split of the middle term.' };
+  const labs = {};
+  for (const k of ['l1', 'l2', 't1', 't2']) { const v = (vals[k] || '').trim(); if (!v) return { ok: false, msg: 'Your cells work! Now fill in the side labels (the common factor of each row and column).' }; const pp = parseMono(v); if (!pp) return { ok: false, msg: 'I can’t read the label “' + v + '”.' }; labs[k] = pp; }
+  const pairs = [['l1', 't1', 'tl', 'top-left'], ['l1', 't2', 'tr', 'top-right'], ['l2', 't1', 'bl', 'bottom-left'], ['l2', 't2', 'br', 'bottom-right']];
+  for (const [l, t, c, name] of pairs) {
+    if (!P.eq(P.mul(labs[l], labs[t]), cells[c])) return { ok: false, msg: 'The labels for the ' + name + ' cell multiply to ' + P.str(P.mul(labs[l], labs[t])) + ', not ' + P.str(cells[c]) + '. Check the signs and numbers on that row and column.' };
+  }
+  const rowB = P.add(labs.l1, labs.l2), colB = P.add(labs.t1, labs.t2);
+  const ans = (g !== 1 ? String(g) : '') + '(' + P.str(colB) + ')(' + P.str(rowB) + ')';
+  return { ok: true, msg: 'Your box works! The brackets are ' + ans + '.', ans };
+}
+
+const READ = {"maze": [{"title": "Chapter 1: The Torn Corner", "items": ["Jules spotted it first: a scrap of yellow paper caught on a cedar branch just past the first gate.", " It was the torn corner of ", {"c": "a", "o": ["a", "an", "ran"]}, " map, with neat pencil lines and ", {"c": "a", "o": ["a", "an", "under"]}, " tiny compass on one edge. \"This ", {"c": "has", "o": ["has", "goes", "green"]}, " to be from the missing plan,\" ", {"c": "Jules", "o": ["Jules", "nobody", "softly"]}, " said, holding it up to the ", {"c": "light", "o": ["light", "dark", "eaten"]}, ". On the back, someone had written ", {"c": "x²", "o": ["x²", "x³", "slowly"]}, " + 7x + 12 in small, ", {"c": "careful", "o": ["careful", "angry", "jumped"]}, " numbers. \"That factors to (x + ", {"c": "3", "o": ["3", "5", "grass"]}, ")(x + 4),\" I said. \"Maybe it ", {"c": "is", "o": ["is", "are", "ran"]}, " some kind of code.\" We looked ", {"c": "around", "o": ["around", "away", "carrot"]}, " for more clues. The path was ", {"c": "soft", "o": ["soft", "dry", "quickly"]}, " and muddy from last night's rain, ", {"c": "and", "o": ["and", "or", "goat"]}, " a line of boot prints led ", {"c": "deeper", "o": ["deeper", "higher", "apple"]}, " into the maze. Each print was ", {"c": "about", "o": ["about", "never", "jump"]}, " 30 cm long, and the steps ", {"c": "were", "o": ["were", "was", "boots"]}, " far apart, as if someone had ", {"c": "been", "o": ["been", "seen", "cedar"]}, " in a hurry. Next to the ", {"c": "boot", "o": ["boot", "deer", "slowly"]}, " prints were small, split hoof marks. \"", {"c": "A", "o": ["A", "An", "Ran"]}, " deer?\" I asked. \"Too small,\" said ", {"c": "Jules", "o": ["Jules", "everyone", "under"]}, ". \"It looks more like a goat.\" ", {"c": "At", "o": ["At", "Under", "Goat"]}, " the next bend we met Dana, ", {"c": "who", "o": ["who", "which", "apple"]}, " drives the hay wagon. She was ", {"c": "eating", "o": ["eating", "driving", "slowly"]}, " an apple and checking her watch. \"", {"c": "The", "o": ["The", "No", "Ran"]}, " wagon leaves every twenty minutes,\" she ", {"c": "said", "o": ["said", "asked", "tower"]}, ", \"so I get exactly six minutes ", {"c": "for", "o": ["for", "under", "green"]}, " lunch.\" She had not seen any ", {"c": "map", "o": ["map", "wagon", "quickly"]}, ". Above us, a small drone buzzed ", {"c": "over", "o": ["over", "under", "apple"]}, " the hedges. Its owner, Mr. Pratt, ", {"c": "was", "o": ["was", "were", "drone"]}, " a photographer who had come to ", {"c": "take", "o": ["take", "eat", "slowly"]}, " pictures of the mazes from the ", {"c": "air", "o": ["air", "basement", "jumped"]}, ". He waved at us from the ", {"c": "top", "o": ["top", "price", "quickly"]}, " of the lookout tower. \"Why is ", {"c": "he", "o": ["he", "she", "green"]}, " allowed up there?\" Jules whispered. \"The ", {"c": "tower", "o": ["tower", "goat", "slowly"]}, " is supposed to be locked.\" I ", {"c": "folded", "o": ["folded", "ate", "under"]}, " the torn corner and slipped it ", {"c": "into", "o": ["into", "onto", "goat"]}, " my pocket. We had three suspects, ", {"c": "one", "o": ["one", "four", "ran"]}, " goat, and a lot of gates ", {"c": "still", "o": ["still", "never", "apple"]}, " to open."]}, {"title": "Chapter 2: The View From Above", "items": ["By the time we reached the Hampton maze, the sun was finally shining.", " Mr. Pratt was waiting at the ", {"c": "gate", "o": ["gate", "moon", "slowly"]}, " with his tablet. \"Look at this,\" ", {"c": "he", "o": ["he", "she", "under"]}, " said, and showed us a photo ", {"c": "his", "o": ["his", "her", "jumped"]}, " drone had taken that morning. From ", {"c": "above", "o": ["above", "below", "eaten"]}, ", the hedges made a pattern of ", {"c": "squares", "o": ["squares", "circles", "quickly"]}, " and rectangles, like a giant box ", {"c": "method", "o": ["method", "lunch", "softly"]}, ". In one corner, a line of ", {"c": "tiny", "o": ["tiny", "purple", "ran"]}, " yellow dots ran from the tower ", {"c": "toward", "o": ["toward", "beneath", "apple"]}, " the goat pen. \"Paper scraps,\" Jules ", {"c": "said", "o": ["said", "ate", "tower"]}, ". \"Someone dropped pieces of the plan ", {"c": "along", "o": ["along", "inside", "green"]}, " the way.\" Mr. Pratt frowned. \"I ", {"c": "climbed", "o": ["climbed", "ate", "slowly"]}, " the tower to take photos, but ", {"c": "the", "o": ["the", "an", "jumped"]}, " lockbox was already open when I ", {"c": "got", "o": ["got", "ate", "softly"]}, " there. Gus asked me not to ", {"c": "touch", "o": ["touch", "touched", "goat"]}, " anything.\" I counted the dots on ", {"c": "the", "o": ["the", "an", "ran"]}, " screen. There were twelve, spaced about ", {"c": "five", "o": ["five", "six", "ran"]}, " metres apart, so the trail was ", {"c": "roughly", "o": ["roughly", "never", "apple"]}, " sixty metres long. That was too ", {"c": "far", "o": ["far", "close", "goat"]}, " for the wind to carry paper ", {"c": "in", "o": ["in", "under", "green"]}, " a straight line. We found Dana ", {"c": "again", "o": ["again", "tomorrow", "slowly"]}, " at the wagon stop. Her schedule ", {"c": "was", "o": ["was", "were", "tablet"]}, " pinned to a post: rides at ", {"c": "10", "o": ["10", "10:10", "lunch"]}, ":00, 10:20, 10:40 and 11:00. \"The tower ", {"c": "was", "o": ["was", "were", "goat"]}, " locked at ten,\" she said, \"because ", {"c": "I", "o": ["I", "you", "under"]}, " watched Gus lock it before my ", {"c": "first", "o": ["first", "last", "eaten"]}, " ride.\" So the plan had gone ", {"c": "missing", "o": ["missing", "hungry", "slowly"]}, " after ten o'clock. Then Jules gasped ", {"c": "and", "o": ["and", "but", "goat"]}, " pointed. Behind the fence, a brown ", {"c": "and", "o": ["and", "or", "ran"]}, " white goat was chewing something yellow. \"", {"c": "That's", "o": ["That's", "Who's", "Under"]}, " Pepper,\" Dana laughed. \"She eats everything.\" ", {"c": "I", "o": ["I", "Pepper", "softly"]}, " opened my notebook and wrote it ", {"c": "all", "o": ["all", "nothing", "green"]}, " down. Pepper had the paper, but ", {"c": "a", "o": ["a", "an", "ran"]}, " goat could not open a lockbox. ", {"c": "Someone", "o": ["Someone", "Pepper", "Quickly"]}, " with a key had been in ", {"c": "the", "o": ["the", "an", "ate"]}, " tower first."]}, {"title": "Chapter 3: The Truth at the Tower", "items": ["When the last gate swung open, we ran to the lookout tower at the centre of the maze.", " Gus Moreau was sitting on the ", {"c": "bottom", "o": ["bottom", "loudest", "jumped"]}, " step, holding a mug of cider ", {"c": "and", "o": ["and", "but", "goat"]}, " smiling. \"You made it,\" he said. \"", {"c": "Nineteen", "o": ["Nineteen", "Twelve", "Gently"]}, " gates, and you factored every one.\" ", {"c": "I", "o": ["I", "Pepper", "Under"]}, " took out the torn corner and ", {"c": "laid", "o": ["laid", "ate", "softly"]}, " it on the step. \"The tower ", {"c": "was", "o": ["was", "were", "apple"]}, " locked at ten,\" I said. \"Mr. ", {"c": "Pratt", "o": ["Pratt", "Moreau", "slowly"]}, " found the lockbox open, and Pepper ", {"c": "ate", "o": ["ate", "drew", "under"]}, " part of the plan. But a ", {"c": "goat", "o": ["goat", "cloud", "softly"]}, " cannot open a lock, and Mr. ", {"c": "Pratt", "o": ["Pratt", "Moreau", "green"]}, " did not have a key. You ", {"c": "did", "o": ["did", "didn't", "apple"]}, ".\" Gus laughed so hard he nearly ", {"c": "spilled", "o": ["spilled", "painted", "under"]}, " his cider. \"Guilty,\" he said. \"I ", {"c": "moved", "o": ["moved", "ate", "quickly"]}, " the plan this morning because rain ", {"c": "was", "o": ["was", "were", "goat"]}, " coming, and the tower roof leaks. ", {"c": "I", "o": ["I", "Pepper", "green"]}, " tucked it into my coat, and ", {"c": "I", "o": ["I", "Pepper", "slowly"]}, " left the note to make Math ", {"c": "Day", "o": ["Day", "Lake", "jumped"]}, " more exciting.\" \"Then how did Pepper ", {"c": "get", "o": ["get", "paint", "under"]}, " it?\" Jules asked. Gus looked a ", {"c": "little", "o": ["little", "lot", "fence"]}, " embarrassed. \"I hung my coat on ", {"c": "the", "o": ["the", "an", "ran"]}, " fence by the goat pen while ", {"c": "I", "o": ["I", "Pepper", "green"]}, " fixed a gate. When I came ", {"c": "back", "o": ["back", "asleep", "apple"]}, ", one pocket was empty.\" So the ", {"c": "boot", "o": ["boot", "hoof", "slowly"]}, " prints were his, and the hoof ", {"c": "marks", "o": ["marks", "boots", "ran"]}, " were Pepper's. The yellow dots in ", {"c": "the", "o": ["the", "an", "jumped"]}, " photo were the pieces she dropped ", {"c": "as", "o": ["as", "unless", "goat"]}, " she wandered. Gus reached into the ", {"c": "lockbox", "o": ["lockbox", "goat", "softly"]}, " and pulled out a folded sheet. \"", {"c": "Most", "o": ["Most", "None", "Under"]}, " of it survived,\" he said. It ", {"c": "was", "o": ["was", "were", "apple"]}, " the original plan, drawn on graph ", {"c": "paper", "o": ["paper", "wagon", "quickly"]}, ", with every hedge marked in pencil. ", {"c": "Only", "o": ["Only", "Every", "Jumped"]}, " one corner was missing, and it ", {"c": "was", "o": ["was", "were", "cider"]}, " in my pocket. I handed it ", {"c": "back", "o": ["back", "upside", "green"]}, ", and Gus fitted the two pieces ", {"c": "together", "o": ["together", "apart", "goat"]}, " like the last cell of a ", {"c": "box", "o": ["box", "goat", "slowly"]}, ". \"Next year,\" Jules said, \"maybe keep ", {"c": "it", "o": ["it", "her", "ran"]}, " somewhere a goat cannot reach.\" Gus ", {"c": "grinned", "o": ["grinned", "cried", "under"]}, " and promised he would."]}], "mc": [{"id": "khwarizmi", "cp": 0, "title": "The Book That Gave Algebra Its Name", "kind": "Information text", "paras": ["More than 1,200 years ago, in the city of Baghdad, a scholar named Muhammad ibn Musa al-Khwarizmi worked at a famous library and research centre called the House of Wisdom. Scholars there translated books from Greek, Persian and Sanskrit, and they wrote new ones. Around the year 820, al-Khwarizmi finished a book that would shape mathematics for centuries.", "## A Book for Everyday Problems", "The book’s title is often translated as The Compendious Book on Calculation by Completion and Balancing. It was not written only for experts. Al-Khwarizmi said he wanted to help people with practical problems, such as dividing an inheritance, measuring land and settling trade. Each problem became an equation with an unknown amount.", "## Restoring and Balancing", "Two steps gave the book its name. The first, al-jabr, means “restoring” or “completing.” It moved a subtracted amount to the other side of an equation so that every term was positive. The second, al-muqabala, means “balancing”: it cancelled equal amounts on both sides. When the book was translated into Latin in the 1100s, the word al-jabr became algebra.", "## Algebra Without Symbols", "Surprisingly, the book has no x, no equals sign and no numerals in its equations. Everything is written in words. A problem might read: “a square and ten roots are equal to thirty-nine.” Today we would write x² + 10x = 39. To solve it, al-Khwarizmi drew a square, attached rectangles to its sides, and then “completed” the picture into a larger square. The answer, 3, came from the picture.", "## A Name That Lives On", "Al-Khwarizmi also wrote about the Hindu-Arabic numerals, including zero. Latin translations spelled his name Algoritmi, which later became the word algorithm: a step-by-step method for solving a problem. When you factor a trinomial with the box method, you are following an algorithm and drawing a picture of an equation, just as al-Khwarizmi did."], "qs": [{"q": "According to paragraph 2, who was al-Khwarizmi’s book meant to help?", "o": ["only experts in Greek mathematics", "people solving practical problems", "students at a school in Baghdad", "translators working in Latin"], "a": 1, "e": "Paragraph 2 says he wanted to help people with practical problems such as inheritances, land and trade."}, {"q": "In paragraph 3, the word “restoring” means", "o": ["removing", "repeating", "completing", "dividing"], "a": 2, "e": "The text gives the meaning right beside the word: al-jabr means “restoring” or “completing.”"}, {"q": "In the problem “a square and ten roots are equal to thirty-nine,” what does “root” stand for?", "o": ["the unknown number, x", "the square, x²", "the number 39", "a rectangle in the picture"], "a": 0, "e": "The modern version is x² + 10x = 39. “Ten roots” matches 10x, so a root is the unknown x."}, {"q": "The heading “Algebra Without Symbols” tells the reader that paragraph 4 explains", "o": ["how al-Khwarizmi wrote equations in words", "why symbols were not allowed in Baghdad", "how the Latin translation added symbols", "why the House of Wisdom closed"], "a": 0, "e": "Paragraph 4 describes equations written entirely in words, with no x, equals sign or numerals."}, {"q": "Why does the writer mention the box method in the last paragraph?", "o": ["to show how al-Khwarizmi factored trinomials", "to connect al-Khwarizmi’s ideas to what students do today", "to prove the box method is older than algebra", "to argue that algorithms are difficult"], "a": 1, "e": "The writer links following an algorithm and drawing a picture of an equation to the factoring students do now."}]}, {"id": "johnson", "cp": 0, "title": "Check the Numbers", "kind": "Story", "paras": ["Maya stared at the blank slide titled “My Math Hero.” Her presentation was due Friday, and her first idea, a famous inventor, had already been taken by two classmates.", "“Try Katherine Johnson,” said her grandfather, setting down his tea. “I watched John Glenn’s launch on a black-and-white TV in 1962. Nobody knew her name back then.”", "Maya searched while he talked. Katherine Johnson was born in West Virginia in 1918. She was so quick with numbers that she started high school at ten. In 1953 she began working at a research centre in Virginia that later became part of NASA. She was one of a group of Black women mathematicians whose job title was “computer.” The word meant a person who computed.", "“Here’s the part I remember,” Grandpa said. “Before Glenn’s flight, NASA used a new electronic computer to plan his orbit. But Glenn didn’t fully trust the machine. He asked for Katherine to check its numbers by hand. If she said they were good, he was ready to go.”", "Maya read on. Johnson spent days checking the path of a capsule that would circle the planet at about 28,000 km/h. Her numbers matched. Glenn’s flight was a success.", "“So she was the backup for a computer,” Maya said slowly.", "“She was the person the astronaut trusted,” Grandpa said. “There’s a difference.”", "Maya typed a new title: “The Woman Who Checked the Computer.” On her last slide she wrote that Johnson counted everything as a child, from the steps to the road to the dishes she washed. In 2015, at age 97, Johnson received the Presidential Medal of Freedom. She lived to 101.", "Maya smiled. Friday couldn’t come soon enough."], "qs": [{"q": "Why did Maya need a new idea for her presentation?", "o": ["Her first slide was deleted.", "Two classmates had already chosen her first idea.", "Her grandfather did not like inventors.", "The presentation was moved to Friday."], "a": 1, "e": "Paragraph 1 says her first idea “had already been taken by two classmates.”"}, {"q": "In paragraph 3, the word “computer” refers to", "o": ["an electronic machine", "a person who did calculations", "an engineer who built rockets", "an astronaut in training"], "a": 1, "e": "The paragraph explains: “The word meant a person who computed.”"}, {"q": "Why did John Glenn ask for Katherine Johnson to check the numbers?", "o": ["The machine was broken.", "He trusted her more than a new machine.", "NASA had no other mathematicians.", "She had planned his training."], "a": 1, "e": "Grandpa says Glenn “didn’t fully trust the machine” and wanted Johnson to check it by hand."}, {"q": "What does Grandpa mean when he says, “There’s a difference”?", "o": ["Johnson was more important than a backup.", "Computers make many mistakes.", "Maya should change her topic.", "Astronauts should check their own numbers."], "a": 0, "e": "He corrects Maya: Johnson was not just a backup but the person the astronaut trusted."}, {"q": "Maya changes her title in paragraph 8 to show that she", "o": ["ran out of time", "now understands what made Johnson’s work special", "wants to talk about computers instead", "copied her grandfather’s words exactly"], "a": 1, "e": "The new title focuses on Johnson checking the computer, the idea Maya learned from her grandfather."}]}, {"id": "noether", "cp": 1, "title": "The Mathematician Einstein Praised", "kind": "Biography", "paras": ["In 1915, two of the most famous mathematicians in Germany, David Hilbert and Felix Klein, invited a young woman named Emmy Noether to the University of Göttingen. They needed her help with a puzzle in Albert Einstein’s new theory of gravity. There was one problem: the university did not want a woman to teach.", "Noether was used to that wall. Born in 1882 in Erlangen, she had at first been allowed only to sit in on university lectures with each professor’s permission, because women could not officially enrol. She earned her doctorate anyway and then worked for years without pay.", "At Göttingen, some professors argued that soldiers returning from the war would not want to learn from a woman. Hilbert is said to have replied that a university was not a bathhouse, so a person’s gender should not matter. For several years, Noether’s courses were listed under Hilbert’s name.", "In 1918, she proved what is now called Noether’s theorem. It connects symmetry, the idea that something stays the same when you move or turn it, with conservation laws, such as the rule that energy is never created or destroyed. Physicists still use it more than a century later.", "Noether then helped create a new branch of mathematics now called abstract algebra. Instead of solving one equation at a time, it studies the patterns and structures that whole families of equations share. Her students were nicknamed “Noether’s boys,” and many became leading mathematicians.", "In 1933, the Nazi government fired Jewish professors, and Noether lost her job. She moved to the United States and taught at Bryn Mawr, a women’s college. She died suddenly in 1935. In a letter to The New York Times, Einstein called her the most significant creative mathematical genius since the higher education of women began."], "qs": [{"q": "Why was Noether invited to Göttingen?", "o": ["to replace David Hilbert", "to help with a puzzle in Einstein’s theory", "to start a college for women", "to teach soldiers returning from war"], "a": 1, "e": "Paragraph 1 says Hilbert and Klein needed her help with a puzzle in Einstein’s theory of gravity."}, {"q": "In paragraph 2, “that wall” refers to", "o": ["a building in Erlangen", "rules that kept women out of universities", "a difficult math problem", "her lack of money"], "a": 1, "e": "The paragraph goes on to describe women not being allowed to enrol, so “wall” means that barrier."}, {"q": "What can you conclude about Hilbert from paragraph 3?", "o": ["He supported Noether teaching at Göttingen.", "He wanted credit for Noether’s work.", "He agreed with the professors who objected.", "He taught all of Noether’s courses himself."], "a": 0, "e": "His reply argues that gender should not matter, and he let her courses run under his name."}, {"q": "Which is an example of symmetry as paragraph 4 defines it?", "o": ["A square looks the same after a quarter turn.", "Energy changes into heat.", "A soldier returns from war.", "A proof takes many pages."], "a": 0, "e": "Symmetry is “something stays the same when you move or turn it,” like a square after a quarter turn."}, {"q": "What is the writer’s main purpose?", "o": ["to explain how abstract algebra works", "to show how Noether did important work despite barriers", "to compare Hilbert with Einstein", "to explain why Göttingen was famous"], "a": 1, "e": "Each paragraph pairs an obstacle she faced with an achievement."}]}, {"id": "fields", "cp": 1, "title": "A Canadian Medal for the World", "kind": "Speech", "paras": ["Good evening, families, teachers and fellow math students. When people hear the phrase “the Nobel Prize of mathematics,” most of them picture a winner from somewhere far away. Tonight I want to tell you about the Canadian whose name is on that prize.", "John Charles Fields was born in Hamilton, Ontario, in 1863. He studied at the University of Toronto and then earned his doctorate at Johns Hopkins University in the United States. He spent years in Europe, learning from leading mathematicians, before returning to teach at the University of Toronto.", "Fields believed that mathematics should bring people together. After the First World War, the International Congress of Mathematicians had shut out scientists from some countries. In 1924, Fields organized the Congress in Toronto and worked hard to raise money to pay for it. When the meeting ended, there was money left over.", "Fields had an idea for that money: an international medal for young mathematicians. He insisted that it should not carry the name of any person or any country. When he died in 1932, he left more money in his will to support the award. The first two medals were handed out in 1936 in Oslo, Norway. After a break during the Second World War, the medals returned in 1950 and have been given every four years since. Despite his wishes, everyone calls it the Fields Medal.", "Today the medal goes to mathematicians under 40. In 2014, Maryam Mirzakhani, who grew up in Iran, became the first woman to win it, for her work on the geometry of curved surfaces.", "So why does this matter to us? Because a student from Hamilton, Ontario, who sat in classrooms a lot like ours, ended up shaping mathematics around the world. Congratulations to tonight’s winners. The next big idea could be yours."], "qs": [{"q": "Why does the speaker mention “the Nobel Prize of mathematics” in paragraph 1?", "o": ["to say that Fields won a Nobel Prize", "to introduce the prize the speech is about", "to argue that math needs a Nobel Prize", "to name tonight’s winners"], "a": 1, "e": "The phrase leads into the speech’s topic: the Canadian whose name is on that prize."}, {"q": "What happened when the 1924 Congress ended?", "o": ["Fields died.", "There was money left over.", "The first medals were handed out.", "Fields moved to Europe."], "a": 1, "e": "Paragraph 3 ends: “When the meeting ended, there was money left over.”"}, {"q": "The words “Despite his wishes, everyone calls it the Fields Medal” suggest that Fields", "o": ["wanted the medal named after Canada", "did not want the medal named after himself", "asked to be remembered as a hero", "chose the name in Oslo"], "a": 1, "e": "He insisted the medal should not carry the name of any person, but people named it after him anyway."}, {"q": "Using the information in paragraph 4, which year could have had Fields Medal winners?", "o": ["2020", "2021", "2022", "2023"], "a": 2, "e": "Medals have been given every four years since 1950: 1950 + 4 × 18 = 2022."}, {"q": "What is the speaker’s main message?", "o": ["The Fields Medal is harder to win than the Nobel Prize.", "A student from Ontario changed world mathematics, so the audience can aim high.", "The math congress should always be held in Canada.", "Only people under 40 can do important mathematics."], "a": 1, "e": "The last paragraph ties Fields’ story to the audience: “The next big idea could be yours.”"}]}], "story": {"intro": ["It’s Math Day at Saunders Farm, the family farm in Munster, southwest of Ottawa, known for its hedge mazes.", "The groundskeeper, Gus Moreau, has fitted every gate with a factoring lock. The prize at the centre was supposed to be the farm’s treasure: the hand-drawn plan of the very first maze.", "But this morning the plan is gone from the lockbox in the lookout tower. All that’s left is a note:", "“Factor your way to the tower, and the truth will be waiting.”", "You and your friend Jules head into the hedges."]}};
+
+// ===== Maze codes (shared by the game and the Apps Script hand-in) =====
+// 30 characters (Crockford base32): 11-bit checksum + 139 bits of data scrambled by the checksum.
+var MZ_FIELDS = [
+  ['ver', 3], ['mode', 1], ['status', 1], ['seed', 10], ['solved', 5], ['cp', 3],
+  ['raw', 13], ['pen', 10], ['bonus', 9],
+  ['wrong', 7], ['hints', 6], ['steps', 5],
+  ['ft0', 2], ['ft1', 2], ['ft2', 3], ['ft3', 2], ['ft4', 2], ['ft5', 2],
+  ['mc', 4], ['mzC', 8], ['mzE', 6], ['pump', 8],
+  ['day', 11], ['name', 12], ['save', 4]
+];
+var MZ_ALPHA = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+var MZ_EPOCH = Date.UTC(2026, 0, 1);
+function mzNameHash(name) {
+  var s = String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+  var h = 2166136261;
+  for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+  return (h ^ (h >>> 12) ^ (h >>> 24)) & 4095;
+}
+function mzChecksum(bits) {
+  var h = 2166136261;
+  for (var i = 0; i < bits.length; i++) { h ^= bits[i] + ((i & 7) << 1) + 1; h = Math.imul(h, 16777619) >>> 0; }
+  return (h ^ (h >>> 11) ^ (h >>> 22)) & 2047;
+}
+function mzStream(c, n) {
+  var x = (Math.imul(c + 1, 2654435761) + 12345) >>> 0, out = [];
+  for (var i = 0; i < n; i++) { x = (Math.imul(x, 1103515245) + 12345) >>> 0; out.push((x >>> 16) & 1); }
+  return out;
+}
+function mzEncode(d) {
+  var bits = [];
+  MZ_FIELDS.forEach(function (f) {
+    var max = (1 << f[1]) - 1, v = Math.max(0, Math.min(max, Math.round(d[f[0]] || 0)));
+    for (var b = f[1] - 1; b >= 0; b--) bits.push((v >> b) & 1);
+  });
+  var c = mzChecksum(bits), st = mzStream(c, bits.length);
+  var all = [];
+  for (var b = 10; b >= 0; b--) all.push((c >> b) & 1);
+  for (var i = 0; i < bits.length; i++) all.push(bits[i] ^ st[i]);
+  var s = '';
+  for (var i = 0; i < all.length; i += 5) { var v = 0; for (var k = 0; k < 5; k++) v = v * 2 + all[i + k]; s += MZ_ALPHA[v]; }
+  return s.replace(/(.{5})(?=.)/g, '$1-');
+}
+function mzDecode(code) {
+  var s = String(code || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1').replace(/U/g, 'V');
+  if (s.length !== 30) return { error: 'A maze code has 30 letters and numbers (6 groups of 5).' };
+  var all = [];
+  for (var i = 0; i < s.length; i++) {
+    var v = MZ_ALPHA.indexOf(s[i]); if (v < 0) return { error: 'That code has a character that isn’t used in maze codes.' };
+    for (var b = 4; b >= 0; b--) all.push((v >> b) & 1);
+  }
+  var c = 0; for (var i = 0; i < 11; i++) c = c * 2 + all[i];
+  var data = all.slice(11), st = mzStream(c, data.length);
+  for (var i = 0; i < data.length; i++) data[i] ^= st[i];
+  if (mzChecksum(data) !== c) return { error: 'This isn’t a real maze code (it may have a typo).' };
+  var d = {}, p = 0;
+  MZ_FIELDS.forEach(function (f) { var v = 0; for (var k = 0; k < f[1]; k++) v = v * 2 + data[p++]; d[f[0]] = v; });
+  if (d.ver !== 1) return { error: 'This code is from a different version of the game.' };
+  return d;
+}
+function mzDayToDate(day) { var dt = new Date(MZ_EPOCH + day * 86400000); return dt.toISOString().slice(0, 10); }
+function mzToday() { var n = new Date(); return Math.round((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - MZ_EPOCH) / 86400000); }
+function mzFmtTime(sec) { sec = Math.max(0, Math.round(sec)); var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0'); }
+var MZ_ZONE_NAMES = ['The Front Hedges', 'The Cedar Rows', 'The Hampton Maze', 'The Pumpkin Patch', 'The Twin Paths', 'The Lookout Tower'];
+var MZ_CUM = [3, 6, 10, 13, 16, 19];
+var MZ_SKILL_GATES = [3, 3, 4, 3, 3, 3];
+var MZ_SKILL_NAMES = ['a = 1', 'a = 1 harder + common factor', 'a ≠ 1', 'Special products', 'Two variables', 'Mixed'];
+function mzFinalTime(d) { return Math.max(0, d.raw + d.pen - d.bonus); }
+function mzRank(d) {
+  if (d.mode !== 1) return 'Practice walk';
+  var t = mzFinalTime(d) / 60;
+  if (t <= 20) return 'Hedge Master';
+  if (t <= 28) return 'Pathfinder';
+  if (t <= 38) return 'Trailblazer';
+  return 'Made it to the tower';
+}
+
+// ===== Maze generation and drawing =====
+const ZONE_CELLS = [[8, 6], [9, 6], [10, 7], [10, 7], [10, 7], [7, 6]];
+const MARGIN = 3;
+const PAL = [
+  { h: '#2f6d2f', hl: '#4f9d45', hd: '#1b461d', p: '#e3d3a6', ps: '#cdb98a', leaf: ['#5aa84e', '#26592a'] },
+  { h: '#245a37', hl: '#3d8a56', hd: '#153a24', p: '#ddcb9f', ps: '#c4ae7f', leaf: ['#4f9e66', '#1d4a2d'] },
+  { h: '#3a6c29', hl: '#5c9c3d', hd: '#22461a', p: '#e7d9b2', ps: '#cfbf93', leaf: ['#6aae48', '#2c561f'] },
+  { h: '#56622a', hl: '#86883a', hd: '#353f18', p: '#e2cb9b', ps: '#c8ae7a', leaf: ['#d9822b', '#9a4a1c', '#b8a33a'] },
+  { h: '#2b6545', hl: '#489366', hd: '#183f2a', p: '#e4d7b5', ps: '#cbbd95', leaf: ['#5aa676', '#1e4a32'] },
+  { h: '#336b2c', hl: '#57a144', hd: '#1e4619', p: '#ebdcb7', ps: '#d2c196', leaf: ['#68b14f', '#285522'] }
+];
+function genZone(seed, z) {
+  const [W, H] = ZONE_CELLS[z];
+  const R = rngFrom(seed * 131 + z * 7 + 1);
+  const TW = 2 * W + 1, TH = 2 * H + 1;
+  const t = new Uint8Array(TW * TH).fill(1);
+  const I = (x, y) => y * TW + x;
+  const vis = new Uint8Array(W * H);
+  const ey = ri(R, 1, H - 2);
+  const stack = [[0, ey]]; vis[ey * W] = 1; t[I(1, 2 * ey + 1)] = 0;
+  const D = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  let last = 1;
+  while (stack.length) {
+    const [cx, cy] = stack[stack.length - 1];
+    let opts = [];
+    for (let d = 0; d < 4; d++) { const nx = cx + D[d][0], ny = cy + D[d][1]; if (nx >= 0 && ny >= 0 && nx < W && ny < H && !vis[ny * W + nx]) opts.push(d); }
+    if (!opts.length) { stack.pop(); continue; }
+    let d = (opts.includes(last) && R() < 0.45) ? last : opts[Math.floor(R() * opts.length)];
+    last = d;
+    const nx = cx + D[d][0], ny = cy + D[d][1];
+    vis[ny * W + nx] = 1;
+    t[I(2 * cx + 1 + D[d][0], 2 * cy + 1 + D[d][1])] = 0; t[I(2 * nx + 1, 2 * ny + 1)] = 0;
+    stack.push([nx, ny]);
+  }
+  // add a couple of loops so it is not a pure tree (only inside dead-end-rich areas, never bypassing gates: done after gates? keep perfect for gate logic)
+  // BFS over cells
+  const dist = new Int16Array(W * H).fill(-1), par = new Int32Array(W * H).fill(-1);
+  const q = [ey * W]; dist[ey * W] = 0;
+  while (q.length) {
+    const c = q.shift(), cx = c % W, cy = (c / W) | 0;
+    for (let d = 0; d < 4; d++) {
+      const nx = cx + D[d][0], ny = cy + D[d][1];
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H) continue;
+      if (t[I(2 * cx + 1 + D[d][0], 2 * cy + 1 + D[d][1])]) continue;
+      const n = ny * W + nx; if (dist[n] >= 0) continue;
+      dist[n] = dist[c] + 1; par[n] = c; q.push(n);
+    }
+  }
+  let xy = 0, best = -1;
+  for (let y = 0; y < H; y++) { const dd = dist[y * W + W - 1]; if (dd > best) { best = dd; xy = y; } }
+  const entrance = { x: 0, y: 2 * ey + 1 }, exit = { x: TW - 1, y: 2 * xy + 1 };
+  t[I(entrance.x, entrance.y)] = 0; t[I(exit.x, exit.y)] = 0;
+  const path = []; for (let c = xy * W + W - 1; c >= 0; c = par[c]) { path.unshift(c); if (c === ey * W) break; }
+  const onPath = new Uint8Array(W * H); path.forEach(c => onPath[c] = 1);
+  const n = ZONE_GATES[z], L = path.length - 1, gates = [];
+  const base = z === 0 ? 0 : MZ_CUM[z - 1];
+  for (let k = 1; k <= n; k++) {
+    let i = Math.max(1, Math.round(L * k / (n + 1)));
+    const a = path[i - 1], b = path[i];
+    const ax = 2 * (a % W) + 1, ay = 2 * ((a / W) | 0) + 1, bx = 2 * (b % W) + 1, by = 2 * ((b / W) | 0) + 1;
+    gates.push({ x: (ax + bx) / 2, y: (ay + by) / 2, gi: base + k - 1, vert: ax === bx });
+  }
+  // pumpkins: deepest dead ends off the main path
+  const pumps = [];
+  if (z < 4) {
+    const de = [];
+    for (let c = 0; c < W * H; c++) {
+      if (onPath[c]) continue;
+      const cx = c % W, cy = (c / W) | 0; let open = 0;
+      for (let d = 0; d < 4; d++) if (!t[I(2 * cx + 1 + D[d][0], 2 * cy + 1 + D[d][1])]) open++;
+      if (open !== 1) continue;
+      let k = c, depth = 0; while (k >= 0 && !onPath[k]) { k = par[k]; depth++; }
+      de.push({ c, depth: depth + R() * 0.5 });
+    }
+    de.sort((p, q2) => q2.depth - p.depth);
+    for (let k = 0; k < Math.min(2, de.length); k++) { const c = de[k].c; pumps.push({ x: 2 * (c % W) + 1, y: 2 * ((c / W) | 0) + 1, k: z * 2 + k }); }
+  }
+  // decorations (flowers on path edges) seeded
+  return { z, W, H, TW, TH, t, entrance, exit, gates, pumps, pal: PAL[z], seed };
+}
+function hashXY(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 1442695041) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+
+// Static layer: hedges, gravel paths, margin field
+function renderStatic(Z, T) {
+  const c = document.createElement('canvas');
+  const Wt = Z.TW + 2 * MARGIN, Ht = Z.TH + 2 * MARGIN;
+  c.width = Wt * T; c.height = Ht * T;
+  const g = c.getContext('2d');
+  const pal = Z.pal;
+  // field
+  g.fillStyle = '#7aa64a'; g.fillRect(0, 0, c.width, c.height);
+  for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
+    const r = hashXY(x, y, 7);
+    g.fillStyle = r < .5 ? '#86b154' : '#6f9a41';
+    for (let k = 0; k < 4; k++) { const rx = hashXY(x, y, k + 11), ry = hashXY(x, y, k + 21); g.fillRect(x * T + rx * T, y * T + ry * T, Math.max(2, T / 14), Math.max(3, T / 7)); }
+  }
+  const at = (x, y) => (x < 0 || y < 0 || x >= Z.TW || y >= Z.TH) ? 2 : Z.t[y * Z.TW + x];
+  const ox = MARGIN * T, oy = MARGIN * T;
+  // paths through margin to entrance and exit
+  g.fillStyle = pal.p;
+  g.fillRect(0, oy + Z.entrance.y * T, ox, T);
+  g.fillRect(ox + Z.TW * T, oy + Z.exit.y * T, ox, T);
+  for (let y = 0; y < Z.TH; y++) for (let x = 0; x < Z.TW; x++) {
+    const px = ox + x * T, py = oy + y * T;
+    if (!Z.t[y * Z.TW + x]) {
+      g.fillStyle = pal.p; g.fillRect(px, py, T, T);
+      g.fillStyle = pal.ps;
+      for (let k = 0; k < 5; k++) { const rx = hashXY(x, y, k + 31), ry = hashXY(x, y, k + 41); g.fillRect(px + rx * (T - 3), py + ry * (T - 3), Math.max(2, T / 16), Math.max(2, T / 16)); }
+    }
+  }
+  // hedges with depth
+  for (let y = 0; y < Z.TH; y++) for (let x = 0; x < Z.TW; x++) {
+    if (!Z.t[y * Z.TW + x]) continue;
+    const px = ox + x * T, py = oy + y * T;
+    const below = at(x, y + 1) === 0;
+    g.fillStyle = pal.hd; g.fillRect(px, py, T, T);
+    g.fillStyle = pal.h; g.fillRect(px, py, T, below ? T * 0.72 : T);
+    // leaf clumps
+    for (let k = 0; k < 7; k++) {
+      const rx = hashXY(x, y, k + 51), ry = hashXY(x, y, k + 61), rr = hashXY(x, y, k + 71);
+      const col = pal.leaf[Math.floor(rr * pal.leaf.length)];
+      g.fillStyle = col; g.beginPath(); g.arc(px + rx * T, py + ry * T * (below ? 0.66 : 0.95), T * (0.08 + rr * 0.08), 0, 7); g.fill();
+    }
+    g.fillStyle = pal.hl; g.fillRect(px, py, T, Math.max(2, T * 0.08));
+    if (at(x, y - 1) === 0) { g.fillStyle = '#0002'; g.fillRect(px, py - T * 0.12, T, T * 0.12); }
+  }
+  // flowers and stones in the margin
+  for (let y = 0; y < Ht; y++) for (let x = 0; x < Wt; x++) {
+    const inMap = x >= MARGIN && y >= MARGIN && x < MARGIN + Z.TW && y < MARGIN + Z.TH;
+    if (inMap) continue;
+    const r = hashXY(x, y, 91);
+    if (r < 0.06) { g.fillStyle = ['#f2c14e', '#f6f1e3', '#d9534f'][Math.floor(r * 50) % 3]; g.beginPath(); g.arc(x * T + T / 2, y * T + T / 2, T / 10, 0, 7); g.fill(); }
+  }
+  return c;
+}
+function drawGate(g, x, y, T, vert, open, num) {
+  const cx = x + T / 2, cy = y + T / 2;
+  g.save();
+  g.translate(cx, cy); if (!vert) g.rotate(Math.PI / 2);
+  g.fillStyle = '#4a2f16';
+  g.fillRect(-T / 2, -T * 0.22, T * 0.14, T * 0.44); g.fillRect(T / 2 - T * 0.14, -T * 0.22, T * 0.14, T * 0.44);
+  if (!open) {
+    g.fillStyle = '#a86d35'; g.fillRect(-T * 0.38, -T * 0.17, T * 0.76, T * 0.12); g.fillRect(-T * 0.38, T * 0.05, T * 0.76, T * 0.12);
+    g.fillStyle = '#7b4c22'; g.save(); g.rotate(Math.atan2(0.22, 0.76)); g.fillRect(-T * 0.4, -T * 0.035, T * 0.8, T * 0.07); g.restore();
+    g.restore();
+    g.fillStyle = '#1b120888'; g.beginPath(); g.ellipse(cx, cy + T * 0.36, T * 0.26, T * 0.07, 0, 0, 7); g.fill();
+    g.strokeStyle = '#f2d07a'; g.lineWidth = Math.max(2.5, T * 0.07); g.beginPath(); g.arc(cx, cy - T * 0.08, T * 0.14, Math.PI, 0); g.stroke();
+    g.fillStyle = '#e8731a'; g.strokeStyle = '#7a3608'; g.lineWidth = 1.5; g.beginPath(); g.roundRect(cx - T * 0.22, cy - T * 0.1, T * 0.44, T * 0.38, T * 0.07); g.fill(); g.stroke();
+    g.fillStyle = '#fff'; g.font = '700 ' + Math.round(T * 0.27) + 'px "Atkinson Hyperlegible",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(String(num), cx, cy + T * 0.095);
+  } else {
+    g.fillStyle = '#a86d35'; g.fillRect(-T / 2 + T * 0.12, -T * 0.2, T * 0.1, T * 0.66);
+    g.restore();
+  }
+}
+function drawPumpkin(g, x, y, T, tm) {
+  const cx = x + T / 2, cy = y + T * 0.56, b = Math.sin(tm / 300 + x) * T * 0.03;
+  g.fillStyle = '#0003'; g.beginPath(); g.ellipse(cx, cy + T * 0.2, T * 0.26, T * 0.07, 0, 0, 7); g.fill();
+  g.fillStyle = '#f0a020'; g.beginPath(); g.ellipse(cx, cy + b, T * 0.28, T * 0.21, 0, 0, 7); g.fill();
+  g.strokeStyle = '#c9700e'; g.lineWidth = Math.max(1.5, T * 0.04);
+  for (const k of [-0.12, 0, 0.12]) { g.beginPath(); g.ellipse(cx + k * T, cy + b, T * 0.08, T * 0.2, 0, 0, 7); g.stroke(); }
+  g.fillStyle = '#3d6b25'; g.fillRect(cx - T * 0.03, cy + b - T * 0.3, T * 0.06, T * 0.12);
+  const s = (Math.sin(tm / 200 + y) + 1) / 2; g.fillStyle = 'rgba(255,240,170,' + (0.4 + s * 0.6) + ')';
+  g.beginPath(); g.arc(cx + T * 0.2, cy + b - T * 0.18, T * 0.04 + s * T * 0.03, 0, 7); g.fill();
+}
+function drawPerson(g, x, y, T, dir, coat, hair, pack) {
+  const cx = x + T / 2, cy = y + T / 2;
+  g.fillStyle = '#0003'; g.beginPath(); g.ellipse(cx, cy + T * 0.3, T * 0.22, T * 0.08, 0, 0, 7); g.fill();
+  const off = [[0, -1], [1, 0], [0, 1], [-1, 0]][dir];
+  if (pack) { g.fillStyle = pack; g.beginPath(); g.roundRect(cx - off[0] * T * 0.18 - T * 0.12, cy - off[1] * T * 0.14 - T * 0.06, T * 0.24, T * 0.26, T * 0.05); g.fill(); }
+  g.fillStyle = coat; g.beginPath(); g.ellipse(cx, cy + T * 0.08, T * 0.2, T * 0.22, 0, 0, 7); g.fill();
+  g.fillStyle = '#c98b5a'; g.beginPath(); g.arc(cx + off[0] * T * 0.04, cy - T * 0.16 + off[1] * T * 0.03, T * 0.15, 0, 7); g.fill();
+  g.fillStyle = hair; g.beginPath(); g.arc(cx - off[0] * T * 0.03, cy - T * 0.2 - off[1] * T * 0.02, T * 0.14, Math.PI * 0.95, Math.PI * 2.05); g.fill();
+}
+function drawArch(g, x, y, T, label) {
+  g.fillStyle = '#6b4423'; g.fillRect(x + T * 0.05, y - T * 0.1, T * 0.12, T * 1.1); g.fillRect(x + T * 0.83, y - T * 0.1, T * 0.12, T * 1.1);
+  g.strokeStyle = '#6b4423'; g.lineWidth = T * 0.12; g.beginPath(); g.arc(x + T / 2, y + T * 0.05, T * 0.39, Math.PI, 0); g.stroke();
+  if (label) {
+    g.fillStyle = '#fbf5e6'; g.beginPath(); g.roundRect(x + T * 1.1, y + T * 0.1, T * 1.6, T * 0.5, 6); g.fill();
+    g.fillStyle = '#2a2118'; g.font = '700 ' + Math.round(T * 0.26) + 'px "Atkinson Hyperlegible",sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.fillText(label, x + T * 1.2, y + T * 0.36);
+  }
+}
+function drawSign(g, x, y, T, text) {
+  g.fillStyle = '#5a3a1c'; g.fillRect(x + T * 0.45, y + T * 0.2, T * 0.1, T * 0.8);
+  g.font = '400 ' + Math.round(T * 0.3) + 'px "Lilita One",sans-serif';
+  const w = g.measureText(text).width + T * 0.4;
+  g.fillStyle = '#c98f4f'; g.beginPath(); g.roundRect(x + T / 2 - w / 2, y - T * 0.25, w, T * 0.55, 6); g.fill();
+  g.fillStyle = '#2a1a0c'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, x + T / 2, y + T * 0.03);
+}
+function drawTower(g, x, y, T) {
+  // x,y = top-left of a 2x3 tile area
+  g.fillStyle = '#0003'; g.beginPath(); g.ellipse(x + T, y + T * 3, T * 1.1, T * 0.25, 0, 0, 7); g.fill();
+  g.strokeStyle = '#6b4423'; g.lineWidth = T * 0.14;
+  g.beginPath(); g.moveTo(x + T * 0.3, y + T * 3); g.lineTo(x + T * 0.55, y + T * 1.1); g.moveTo(x + T * 1.7, y + T * 3); g.lineTo(x + T * 1.45, y + T * 1.1);
+  g.moveTo(x + T * 0.4, y + T * 2.4); g.lineTo(x + T * 1.6, y + T * 1.7); g.moveTo(x + T * 1.6, y + T * 2.4); g.lineTo(x + T * 0.4, y + T * 1.7); g.stroke();
+  g.fillStyle = '#9a6531'; g.fillRect(x + T * 0.2, y + T * 0.8, T * 1.6, T * 0.45);
+  g.fillStyle = '#7b4c22'; for (let k = 0; k < 5; k++) g.fillRect(x + T * 0.25 + k * T * 0.36, y + T * 0.55, T * 0.08, T * 0.3);
+  g.fillStyle = '#a63a2a'; g.beginPath(); g.moveTo(x, y + T * 0.6); g.lineTo(x + T, y - T * 0.2); g.lineTo(x + T * 2, y + T * 0.6); g.closePath(); g.fill();
+  g.fillStyle = '#f2d07a'; g.fillRect(x + T * 0.85, y + T * 0.95, T * 0.3, T * 0.22);
+}
+
+// ===== Game =====
+// Paste your pre-filled Google Form link here (the Apps Script setup prints it). Leave "" to show the code only.
+const HANDIN_URL = "";
+const COST = { wrong: 30, hint: 20, steps: 60, pump: 15, mc: 20, mazeEach: 2, mazeMax: 90 };
+const CPS = [
+  { zone: 0, type: 'maze', ch: 0, place: 'The cider stand' },
+  { zone: 1, type: 'mc', pool: 0, place: 'The bench by the jumping pillows' },
+  { zone: 2, type: 'maze', ch: 1, place: 'The hay wagon stop' },
+  { zone: 3, type: 'mc', pool: 1, place: 'The pumpkin patch fence' },
+  { zone: 5, type: 'maze', ch: 2, place: 'The lookout tower' }
+];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+let S = null, mode = 1;
+const cv = $('cv'), ctx = cv.getContext('2d');
+let T = 40, DPR = 1, staticLayer = null, cam = { x: 0, y: 0 };
+const held = new Set(); let padDir = -1;
+
+function newState(name, md, seed) {
+  return { name, mode: md, seed, solved: 0, cp: 0, raw: 0, pen: 0, bonus: 0, wrong: 0, hints: 0, steps: 0, ft: [0, 0, 0, 0, 0, 0], mc: 0, mzC: 0, mzE: 0, pump: 0, saveNo: 0,
+    zone: 0, Z: null, px: 0, py: 0, fx: 0, fy: 0, jx: 0, jy: 0, jfx: 0, jfy: 0, dir: 1, jdir: 1, mv: null, path: [], paused: true, gates: {}, seen: null, mapOn: true, done: false, lastT: 0 };
+}
+function show(id) { for (const s of ['title', 'story', 'play', 'end']) $(s).hidden = s !== id; window.scrollTo(0, 0); }
+function timed() { return S && S.mode === 1; }
+function curTime() { return S.mode === 1 ? Math.max(0, S.raw + S.pen - S.bonus) : S.raw; }
+function addPen(s) { if (!timed() || !s) return; S.pen = Math.min(1023, S.pen + s); floatTxt('+' + s + ' s', 'p'); }
+function addBonus(s) { if (!timed() || !s) return; S.bonus = Math.min(511, S.bonus + s); floatTxt('−' + s + ' s', 'b'); }
+function floatTxt(t, c) { const e = document.createElement('span'); e.className = 'float ' + c; e.textContent = t; $('clock').appendChild(e); setTimeout(() => e.remove(), 1500); }
+let toastT = 0;
+function toast(msg, ms = 2200) { const e = $('toast'); e.textContent = msg; e.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => e.style.opacity = 0, ms); }
+
+// ---------- Title ----------
+document.querySelectorAll('.mode').forEach(b => b.onclick = () => { mode = +b.dataset.mode; document.querySelectorAll('.mode').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+$('startBtn').onclick = () => {
+  const name = $('nameIn').value.trim();
+  if (name.replace(/[^A-Za-z]/g, '').length < 2) { $('titleMsg').textContent = 'Type your name first.'; $('nameIn').focus(); return; }
+  $('titleMsg').textContent = '';
+  S = newState(name, mode, Math.floor(Math.random() * 1024));
+  showIntro();
+};
+function showIntro() {
+  $('storyTitle').textContent = 'Math Day at Saunders Farm';
+  const p = READ.story.intro;
+  $('storyBody').innerHTML = p.map((t, i) => i === 3 ? '<p class="note">' + esc(t) + '</p>' : '<p>' + esc(t) + '</p>').join('') +
+    '<p><b>' + (S.mode === 1 ? 'Maze Run:' : 'Practice Walk:') + '</b> ' + (S.mode === 1
+      ? 'the stopwatch starts when you step in. A wrong answer adds ' + COST.wrong + ' s, a hint ' + COST.hint + ' s (free after 2 misses) and worked steps ' + COST.steps + ' s. Each golden pumpkin takes ' + COST.pump + ' s off, and good reading at the rest stops takes time off too. The clock stops while you read.'
+      : 'no penalties, and hints and worked steps are free. The stopwatch still runs so you can see your pace.') + '</p>';
+  show('story'); $('storyGo').focus();
+}
+$('storyGo').onclick = () => { show('play'); resume(); };
+
+// ---------- Zones ----------
+function cumBefore(z) { return z === 0 ? 0 : MZ_CUM[z - 1]; }
+function resume() {
+  let z = 0; while (z < 6 && S.solved >= MZ_CUM[z]) z++;
+  const prev = z - 1;
+  if (prev >= 0) {
+    const ci = CPS.findIndex(c => c.zone === prev);
+    if (ci >= 0 && S.cp <= ci) { loadZone(Math.min(prev, 5), true); openCheckpoint(ci, z); return; }
+  }
+  if (z >= 6) { finish(); return; }
+  loadZone(z);
+}
+function loadZone(z, silent) {
+  S.zone = z; S.Z = genZone(S.seed, z);
+  const Z = S.Z;
+  S.px = Z.entrance.x; S.py = Z.entrance.y; S.fx = S.px; S.fy = S.py; S.jx = S.px - 1; S.jy = S.py; S.jfx = S.jx; S.jfy = S.jy; S.dir = 1; S.path = []; S.mv = null;
+  S.seen = new Uint8Array(Z.TW * Z.TH); markSeen();
+  $('zoneName').textContent = 'Zone ' + (z + 1) + ': ' + MZ_ZONE_NAMES[z];
+  $('zoneSkill').textContent = SKILLS[z].name;
+  buildStatic();
+  if (!silent) { S.paused = false; toast('Zone ' + (z + 1) + ' · ' + MZ_ZONE_NAMES[z] + ': ' + SKILLS[z].name, 3200); cv.focus({ preventScroll: true }); }
+  updHud();
+}
+function openCount() { return Math.max(0, Math.min(ZONE_GATES[S.zone], S.solved - cumBefore(S.zone))); }
+function tileAt(x, y) {
+  const Z = S.Z;
+  if (x < 0 || y < 0 || x >= Z.TW || y >= Z.TH) return 'out';
+  if (Z.t[y * Z.TW + x]) return 'hedge';
+  const gk = Z.gates.findIndex(g => g.x === x && g.y === y);
+  if (gk >= 0 && gk >= openCount()) return 'gate:' + gk;
+  return 'path';
+}
+function markSeen() { const Z = S.Z; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const x = S.px + dx, y = S.py + dy; if (x >= 0 && y >= 0 && x < Z.TW && y < Z.TH) S.seen[y * Z.TW + x] = 1; } }
+
+// ---------- Canvas ----------
+function sizeCanvas() {
+  const r = cv.getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(r.width * DPR); cv.height = Math.round(r.height * DPR);
+  const nT = Math.max(26, Math.min(46, Math.floor(r.width / 15)));
+  if (nT !== T || !staticLayer) { T = nT; buildStatic(); }
+}
+function buildStatic() { if (S && S.Z) staticLayer = renderStatic(S.Z, T); }
+new ResizeObserver(() => { if (!$('play').hidden) sizeCanvas(); }).observe(cv);
+
+function draw(now) {
+  requestAnimationFrame(draw);
+  if (!S || $('play').hidden || !S.Z) { S && (S.lastT = now); return; }
+  const dt = Math.min(1000, now - (S.lastT || now)); S.lastT = now;
+  if (!S.paused && !S.done) S.raw = Math.min(8191, S.raw + dt / 1000);
+  stepMove(now);
+  updClock();
+  const Z = S.Z, W = cv.width / DPR, H = cv.height / DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const worldW = (Z.TW + 2 * MARGIN) * T, worldH = (Z.TH + 2 * MARGIN) * T;
+  let tx = (S.fx + MARGIN + 0.5) * T - W / 2, ty = (S.fy + MARGIN + 0.5) * T - H / 2;
+  tx = worldW <= W ? (worldW - W) / 2 : Math.max(0, Math.min(worldW - W, tx));
+  ty = worldH <= H ? (worldH - H) / 2 : Math.max(0, Math.min(worldH - H, ty));
+  cam.x += (tx - cam.x) * 0.25; cam.y += (ty - cam.y) * 0.25;
+  if (Math.abs(tx - cam.x) > W) { cam.x = tx; cam.y = ty; }
+  ctx.fillStyle = '#6f9a41'; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(-Math.round(cam.x), -Math.round(cam.y));
+  if (staticLayer) ctx.drawImage(staticLayer, 0, 0);
+  const O = MARGIN * T, px = x => O + x * T;
+  // entrance sign, exit arch, tower
+  drawSign(ctx, px(Z.entrance.x - 2), px(Z.entrance.y - 1), T, 'Zone ' + (Z.z + 1));
+  if (Z.z === 5) drawTower(ctx, px(Z.exit.x + 1), px(Z.exit.y - 2), T);
+  else drawArch(ctx, px(Z.exit.x), px(Z.exit.y), T, '');
+  // gates
+  Z.gates.forEach((g, k) => drawGate(ctx, px(g.x), px(g.y), T, g.vert, k < openCount(), g.gi + 1));
+  // pumpkins
+  Z.pumps.forEach(p => { if (!(S.pump >> p.k & 1)) drawPumpkin(ctx, px(p.x), px(p.y), T, now); });
+  // people
+  drawPerson(ctx, px(S.jfx), px(S.jfy), T, S.jdir, '#3f8f4f', '#7a3b1d', '');
+  drawPerson(ctx, px(S.fx), px(S.fy), T, S.dir, '#3a6fd8', '#2a1a10', '#e8731a');
+  // target marker
+  if (S.path.length) { const tg = S.path[S.path.length - 1]; ctx.strokeStyle = '#fff8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px(tg[0]) + T / 2, px(tg[1]) + T / 2, T * 0.2, 0, 7); ctx.stroke(); }
+  ctx.restore();
+  if (S.mapOn) drawMini(W);
+}
+function drawMini(W) {
+  const Z = S.Z, m = Math.max(2, Math.min(6, Math.floor((W < 520 ? 84 : 150) / Z.TW))), mw = Z.TW * m, mh = Z.TH * m, x0 = W - mw - 10, y0 = 10;
+  ctx.fillStyle = '#0f2410cc'; ctx.fillRect(x0 - 5, y0 - 5, mw + 10, mh + 10);
+  for (let y = 0; y < Z.TH; y++) for (let x = 0; x < Z.TW; x++) {
+    if (!S.seen[y * Z.TW + x]) continue;
+    ctx.fillStyle = Z.t[y * Z.TW + x] ? '#3d7a3a' : '#e8dcb6'; ctx.fillRect(x0 + x * m, y0 + y * m, m, m);
+  }
+  Z.gates.forEach((g, k) => { if (S.seen[g.y * Z.TW + g.x]) { ctx.fillStyle = k < openCount() ? '#c9a46a' : '#e8731a'; ctx.fillRect(x0 + g.x * m, y0 + g.y * m, m, m); } });
+  Z.pumps.forEach(p => { if (S.seen[p.y * Z.TW + p.x] && !(S.pump >> p.k & 1)) { ctx.fillStyle = '#ffd23f'; ctx.fillRect(x0 + p.x * m, y0 + p.y * m, m, m); } });
+  ctx.fillStyle = '#ff4d4d'; ctx.beginPath(); ctx.arc(x0 + (S.fx + 0.5) * m, y0 + (S.fy + 0.5) * m, Math.max(2, m * 0.7), 0, 7); ctx.fill();
+}
+
+// ---------- Movement ----------
+const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const KEYMAP = { ArrowUp: 0, KeyW: 0, ArrowRight: 1, KeyD: 1, ArrowDown: 2, KeyS: 2, ArrowLeft: 3, KeyA: 3 };
+function blocked() { return !S || S.paused || S.done || !$('gateM').hidden || !$('readM').hidden || !$('miscM').hidden || $('play').hidden; }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('gateM').hidden) closeGate(); else if (!$('miscM').hidden && $('miscM').dataset.esc) closeMisc(); return; }
+  if (blocked()) return;
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code in KEYMAP) { held.add(KEYMAP[e.code]); S.path = []; e.preventDefault(); }
+  if (e.code === 'KeyM') toggleMap();
+});
+document.addEventListener('keyup', e => { if (e.code in KEYMAP) held.delete(KEYMAP[e.code]); });
+window.addEventListener('blur', () => { held.clear(); padDir = -1; });
+document.querySelectorAll('.pad button').forEach(b => {
+  b.addEventListener('pointerdown', e => { e.preventDefault(); padDir = +b.dataset.d; S && (S.path = []); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(ev, () => padDir = -1);
+});
+cv.addEventListener('pointerdown', e => {
+  if (blocked()) return;
+  const r = cv.getBoundingClientRect();
+  const wx = e.clientX - r.left + Math.round(cam.x), wy = e.clientY - r.top + Math.round(cam.y);
+  const tx = Math.floor(wx / T) - MARGIN, ty = Math.floor(wy / T) - MARGIN;
+  const p = findPath(S.px, S.py, tx, ty);
+  if (p) S.path = p; else toast('You can’t get there from here yet.', 1400);
+});
+function findPath(sx, sy, tx, ty) {
+  const Z = S.Z;
+  if (tx < 0 || ty < 0 || tx >= Z.TW || ty >= Z.TH) return null;
+  const goal = tileAt(tx, ty);
+  if (goal === 'hedge') return null;
+  const N = Z.TW * Z.TH, prev = new Int32Array(N).fill(-2), q = [sy * Z.TW + sx]; prev[q[0]] = -1;
+  while (q.length) {
+    const c = q.shift(), x = c % Z.TW, y = (c / Z.TW) | 0;
+    if (x === tx && y === ty) { const out = []; let k = c; while (prev[k] !== -1) { out.unshift([k % Z.TW, (k / Z.TW) | 0]); k = prev[k]; } return out; }
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= Z.TW || ny >= Z.TH) continue;
+      const n = ny * Z.TW + nx; if (prev[n] !== -2) continue;
+      const tt = tileAt(nx, ny);
+      if (tt === 'hedge') continue;
+      if (tt.startsWith('gate') && !(nx === tx && ny === ty)) continue;
+      prev[n] = c; q.push(n);
+    }
+  }
+  return null;
+}
+function stepMove(now) {
+  if (S.mv) {
+    const k = Math.min(1, (now - S.mv.t0) / S.mv.dur);
+    S.fx = S.mv.fx + (S.px - S.mv.fx) * k; S.fy = S.mv.fy + (S.py - S.mv.fy) * k;
+    S.jfx = S.mv.jfx + (S.jx - S.mv.jfx) * k; S.jfy = S.mv.jfy + (S.jy - S.mv.jfy) * k;
+    if (k < 1) return;
+    S.mv = null; arrived();
+  }
+  if (blocked()) return;
+  let d = -1;
+  if (padDir >= 0) d = padDir; else if (held.size) d = [...held][held.size - 1];
+  if (d >= 0) { tryStep(d, now); return; }
+  if (S.path.length) {
+    const [nx, ny] = S.path[0];
+    const dd = DIRS.findIndex(([dx, dy]) => S.px + dx === nx && S.py + dy === ny);
+    if (dd < 0) { S.path = []; return; }
+    if (tryStep(dd, now)) S.path.shift(); else S.path = [];
+  }
+}
+function tryStep(d, now) {
+  const nx = S.px + DIRS[d][0], ny = S.py + DIRS[d][1];
+  S.dir = d;
+  const tt = tileAt(nx, ny);
+  if (tt === 'hedge' || tt === 'out') {
+    if (tt === 'out' && S.px === S.Z.entrance.x && S.py === S.Z.entrance.y && d === 3) toast('The way out is through the maze!', 1400);
+    return false;
+  }
+  if (tt.startsWith('gate')) { held.clear(); padDir = -1; S.path = []; openGate(S.Z.gates[+tt.split(':')[1]].gi); return false; }
+  S.mv = { t0: now, dur: 125, fx: S.px, fy: S.py, jfx: S.jx, jfy: S.jy };
+  S.jdir = DIRS.findIndex(([dx, dy]) => S.jx + dx === S.px && S.jy + dy === S.py); if (S.jdir < 0) S.jdir = d;
+  S.jx = S.px; S.jy = S.py; S.px = nx; S.py = ny;
+  return true;
+}
+function arrived() {
+  markSeen();
+  const Z = S.Z;
+  const p = Z.pumps.find(q => q.x === S.px && q.y === S.py && !(S.pump >> q.k & 1));
+  if (p) { S.pump |= 1 << p.k; addBonus(COST.pump); toast('Golden pumpkin! ' + (timed() ? '−' + COST.pump + ' s' : '') + ' (' + popcount(S.pump) + ' of 8)'); updHud(); }
+  if (S.px === Z.exit.x && S.py === Z.exit.y && openCount() >= ZONE_GATES[S.zone]) zoneDone();
+}
+function popcount(n) { let c = 0; while (n) { c += n & 1; n >>= 1; } return c; }
+function zoneDone() {
+  held.clear(); padDir = -1; S.path = [];
+  const z = S.zone, ci = CPS.findIndex(c => c.zone === z);
+  if (ci >= 0) openCheckpoint(ci, z + 1);
+  else if (z < 5) loadZone(z + 1);
+}
+function toggleMap() { S.mapOn = !S.mapOn; $('mapBtn').setAttribute('aria-pressed', S.mapOn); }
+$('mapBtn').onclick = () => { toggleMap(); cv.focus({ preventScroll: true }); };
+function updHud() {
+  $('gatePill').textContent = 'Gates ' + S.solved + '/19';
+  $('pumpPill').textContent = 'Pumpkins ' + popcount(S.pump) + '/8';
+}
+let lastClock = '';
+function updClock() {
+  const s = mzFmtTime(curTime()) + '|' + (S.paused ? 1 : 0);
+  if (s === lastClock) return; lastClock = s;
+  $('clock').firstChild.nodeValue = mzFmtTime(curTime());
+  $('clockLbl').textContent = S.paused ? 'paused' : (S.mode === 1 ? 'stopwatch' : 'practice');
+}
+
+// ---------- Gates ----------
+let G = null, lastInput = null;
+function openGate(gi) {
+  if (!S.gates[gi]) S.gates[gi] = { gi, pr: genGate(S.seed, gi), misses: 0, hint: 0, steps: false, almost: false, solved: false, typed: '', box: false };
+  G = S.gates[gi];
+  renderGate();
+  $('gateM').hidden = false;
+  setTimeout(() => $('ans') && $('ans').focus(), 30);
+}
+function renderGate(fbHTML) {
+  const pr = G.pr, sk = SKILLS[pr.skill];
+  const free = !timed() || G.misses >= 2;
+  const hintLbl = G.hint >= 2 ? 'No more hints' : (G.hint ? 'Next hint' : 'Hint') + (free ? '' : ' (+' + COST.hint + ' s)');
+  const stepsOk = !timed() || G.hint >= 1;
+  const sh = $('gateM').firstElementChild;
+  sh.innerHTML =
+    '<button class="x" id="gx" aria-label="Close">×</button>' +
+    '<h2 id="gateH">Gate ' + (pr.gate + 1) + ' of 19</h2><p class="sub">' + esc(sk.name) + '</p>' +
+    '<div class="q"><small>Factor fully</small>' + esc(pr.text) + '</div>' +
+    (G.solved ? '' :
+      '<label for="ans" class="sub" style="display:block;margin:0">Your answer</label><input type="text" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. 2(x + 3)(x − 4)" value="' + esc(G.typed) + '">' +
+      '<div class="keys" id="keys">' + ['x', 'y', 'x²', 'y²', '(', ')', '+', '−', '⌫', 'Clear'].map(k => '<button data-k="' + k + '">' + k + '</button>').join('') + '</div>' +
+      '<div class="preview" id="prev"></div>') +
+    '<div id="gfb">' + (fbHTML || '') + '</div>' +
+    (G.hint >= 1 ? '<div class="hintbox"><b>Hint:</b> ' + esc(hint1(pr)) + '</div>' : '') +
+    (G.hint >= 2 ? '<div class="hintbox"><b>Hint 2:</b> ' + esc(hint2(pr)) + '</div>' : '') +
+    (G.steps ? '<div class="steps">' + stepsHTML(pr) + '</div>' : '') +
+    (G.solved ? '<div class="acts"><button class="btn" id="gCont">Through the gate →</button></div>' :
+      '<div class="acts"><button class="btn" id="gCheck">Check</button><button class="btn quiet" id="gHint"' + (G.hint >= 2 ? ' disabled' : '') + '>' + hintLbl + '</button>' +
+      '<button class="btn quiet" id="gBox" aria-pressed="' + G.box + '">Box helper</button>' +
+      '<button class="btn quiet" id="gSteps"' + (G.steps || !stepsOk ? ' disabled' : '') + '>' + (stepsOk ? 'Worked steps' + (timed() ? ' (+' + COST.steps + ' s)' : '') : 'Worked steps (after a hint)') + '</button></div>' +
+      (G.box ? scratchHTML() : ''));
+  $('gx').onclick = closeGate;
+  if (G.solved) { $('gCont').onclick = closeGate; setTimeout(() => $('gCont').focus(), 20); return; }
+  const ans = $('ans');
+  lastInput = ans;
+  ans.oninput = () => { G.typed = ans.value; updPrev(); };
+  ans.onfocus = () => lastInput = ans;
+  ans.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); doCheck(); } };
+  $('keys').onclick = e => { const b = e.target.closest('button'); if (b) keyPress(b.dataset.k); };
+  $('gCheck').onclick = doCheck;
+  $('gHint').onclick = doHint;
+  $('gSteps').onclick = doSteps;
+  $('gBox').onclick = () => { G.box = !G.box; G.typed = ans.value; renderGate($('gfb').innerHTML); };
+  if (G.box) wireScratch();
+  updPrev();
+}
+function keyPress(k) {
+  const inp = lastInput && document.body.contains(lastInput) ? lastInput : $('ans');
+  if (!inp) return;
+  const s = inp.selectionStart ?? inp.value.length, e2 = inp.selectionEnd ?? inp.value.length;
+  if (k === 'Clear') { inp.value = ''; }
+  else if (k === '⌫') { if (s !== e2) inp.value = inp.value.slice(0, s) + inp.value.slice(e2); else if (s > 0) { inp.value = inp.value.slice(0, s - 1) + inp.value.slice(s); inp.setSelectionRange(s - 1, s - 1); } }
+  else { const ins = k === '−' ? '-' : k; inp.value = inp.value.slice(0, s) + ins + inp.value.slice(e2); const p = s + ins.length; inp.setSelectionRange(p, p); }
+  inp.dispatchEvent(new Event('input')); inp.focus();
+}
+function pretty(s) { return s.replace(/\^2/g, '²').replace(/-/g, ' − ').replace(/\+/g, ' + ').replace(/\*/g, '·').replace(/\s+/g, ' ').replace(/\( /g, '(').replace(/ \)/g, ')').replace(/^ − /, '−').replace(/\(\s−\s/g, '(−').trim(); }
+function updPrev() { const v = $('ans') ? $('ans').value : ''; $('prev').innerHTML = v.trim() ? '<span>You typed:</span> ' + esc(pretty(v)) : ''; }
+function fb(cls, msg, extra) { return '<div class="fb ' + cls + '">' + esc(msg) + (extra ? '<span class="ex">' + esc(extra) + '</span>' : '') + '</div>'; }
+function doCheck() {
+  const v = $('ans').value; G.typed = v;
+  const r = checkAnswer(v, G.pr);
+  if (r.empty || r.parse) { $('gfb').innerHTML = fb('mid', r.msg); return; }
+  if (r.ok) {
+    G.solved = true;
+    const first = G.misses === 0 && !G.almost && G.hint === 0 && !G.steps;
+    if (first) S.ft[G.pr.skill]++;
+    S.solved++; updHud();
+    renderGate(fb('ok', (first ? 'First try! ' : 'Correct! ') + 'The lock clicks open.', (r.msg ? r.msg + ' ' : '') + G.pr.text + ' = ' + G.pr.answer));
+    return;
+  }
+  if (r.almost) { G.almost = true; $('gfb').innerHTML = fb('mid', 'Almost! ' + r.msg, r.expands ? 'Your answer expands to ' + r.expands + ' ✓' : ''); return; }
+  G.misses++; S.wrong++;
+  addPen(COST.wrong);
+  const freeNow = timed() && G.misses === 2 && G.hint < 2 ? ' Hints are free for this gate now.' : '';
+  renderGate(fb('bad', r.msg + (timed() ? ' (+' + COST.wrong + ' s)' : '') + freeNow, r.expands ? 'Your answer expands to ' + r.expands + '.' : ''));
+  setTimeout(() => { const a = $('ans'); if (a) { a.focus(); a.select(); } }, 20);
+}
+function doHint() {
+  if (G.hint >= 2) return;
+  if (timed() && G.misses < 2) addPen(COST.hint);
+  G.hint++; S.hints++; G.typed = $('ans').value;
+  renderGate($('gfb').innerHTML);
+}
+function doSteps() {
+  if (G.steps) return;
+  if (timed() && G.hint < 1) return;
+  addPen(timed() ? COST.steps : 0);
+  G.steps = true; S.steps++; G.typed = $('ans').value;
+  renderGate($('gfb').innerHTML);
+}
+function closeGate() {
+  $('gateM').hidden = true;
+  if (G && G.solved) toast('Gate ' + (G.pr.gate + 1) + ' is open!', 1500);
+  cv.focus({ preventScroll: true });
+}
+function scratchHTML() {
+  const pr = G.pr, b = G.boxVals || {};
+  const inp = (k, ph, cls) => '<div class="' + cls + '"><input type="text" data-b="' + k + '" aria-label="' + ph + '" placeholder="' + ph + '" value="' + esc(b[k] || '') + '" autocomplete="off" spellcheck="false"></div>';
+  return '<div class="scratch"><b>Box helper</b> <span class="sub">Fill the box the way you do in class, then check it. The keys above type into whichever box you tapped last.</span>' +
+    '<div class="gcf"><label for="bg">Common factor out front (leave empty if none):</label><input type="text" id="bg" data-b="g" value="' + esc(b.g || '') + '" autocomplete="off"></div>' +
+    '<div class="bx"><div></div>' + inp('t1', 'top', 'lab') + inp('t2', 'top', 'lab') +
+    inp('l1', 'side', 'lab') + inp('tl', 'first term', 'cell') + inp('tr', 'middle part', 'cell') +
+    inp('l2', 'side', 'lab') + inp('bl', 'middle part', 'cell') + inp('br', 'last term', 'cell') + '</div>' +
+    '<div class="acts"><button class="btn quiet" id="bCheck">Check my box</button></div><div id="bfb"></div></div>';
+}
+function wireScratch() {
+  G.boxVals = G.boxVals || {};
+  document.querySelectorAll('.scratch input').forEach(i => {
+    i.onfocus = () => lastInput = i;
+    i.oninput = () => { G.boxVals[i.dataset.b] = i.value; };
+    i.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('bCheck').click(); } };
+  });
+  $('bCheck').onclick = () => {
+    const r = checkBox(G.pr, G.boxVals);
+    $('bfb').innerHTML = fb(r.ok ? 'ok' : 'mid', r.msg) + (r.ok ? '<button class="btn" id="bUse">Put this in my answer</button>' : '');
+    if (r.ok) $('bUse').onclick = () => { $('ans').value = r.ans.replace(/−/g, '-').replace(/²/g, '^2'); G.typed = $('ans').value; updPrev(); $('ans').focus(); };
+  };
+}
+
+// ---------- Reading checkpoints ----------
+let RD = null;
+function shuffleSeeded(arr, seed) { const R = rngFrom(seed); const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function openCheckpoint(ci, nextZone) {
+  S.paused = true; updClock();
+  const cp = CPS[ci];
+  RD = { ci, cp, nextZone };
+  const sh = $('readM').firstElementChild;
+  const isMaze = cp.type === 'maze';
+  const ch = isMaze ? READ.maze[cp.ch] : null;
+  const pool = READ.mc.filter(p => p.cp === cp.pool);
+  const pass = isMaze ? null : pool[(S.seed + ci) % pool.length];
+  RD.pass = pass; RD.ch = ch;
+  sh.innerHTML = '<h2>Rest stop: ' + esc(cp.place) + '</h2>' +
+    '<p class="sub">' + (ci === 4 ? 'You opened the last gate! One more reading to solve the mystery.' : 'Zone ' + (cp.zone + 1) + ' is done. The stopwatch is paused while you read.') + '</p>' +
+    (isMaze
+      ? '<p><b>' + esc(ch.title) + '</b> (story, maze reading). Read the story. Wherever you see three words, click the one that makes sense. Click it again to clear it. You have <b>3 minutes</b>, and words you don’t reach don’t count against you.</p>' +
+        (timed() ? '<p>Time back: ' + COST.mazeEach + ' s for every correct word, minus ' + COST.mazeEach + ' s for every wrong one (up to ' + COST.mazeMax + ' s).</p>' : '')
+      : '<p><b>' + esc(pass.title) + '</b> (' + esc(pass.kind.toLowerCase()) + ' about a mathematician). Read it, then answer 5 questions. You get one try at each.</p>' +
+        (timed() ? '<p>Time back: ' + COST.mc + ' s for every correct answer.</p>' : '')) +
+    '<div class="acts"><button class="btn" id="rStart">Start reading</button></div>';
+  $('readM').hidden = false;
+  $('rStart').onclick = isMaze ? startMaze : startMC;
+  $('rStart').focus();
+}
+function startMC() {
+  const p = RD.pass, sh = $('readM').firstElementChild;
+  const order = p.qs.map((q, i) => shuffleSeeded(q.o.map((t, k) => ({ t, k })), S.seed * 17 + RD.ci * 5 + i));
+  RD.order = order; RD.ans = p.qs.map(() => -1);
+  let n = 0;
+  const paras = p.paras.map(t => t.startsWith('## ') ? '<h4>' + esc(t.slice(3)) + '</h4>' : '<p><span class="n">' + (++n) + '</span><span>' + esc(t) + '</span></p>').join('');
+  sh.innerHTML = '<h2>' + esc(p.title) + '</h2><p class="sub">Read the passage, then answer the questions. Paragraphs are numbered.</p>' +
+    '<div class="readGrid"><div class="passage"><h3>' + esc(p.title) + '</h3><p class="kind">' + esc(p.kind) + '</p>' + paras + '</div>' +
+    '<div class="qs" id="qs">' + p.qs.map((q, i) => {
+      const L = i % 2 ? 'FGHJ' : 'ABCD';
+      return '<div class="qq" data-i="' + i + '"><p>' + (i + 1) + '. ' + esc(q.q) + '</p>' + order[i].map((o, j) => '<button class="opt" data-j="' + j + '" aria-pressed="false"><span class="L">' + L[j] + '</span><span>' + esc(o.t) + '</span></button>').join('') + '<div class="ex" hidden></div></div>';
+    }).join('') + '<div class="acts"><button class="btn" id="mcSub" disabled>Submit answers</button><span class="sub" id="mcLeft">Answer all 5 to submit.</span></div></div></div>';
+  $('qs').onclick = e => {
+    const b = e.target.closest('.opt'); if (!b || RD.submitted) return;
+    const qq = b.closest('.qq'), i = +qq.dataset.i;
+    RD.ans[i] = +b.dataset.j;
+    qq.querySelectorAll('.opt').forEach(x => x.setAttribute('aria-pressed', x === b));
+    const left = RD.ans.filter(a => a < 0).length;
+    $('mcSub').disabled = left > 0; $('mcLeft').textContent = left ? 'Answer all 5 to submit (' + left + ' left).' : 'Ready when you are.';
+  };
+  $('mcSub').onclick = submitMC;
+}
+function submitMC() {
+  RD.submitted = true;
+  const p = RD.pass; let right = 0;
+  p.qs.forEach((q, i) => {
+    const qq = document.querySelector('.qq[data-i="' + i + '"]');
+    const chosen = RD.order[i][RD.ans[i]].k, ok = chosen === q.a; if (ok) right++;
+    qq.querySelectorAll('.opt').forEach((b, j) => { const k = RD.order[i][j].k; if (k === q.a) b.classList.add('right'); else if (j === RD.ans[i]) b.classList.add('wrong'); b.disabled = true; });
+    const ex = qq.querySelector('.ex'); ex.hidden = false; ex.textContent = (ok ? '✓ ' : '✗ ') + q.e;
+  });
+  S.mc += right; S.cp = RD.ci + 1;
+  const bonus = right * COST.mc;
+  $('mcSub').parentElement.innerHTML = '<div class="fb ok" style="flex:1">You got ' + right + ' of 5.' + (timed() ? ' That takes ' + bonus + ' s off your time.' : '') + '</div><button class="btn" id="rDone">Back to the maze</button>';
+  if (timed()) S.bonus = Math.min(511, S.bonus + bonus);
+  $('rDone').onclick = endCheckpoint; $('rDone').focus();
+}
+function startMaze() {
+  const ch = RD.ch, sh = $('readM').firstElementChild;
+  RD.sel = []; let n = 0;
+  const html = ch.items.map(it => {
+    if (typeof it === 'string') return esc(it);
+    const i = n++; RD.sel.push(-1);
+    const opts = shuffleSeeded(it.o.map((t, k) => ({ t, k })), S.seed * 31 + RD.ci * 101 + i);
+    return '<span class="ch" data-i="' + i + '" role="group" aria-label="Choice ' + (i + 1) + '">' + opts.map(o => '<button data-k="' + o.k + '"' + (o.k === 0 ? ' class="c"' : '') + ' aria-pressed="false">' + esc(o.t) + '</button>').join('') + '</span>';
+  }).join('');
+  RD.n = n;
+  sh.innerHTML = '<h2>' + esc(ch.title) + '</h2><div class="row" style="justify-content:space-between"><p class="sub" style="margin:0">Click the word that fits. Click again to clear.</p><b id="mzClock" style="font-size:22px;font-variant-numeric:tabular-nums">3:00</b></div>' +
+    '<div class="timerBar"><i id="mzBar"></i></div><div class="mz" id="mz">' + html + '</div>' +
+    '<div class="acts"><button class="btn" id="mzDone">I’m finished</button><span id="mzConf"></span></div>';
+  RD.t0 = performance.now(); RD.left = 180;
+  RD.timer = setInterval(() => {
+    RD.left = Math.max(0, 180 - (performance.now() - RD.t0) / 1000);
+    if (!$('mzClock')) { clearInterval(RD.timer); return; }
+    $('mzClock').textContent = mzFmtTime(Math.ceil(RD.left)); $('mzBar').style.width = (RD.left / 1.8) + '%';
+    if (RD.left <= 0) finishMaze(true);
+  }, 250);
+  $('mz').onclick = e => {
+    const b = e.target.closest('.ch button'); if (!b || RD.mzDone) return;
+    const g = b.parentElement, i = +g.dataset.i, k = +b.dataset.k;
+    RD.sel[i] = RD.sel[i] === k ? -1 : k;
+    g.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', +x.dataset.k === RD.sel[i]));
+  };
+  $('mzDone').onclick = () => {
+    const blank = RD.sel.filter(s => s < 0).length;
+    if (blank && !RD.confirm) { RD.confirm = true; $('mzConf').innerHTML = '<b>' + blank + ' word' + (blank > 1 ? 's are' : ' is') + ' still blank.</b> Press again to finish.'; return; }
+    finishMaze(false);
+  };
+}
+function finishMaze(timeUp) {
+  if (RD.mzDone) return; RD.mzDone = true; clearInterval(RD.timer);
+  let c = 0, e = 0, lastAns = -1;
+  RD.sel.forEach((s, i) => { if (s >= 0) lastAns = i; });
+  document.querySelectorAll('.ch').forEach(g => {
+    const i = +g.dataset.i, s = RD.sel[i];
+    if (s === 0) { c++; g.classList.add('right'); } else if (s > 0) { e++; g.classList.add('wrong'); } else g.classList.add(i > lastAns ? 'skip' : 'wrong');
+    g.querySelectorAll('button').forEach(b => b.disabled = true);
+  });
+  S.mzC = Math.min(255, S.mzC + c); S.mzE = Math.min(63, S.mzE + e); S.cp = RD.ci + 1;
+  const bonus = Math.max(0, Math.min(COST.mazeMax, (c - e) * COST.mazeEach));
+  if (timed()) S.bonus = Math.min(511, S.bonus + bonus);
+  $('mzDone').parentElement.innerHTML = '<div class="fb ok" style="flex:1">' + (timeUp ? 'Time’s up! ' : '') + c + ' correct, ' + e + ' wrong' + (RD.n - c - e ? ', ' + (RD.n - c - e) + ' not answered' : '') + ' (out of ' + RD.n + ').' + (timed() ? ' That takes ' + bonus + ' s off your time.' : '') +
+    '<span class="ex">Green = correct, red = wrong (the right word has a green outline), faded = not reached.</span></div><button class="btn" id="rDone">' + (RD.ci === 4 ? 'See your results' : 'Back to the maze') + '</button>';
+  $('rDone').onclick = endCheckpoint; $('rDone').focus();
+}
+function endCheckpoint() {
+  $('readM').hidden = true; clearInterval(RD && RD.timer);
+  const nz = RD.nextZone;
+  if (nz >= 6 || RD.ci === 4) { finish(); return; }
+  loadZone(nz);
+}
+
+// ---------- Codes, save, hand in ----------
+function codeData(status) {
+  const d = { ver: 1, mode: S.mode, status, seed: S.seed, solved: S.solved, cp: S.cp, raw: Math.floor(S.raw), pen: S.pen, bonus: S.bonus, wrong: S.wrong, hints: S.hints, steps: S.steps,
+    mc: S.mc, mzC: S.mzC, mzE: S.mzE, pump: S.pump, day: mzToday(), name: mzNameHash(S.name), save: S.saveNo };
+  S.ft.forEach((v, i) => d['ft' + i] = v);
+  return d;
+}
+function handInLink(code) {
+  if (!HANDIN_URL) return '';
+  const u = HANDIN_URL.replace('STUDENTNAME', encodeURIComponent(S.name)).replace('MAZECODE', encodeURIComponent(code));
+  return '<a class="btn" href="' + esc(u) + '" target="_blank" rel="noopener">Hand in my code</a>';
+}
+function copyBtn(code) { return '<button class="btn quiet" data-copy="' + esc(code) + '">Copy code</button>'; }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  const t = b.dataset.copy;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = 'Copied!'; }, () => { b.textContent = 'Select the code and copy it'; });
+});
+function openMisc(html, escClose) { const m = $('miscM'); m.firstElementChild.innerHTML = html; m.dataset.esc = escClose ? '1' : ''; m.hidden = false; }
+function closeMisc() { $('miscM').hidden = true; }
+$('saveBtn').onclick = () => {
+  if (!S || S.done) return;
+  S.saveNo = Math.min(15, S.saveNo + 1);
+  const code = mzEncode(codeData(0));
+  const wasPaused = S.paused; S.paused = true; updClock();
+  openMisc('<h2>Save &amp; hand in</h2><p class="sub">Your stopwatch is paused. This code holds your progress so far.</p>' +
+    '<div class="codeBox">' + esc(code) + '</div>' +
+    '<p>' + (HANDIN_URL ? 'Hand it in now so your teacher sees your progress. Your teacher’s form can email you a copy, so you can continue next class with the same name and code.' : 'Write this code down (or copy it). To keep going later, choose <b>Continue a saved maze</b> and type the same name and this code.') + '</p>' +
+    '<div class="acts">' + handInLink(code) + copyBtn(code) + '<button class="btn quiet" id="keepGo">Keep playing</button><button class="btn ghost" id="quitT" style="color:var(--ink)">Quit to title</button></div>');
+  $('keepGo').onclick = () => { closeMisc(); S.paused = wasPaused; cv.focus({ preventScroll: true }); };
+  $('quitT').onclick = () => { closeMisc(); S.done = true; show('title'); };
+};
+
+// ---------- Continue and checker ----------
+$('contBtn').onclick = () => {
+  openMisc('<button class="x" id="mx" aria-label="Close">×</button><h2>Continue a saved maze</h2><p class="sub">Type the same name you used and your save code.</p>' +
+    '<label for="cName"><b>Name</b></label><input type="text" id="cName" autocomplete="off" value="' + esc($('nameIn').value) + '"><br><br>' +
+    '<label for="cCode"><b>Save code</b></label><input type="text" id="cCode" autocomplete="off" spellcheck="false" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">' +
+    '<div id="cMsg"></div><div class="acts"><button class="btn" id="cGo">Continue</button></div>', true);
+  $('mx').onclick = closeMisc;
+  $('cGo').onclick = () => {
+    const name = $('cName').value.trim(), d = mzDecode($('cCode').value);
+    if (d.error) { $('cMsg').innerHTML = fb('bad', d.error); return; }
+    if (d.name !== mzNameHash(name)) { $('cMsg').innerHTML = fb('bad', 'That code was made with a different name. Type your name exactly as you did before.'); return; }
+    if (d.status === 1) { $('cMsg').innerHTML = fb('mid', 'That maze is already finished, so it can’t be continued. Start a new one!'); return; }
+    S = newState(name, d.mode, d.seed);
+    Object.assign(S, { solved: d.solved, cp: d.cp, raw: d.raw, pen: d.pen, bonus: d.bonus, wrong: d.wrong, hints: d.hints, steps: d.steps, mc: d.mc, mzC: d.mzC, mzE: d.mzE, pump: d.pump, saveNo: d.save });
+    S.ft = [d.ft0, d.ft1, d.ft2, d.ft3, d.ft4, d.ft5];
+    $('nameIn').value = name;
+    closeMisc(); show('play'); sizeCanvas(); resume();
+    toast('Welcome back! Your stopwatch picks up at ' + mzFmtTime(curTime()) + '.', 3000);
+  };
+};
+function reportRows(d) {
+  const rows = [];
+  for (let i = 0; i < 6; i++) {
+    const before = i === 0 ? 0 : MZ_CUM[i - 1], tried = Math.max(0, Math.min(MZ_SKILL_GATES[i], d.solved - before));
+    rows.push('<tr><td>' + esc(MZ_SKILL_NAMES[i]) + '</td><td class="num">' + tried + ' / ' + MZ_SKILL_GATES[i] + '</td><td class="num">' + d['ft' + i] + ' / ' + tried + '</td></tr>');
+  }
+  return '<table class="rep"><thead><tr><th>Skill</th><th class="num">Gates opened</th><th class="num">First try</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+}
+function statsHTML(d) {
+  const st = (v, l) => '<div class="stat"><b>' + v + '</b><span>' + l + '</span></div>';
+  return '<div class="stats">' +
+    (d.mode === 1 ? st(mzFmtTime(mzFinalTime(d)), 'final time') + st(mzFmtTime(d.raw), 'on the stopwatch') + st('+' + mzFmtTime(d.pen), 'penalties') + st('−' + mzFmtTime(d.bonus), 'time won back') : st(mzFmtTime(d.raw), 'time (practice)')) +
+    st(d.solved + ' / 19', 'gates opened') + st(d.wrong, 'wrong answers') + st(d.hints, 'hints') + st(d.steps, 'worked steps') +
+    st(d.mc + ' / ' + Math.min(2, Math.max(0, d.cp >= 4 ? 2 : d.cp >= 2 ? 1 : 0)) * 5, 'reading questions') + st(d.mzC + ' ✓  ' + d.mzE + ' ✗', 'maze words') +
+    st(popcount(d.pump) + ' / 8', 'golden pumpkins') + '</div>';
+}
+$('checkBtn').onclick = () => {
+  openMisc('<button class="x" id="mx" aria-label="Close">×</button><h2>Check a maze code</h2><p class="sub">For teachers: type the student’s name and code to see what it holds.</p>' +
+    '<label for="kName"><b>Student name</b></label><input type="text" id="kName" autocomplete="off"><br><br>' +
+    '<label for="kCode"><b>Maze code</b></label><input type="text" id="kCode" autocomplete="off" spellcheck="false">' +
+    '<div class="acts"><button class="btn" id="kGo">Check</button></div><div id="kOut"></div>', true);
+  $('mx').onclick = closeMisc;
+  $('kGo').onclick = () => {
+    const d = mzDecode($('kCode').value);
+    if (d.error) { $('kOut').innerHTML = fb('bad', d.error); return; }
+    const nameOk = d.name === mzNameHash($('kName').value);
+    $('kOut').innerHTML = fb(nameOk ? 'ok' : 'bad', nameOk ? '✓ Real code, and it matches this name.' : '✗ Real code, but it was made with a different name.') +
+      '<p><b>' + (d.status === 1 ? 'Finished' : 'Saved (not finished)') + '</b> · ' + (d.mode === 1 ? 'Maze Run · ' + mzRank(d) : 'Practice Walk') + ' · played ' + mzDayToDate(d.day) + ' · maze #' + d.seed + (d.status === 0 ? ' · save #' + d.save : '') + '</p>' +
+      statsHTML(d) + reportRows(d);
+  };
+};
+
+// ---------- Finish ----------
+function finish() {
+  S.done = true; S.paused = true;
+  const d = codeData(1), code = mzEncode(d);
+  const rank = mzRank(d);
+  const sec = $('end');
+  sec.innerHTML = '<div class="sheet wide" style="margin:3vh auto">' +
+    '<h2>' + (d.solved >= 19 ? 'You found the plan!' : 'Maze over') + '</h2>' +
+    '<p class="sub">' + esc(S.name) + ' · ' + (d.mode === 1 ? 'Maze Run' : 'Practice Walk') + '</p>' +
+    '<div class="rank">' + esc(rank) + '</div>' +
+    (d.mode === 1 ? '<p class="sub" style="margin-top:6px">Ranks: Hedge Master ≤ 20:00 · Pathfinder ≤ 28:00 · Trailblazer ≤ 38:00</p>' : '') +
+    statsHTML(d) +
+    '<h3 style="margin:12px 0 0;font-family:Lilita One,sans-serif;font-weight:400;color:var(--hedge2)">Skill report</h3>' + reportRows(d) +
+    '<p class="sub">Practise the skills where your first-try count is low. Factor with the box method, and always check for a common factor first.</p>' +
+    '<h3 style="margin:12px 0 6px;font-family:Lilita One,sans-serif;font-weight:400;color:var(--hedge2)">Your code</h3>' +
+    '<div class="codeBox">' + esc(code) + '</div>' +
+    '<p>' + (HANDIN_URL ? 'Press <b>Hand in my code</b> and then Submit on the form.' : 'Hand this code in to your teacher with your name.') + '</p>' +
+    '<div class="acts">' + handInLink(code) + copyBtn(code) + '<button class="btn quiet" id="again">Play again</button></div></div>';
+  show('end');
+  $('again').onclick = () => show('title');
+}
+
+// ---------- Hero picture ----------
+function drawHero() {
+  const c = $('heroMaze'), r = c.getBoundingClientRect(); if (!r.width) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1); c.width = r.width * dpr; c.height = r.height * dpr;
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const Z = genZone(42, 5), tt = Math.ceil(Math.max(r.width / (Z.TW + 2 * MARGIN), r.height / (Z.TH + 2 * MARGIN - 1)));
+  const L = renderStatic(Z, tt);
+  const ox = r.width - L.width, oy = -(L.height - r.height) / 2;
+  g.drawImage(L, ox, oy);
+  const px = x => MARGIN * tt + x * tt;
+  g.save(); g.translate(ox, oy);
+  Z.gates.forEach((q, k) => drawGate(g, px(q.x), px(q.y), tt, q.vert, k === 0, 17 + k));
+  drawTower(g, px(Z.exit.x + 1), px(Z.exit.y - 2), tt);
+  drawPerson(g, px(Z.entrance.x + 1), px(Z.entrance.y), tt, 1, '#3a6fd8', '#2a1a10', '#e8731a');
+  drawPerson(g, px(Z.entrance.x), px(Z.entrance.y), tt, 1, '#3f8f4f', '#7a3b1d', '');
+  g.restore();
+}
+document.fonts && document.fonts.ready.then(drawHero);
+drawHero();
+new ResizeObserver(drawHero).observe($('heroMaze'));
+$('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('startBtn').click(); });
+requestAnimationFrame(draw);
+// size canvas when play is shown
+new MutationObserver(() => { if (!$('play').hidden) { sizeCanvas(); } }).observe($('play'), { attributes: true, attributeFilter: ['hidden'] });
+
+}
+</script>
+</body>
+</html>
