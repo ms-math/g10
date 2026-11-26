@@ -1381,7 +1381,7 @@ $('saveBtn').onclick = () => {
   const wasPaused = S.paused; S.paused = true; updClock();
   openMisc('<h2>Save &amp; hand in</h2><p class="sub">Your stopwatch is paused. This code holds your progress so far.</p>' +
     '<div class="codeBox">' + esc(code) + '</div>' +
-    '<p>' + (HANDIN_URL ? 'Hand it in now so your teacher sees your progress. Your teacher’s form can email you a copy, so you can continue next class with the same name and code.' : 'Write this code down (or copy it). To keep going later, choose <b>Continue a saved maze</b> and type the same first name and last initial and this code.') + '</p>' +
+    '<p>' + (HANDIN_URL ? 'Hand it in now so your teacher sees your progress. After you press Submit, you’ll get an email with this code and the steps to continue next class.' : 'Write this code down (or copy it). To keep going later, choose <b>Continue a saved maze</b> and type the same first name and last initial and this code.') + '</p>' +
     '<div class="acts">' + handInLink(code) + copyBtn(code) + '<button class="btn quiet" id="keepGo">Keep playing</button><button class="btn ghost" id="quitT" style="color:var(--ink)">Quit to title</button></div>');
   $('keepGo').onclick = () => { closeMisc(); S.paused = wasPaused; cv.focus({ preventScroll: true }); };
   $('quitT').onclick = () => { closeMisc(); S.done = true; show('title'); };
